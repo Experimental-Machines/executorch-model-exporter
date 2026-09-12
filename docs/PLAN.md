@@ -9,7 +9,7 @@ the [openweights](https://github.com/alpharomercoma/openweights) Android app: XN
 | Topic | Decision |
 |---|---|
 | Models | Dense (no MoE) text LLMs of the 4B class and smaller (size in the name ≤ 4B; real count < 4.5B, since Qwen3-4B is 4,022,468,096), instruct and base, original bf16/fp16 weights only |
-| Watched orgs | `Qwen`, `google`, `meta-llama`, `HuggingFaceTB` |
+| Watched orgs | `Qwen`, `google`, `meta-llama`, `HuggingFaceTB`, each for its own families |
 | Trigger | Scheduled watcher; a new eligible model auto-dispatches every backend workflow that supports it |
 | First run | Seeds state without exporting; existing models are backfilled by manual dispatch |
 | Runners | Standard GitHub-hosted `ubuntu-latest` (public repo: 4 vCPU, 16 GB RAM), one workflow run per backend |
@@ -54,8 +54,12 @@ just to what the runner can export:
 - KV cache bytes = `n_layers × 2 × n_kv_heads × head_dim × window × 4`.
   Qwen3-1.7B at 32k: 28 × 2 × 8 × 128 × 32,768 × 4 = 7,516,192,768 bytes.
 - Resident on the phone ≈ `.pte` + KV cache + 0.5 GB (measured in the app's research).
-- `.pte` estimate for 8da4w/g32 + int8 embeddings ≈ `embedding params × 1 B + linear
-  params × 0.625 B` (tied embeddings add a separate 4-bit output projection).
+- `.pte` estimate for 8da4w/g32 + int8 embeddings = (`embedding params × 1 B + linear
+  params × 0.5625 B + window × head_dim × 16 B` of RoPE tables) × 1.01, with linear
+  params counted from the architecture (the output projection always gets its own 4-bit
+  copy). Within 1% of every measured file.
+- Export peak ≈ fp32 weights + KV cache + `n_layers × window²` bytes of causal masks +
+  2.5 GB.
 - Pick the largest tier with resident ≤ `device_budget_bytes` (default 5.0 GB) and
   estimated export peak ≤ runner RAM + swap.
 
@@ -116,8 +120,9 @@ MediaTek code: read the license bundled in the SDK archive and write
 
    `pipeline/sizing.py` is calibrated on these: estimates within 1% of every measured
    `.pte` and 4-7% above the measured export peaks.
-1. **XNNPACK end to end** (`export-xnnpack.yml`, validated locally in Docker; publishing
-   not yet exercised): manual dispatch → export → smoke test → HF + release + artifact.
+1. **XNNPACK end to end** (`export-xnnpack.yml`, done 2026-09-12): first publish
+   [experimentalmachines/Qwen3-0.6B-ExecuTorch](https://huggingface.co/experimentalmachines/Qwen3-0.6B-ExecuTorch)
+   (16k window, smoke test "Paris") and GitHub release `Qwen3-0.6B-xnnpack-c1899de`.
 2. **Watcher** (`watch-hf.yml`, every 6 hours at :17, plus manual dispatch with `backfill`
    and `dry_run` inputs). Lists each org's 200 newest repos; a repo not yet in
    `seen.json` (on the `state` branch) is checked once, by name first and then by config,

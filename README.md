@@ -29,7 +29,7 @@ exist without exporting them; to export existing ones, run it with `backfill` se
 comma-separated list of model ids (or run **Export XNNPACK** directly). `dry_run` reports
 what it would do without dispatching or saving state.
 
-**Probe runner** exports one small model at 2k and 32k windows without publishing, to
+**Probe runner** exports one small model at a list of windows (default 2k and 16k) without publishing, to
 measure what the runner really has and calibrate the sizing estimates.
 
 ## Locally
