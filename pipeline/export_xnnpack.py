@@ -180,6 +180,14 @@ def run(
     else:
         window = context
         window_reason = f"forced to {context} by the caller"
+        budget = host_budget(host)
+        peak = sizing.export_peak_bytes(arch, context)
+        if budget is not None and peak > budget:
+            # Past the budget the runner VM is killed outright, with no Python error.
+            raise ExportError(
+                f"a {context}-token export needs about {peak:,} B (causal masks alone "
+                f"{sizing.causal_mask_bytes(arch, context):,} B); this host has {budget:,} B"
+            )
 
     output_repo = naming.output_repo(model_id, cfg.hub_org, cfg.repo_suffix)
     pte_name = naming.xnnpack_file(model_id, cfg.xnnpack.qmode, window)

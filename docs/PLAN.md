@@ -115,6 +115,12 @@ MediaTek code: read the license bundled in the SDK archive and write
 
 ## Known limits
 
+- Export memory grows with the square of the window: every attention layer of ExecuTorch
+  1.4.0's transformer builds its own window × window causal mask (not stored in the
+  `.pte`). Qwen3-0.6B at 32k needs 30,064,771,072 bytes of masks alone and killed a
+  16.8 GB + 24 GB swap runner; `sizing.export_peak_bytes` counts it and a forced window
+  that cannot fit is refused.
+
 - QNN and MediaTek only export models ExecuTorch has hard-coded; a new family waits for an
   ExecuTorch release, and the app's AAR must move with it.
 - QNN/MediaTek exports of 3-4B models may run out of memory or hit the 6-hour job limit

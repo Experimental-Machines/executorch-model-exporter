@@ -57,6 +57,16 @@ def test_window_choice_per_model():
         assert choice.context == context, model_id
 
 
+def test_causal_masks_dominate_export_memory_at_32k():
+    # The probe's Qwen3-0.6B 32k export killed a 16.8 GB + 24 GB swap runner: 28 layers of
+    # 32,768 x 32,768 one-byte masks is 30,064,771,072 bytes before weights or KV cache.
+    qwen = arch("Qwen/Qwen3-0.6B")
+    assert sizing.causal_mask_bytes(qwen, 32768) == 30_064_771_072
+    host_budget = 16_766_414_848 + 25_769_799_680 - 1_000_000_000
+    assert sizing.export_peak_bytes(qwen, 32768) > host_budget
+    assert sizing.export_peak_bytes(qwen, 16384) < host_budget
+
+
 def test_window_choice_respects_host_budget():
     qwen = arch("Qwen/Qwen3-0.6B")
     unconstrained = sizing.choose_context(qwen, TIERS, 10**12, OVERHEAD, None)

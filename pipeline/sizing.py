@@ -52,9 +52,21 @@ def device_resident_bytes(arch: Architecture, context: int, overhead: int) -> in
     return pte_bytes_estimate(arch) + kv_cache_bytes(arch, context) + overhead
 
 
+def causal_mask_bytes(arch: Architecture, context: int) -> int:
+    """Every AttentionMHA layer builds its own window x window bool mask at construction
+    (ExecuTorch 1.4.0 examples/models/llama/attention.py). The custom SDPA op does not keep
+    it in the .pte, but the eager model holds all of them while exporting."""
+    return arch.n_layers * context * context
+
+
 def export_peak_bytes(arch: Architecture, context: int) -> int:
     weights = arch.total_params * FP32_BYTES
-    return int(weights * EXPORT_PEAK_WEIGHT_MULTIPLE + kv_cache_bytes(arch, context) + EXPORT_FIXED_OVERHEAD_BYTES)
+    return int(
+        weights * EXPORT_PEAK_WEIGHT_MULTIPLE
+        + kv_cache_bytes(arch, context)
+        + causal_mask_bytes(arch, context)
+        + EXPORT_FIXED_OVERHEAD_BYTES
+    )
 
 
 @dataclass(frozen=True)

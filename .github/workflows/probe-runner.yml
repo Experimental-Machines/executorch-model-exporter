@@ -9,6 +9,10 @@ on:
         description: Model to export at each window
         default: Qwen/Qwen3-0.6B
         type: string
+      contexts:
+        description: JSON list of windows, one job each
+        default: "[2048, 16384]"
+        type: string
 
 permissions:
   contents: read
@@ -18,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        context: [2048, 32768]
+        context: ${{ fromJSON(inputs.contexts) }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
