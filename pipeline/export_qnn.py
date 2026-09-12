@@ -73,6 +73,10 @@ def llama_command(
         str(recipe.calib_limit),
         "--artifact",
         str(artifact),
+        # main() calls os.path.realpath(args.build_folder) even in compile-only mode, where the
+        # on-device runner it points at is never used.
+        "--build_folder",
+        str(artifact.parent / "build-android"),
         # Required by the script; used only when it runs on a device, which compile-only skips.
         "--prompt",
         "What is the capital of France?",

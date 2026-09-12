@@ -21,6 +21,7 @@ def test_compile_only_command_for_a_registered_checkpoint(tmp_path):
     assert flag(command, "--max_context_len") == flag(command, "--max_seq_len") == "2048"
     assert flag(command, "--prefill_ar_len") == "128"
     assert flag(command, "--calib_tasks") == "wikitext"
+    assert flag(command, "--build_folder")  # llama.py realpath()s it even when compiling only
     assert "--checkpoint" not in command
 
 

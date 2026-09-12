@@ -79,8 +79,26 @@ jobs:
           echo "ARTIFACT=qnn-${soc_lower}-${MODEL_ID//\//--}" >>"$GITHUB_ENV"
 
       # The executorch wheel downloads the QAIRT SDK and a libc++ into ~/.cache/executorch/qnn
-      # on first import. Cached per version in this repository only; never re-hosted.
-      - uses: actions/cache@v6
+      # on first import. Cached per version in this repository only; never re-hosted. Restore
+      # and save are separate steps so the cache is kept even when the export fails.
+      - name: Restore QAIRT
+        id: qairt
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cache/executorch/qnn
+          key: qairt-${{ env.QAIRT_VERSION }}-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Install QAIRT
+        run: |
+          python -c "import executorch.backends.qualcomm" 2>&1 | grep -v "Downloading\|Extracting" || true
+          find ~/.cache/executorch/qnn/sdk-"$QAIRT_VERSION" -name libQnnHtp.so -path '*x86_64*' | grep -q .
+          # The archives are only needed until extraction; keep them out of the cache.
+          find ~/.cache/executorch/qnn \( -name '*.zip' -o -name '*.tar.xz' \) -delete
+          du -sh ~/.cache/executorch/qnn
+
+      - name: Save QAIRT
+        if: steps.qairt.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
         with:
           path: ~/.cache/executorch/qnn
           key: qairt-${{ env.QAIRT_VERSION }}-${{ runner.os }}-${{ runner.arch }}
