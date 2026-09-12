@@ -32,9 +32,10 @@ runs:
       env:
         REQUIREMENTS: ${{ inputs.requirements }}
       run: |
-        # torch from the CPU index: the PyPI Linux wheel pulls gigabytes of CUDA libraries.
-        torch_pin=$(grep -E '^torch==' "$REQUIREMENTS")
+        # torch (and torchvision, where pinned) from the CPU index: the PyPI Linux wheels pull
+        # gigabytes of CUDA libraries.
+        cpu_pins=$(grep -E '^(torch|torchvision)==' "$REQUIREMENTS")
         python -m pip install --upgrade pip
-        python -m pip install "$torch_pin" --index-url https://download.pytorch.org/whl/cpu
+        python -m pip install $cpu_pins --index-url https://download.pytorch.org/whl/cpu
         python -m pip install -r "$REQUIREMENTS"
         python -m pip list | grep -iE '^(torch|torchao|executorch|transformers|huggingface.hub) '

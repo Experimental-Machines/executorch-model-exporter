@@ -1,5 +1,5 @@
-# Qualcomm QNN export. Same core pins as export-xnnpack.txt; install torch from the CPU
-# index first. The executorch Linux x86_64 wheel ships the Qualcomm backend and downloads
+# Qualcomm QNN export. Same core pins as export-xnnpack.txt; install torch and torchvision
+# from the CPU index first. The executorch Linux x86_64 wheel ships the Qualcomm backend and downloads
 # the QAIRT SDK version it was built against on first import (config/versions.env).
 torch==2.13.0
 torchao==0.18.0
@@ -15,6 +15,14 @@ pyyaml==6.0.3
 transformers==5.0.0rc1
 datasets==3.6.0
 lm_eval==0.4.5
+# The Qualcomm LLM package imports every family's weight converter at import time; some go
+# through torchtune. ExecuTorch 1.4.0 pins this commit (examples/models/llama/install_requirements.sh).
+torchtune @ git+https://github.com/pytorch/torchtune.git@3c1872ace149f03ef4ffec765d3f0a5fd0399497
+# torchtune imports torchvision; 0.28.0 is the release built against torch 2.13.0 (CPU index).
+torchvision==0.28.0
+sentencepiece
+tiktoken
+blobfile
 # backends/qualcomm/requirements.txt
 py-cpuinfo
 requests
