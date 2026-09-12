@@ -1,0 +1,57 @@
+name: Probe runner
+# Phase 0: what a standard hosted runner really has, and what an export really costs, so
+# the sizing estimates in pipeline/sizing.py can be calibrated. Publishes nothing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_id:
+        description: Model to export at each window
+        default: Qwen/Qwen3-0.6B
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  calibrate:
+    strategy:
+      fail-fast: false
+      matrix:
+        context: [2048, 32768]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      MODEL_ID: ${{ inputs.model_id }}
+      CONTEXT: ${{ matrix.context }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Runner hardware
+        run: |
+          lscpu | grep -E 'Model name|^CPU\(s\)|Flags' | cut -c1-200
+          grep -E 'MemTotal|SwapTotal' /proc/meminfo
+          lsblk -b -o NAME,SIZE,MOUNTPOINT
+
+      - uses: ./.github/actions/setup-export
+        with:
+          swap-gib: "24"
+
+      - name: Export at a forced window
+        run: python -m pipeline export-xnnpack "$MODEL_ID" --context "$CONTEXT" --out "$WORK_DIR/out" --work "$WORK_DIR/work"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f "$WORK_DIR/out/xnnpack/export-report.json" ]; then
+            python -m pipeline summary "$WORK_DIR/out" --backend xnnpack >>"$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: probe-${{ matrix.context }}
+          path: ${{ env.WORK_DIR }}/out/xnnpack/export-report.json
+          if-no-files-found: warn

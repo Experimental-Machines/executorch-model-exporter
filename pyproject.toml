@@ -1,0 +1,16 @@
+[project]
+name = "exe-expo"
+version = "0.1.0"
+description = "Watches Hugging Face for small dense LLMs and exports them to ExecuTorch for the openweights app"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

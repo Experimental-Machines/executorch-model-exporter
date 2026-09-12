@@ -1,0 +1,40 @@
+name: Set up export host
+description: Free disk, add swap, install the pinned Python toolchain for an ExecuTorch export.
+
+inputs:
+  swap-gib:
+    description: Size of the swap file in GiB.
+    default: "24"
+  requirements:
+    description: Requirements file with the pinned toolchain.
+    default: requirements/export-xnnpack.txt
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare host
+      shell: bash
+      run: bash scripts/ci/prepare-host.sh "${{ inputs.swap-gib }}"
+
+    - name: Read versions
+      id: versions
+      shell: bash
+      run: grep -E '^[A-Z_]+=' config/versions.env >>"$GITHUB_OUTPUT"
+
+    - uses: actions/setup-python@v7
+      with:
+        python-version: ${{ steps.versions.outputs.PYTHON_VERSION }}
+        cache: pip
+        cache-dependency-path: ${{ inputs.requirements }}
+
+    - name: Install toolchain
+      shell: bash
+      env:
+        REQUIREMENTS: ${{ inputs.requirements }}
+      run: |
+        # torch from the CPU index: the PyPI Linux wheel pulls gigabytes of CUDA libraries.
+        torch_pin=$(grep -E '^torch==' "$REQUIREMENTS")
+        python -m pip install --upgrade pip
+        python -m pip install "$torch_pin" --index-url https://download.pytorch.org/whl/cpu
+        python -m pip install -r "$REQUIREMENTS"
+        python -m pip list | grep -iE '^(torch|torchao|executorch|transformers|huggingface.hub) '

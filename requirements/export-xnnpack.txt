@@ -1,0 +1,14 @@
+# Install torch from the CPU index first (the PyPI Linux wheel pulls ~3 GB of CUDA libs):
+#   pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cpu
+# ExecuTorch 1.4.0 is built against torch 2.13.0 (torch_pin.py) and torchao 0.18.0.
+torch==2.13.0
+torchao==0.18.0
+executorch==1.4.0
+pytorch-tokenizers==1.4.1
+# executorch.extension.llm.runner imports transformers at package import time; the smoke
+# test needs that package for TextLLMRunner.
+transformers==5.17.0
+huggingface_hub==1.31.0
+safetensors==0.8.0
+jinja2==3.1.6
+pyyaml==6.0.3

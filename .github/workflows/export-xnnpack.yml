@@ -1,0 +1,87 @@
+name: Export XNNPACK
+run-name: "XNNPACK: ${{ inputs.model_id }}@${{ inputs.revision }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_id:
+        description: Hugging Face model id, e.g. Qwen/Qwen3-1.7B
+        required: true
+        type: string
+      revision:
+        description: Branch, tag or commit of the source repo
+        default: main
+        type: string
+      context:
+        description: Context window in tokens, or "auto" to fit the phone budget
+        default: auto
+        type: string
+      publish_hf:
+        description: Publish to the Hugging Face org in config/pipeline.yaml
+        default: true
+        type: boolean
+      publish_release:
+        description: Attach the files to a GitHub release
+        default: true
+        type: boolean
+
+permissions:
+  contents: write # GitHub releases
+
+concurrency:
+  group: export-xnnpack-${{ inputs.model_id }}
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      MODEL_ID: ${{ inputs.model_id }}
+      REVISION: ${{ inputs.revision }}
+      CONTEXT: ${{ inputs.context }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-export
+        with:
+          swap-gib: "24"
+
+      - name: Export and smoke-test
+        run: |
+          echo "ARTIFACT=xnnpack-${MODEL_ID//\//--}" >>"$GITHUB_ENV"
+          args=(--revision "$REVISION" --out "$WORK_DIR/out" --work "$WORK_DIR/work")
+          if [ "$CONTEXT" != "auto" ]; then args+=(--context "$CONTEXT"); fi
+          python -m pipeline export-xnnpack "$MODEL_ID" "${args[@]}"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f "$WORK_DIR/out/xnnpack/export-report.json" ]; then
+            python -m pipeline summary "$WORK_DIR/out" --backend xnnpack >>"$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ env.WORK_DIR }}/out
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Publish to Hugging Face
+        if: inputs.publish_hf
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::Set the HF_TOKEN repository secret (write access to the output org)"
+            exit 1
+          fi
+          python -m pipeline publish-hf "$WORK_DIR/out" --backend xnnpack
+
+      - name: Publish GitHub release
+        if: inputs.publish_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m pipeline publish-release "$WORK_DIR/out" --backend xnnpack

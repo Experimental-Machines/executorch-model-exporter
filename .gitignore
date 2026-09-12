@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+# Local export runs
+out/
+work/
+.local-out/
+.local-export-*.log

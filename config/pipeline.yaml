@@ -1,0 +1,56 @@
+# Settings for the watcher and the export workflows. Toolchain versions live in
+# requirements/*.txt; config/versions.env holds the ones pip does not install.
+
+hub:
+  # Where exports are published. One repo per source model: <org>/<source name><suffix>.
+  org: experimentalmachines
+  repo_suffix: -ExecuTorch
+  # Tags on every published repo. The app's Discover screen searches filter=executorch.
+  tags: [executorch, android, on-device, openweights]
+
+watch:
+  orgs: [Qwen, google, meta-llama, HuggingFaceTB]
+  pipeline_tag: text-generation
+  # Size limit, read from the size in the repo name ("4B", "360M"): at most this many
+  # billions. Publishers name by nominal size; Qwen3-4B's real total is 4,022,468,096, so
+  # a strict cap on the real count would drop the whole 4B class.
+  max_nominal_billions: 4.0
+  # Hard cap on the real parameter count (HF safetensors metadata), whatever the name says.
+  max_params: 4500000000
+  # A repo whose name contains one of these (case-insensitive, separators removed) is
+  # skipped: pre-quantized weights cannot be re-exported, and the others are not chat or
+  # completion models even when their architecture is a causal LM.
+  name_exclude:
+    - awq
+    - gptq
+    - gguf
+    - fp8
+    - fp4
+    - int4
+    - int8
+    - mlx
+    - bnb
+    - onnx
+    - exl2
+    - 4bit
+    - 8bit
+    - w4a16
+    - w8a8
+    - embedding
+    - reranker
+    - reward
+
+export:
+  # Candidate windows, largest first. The largest one that fits both budgets is used.
+  context_tiers: [32768, 16384, 8192, 4096, 2048]
+  # Phone budget for resident memory (.pte + KV cache + runtime overhead). Samsung's and
+  # MIUI's memory guards killed the app at 6 GB PSS in the openweights window matrix
+  # (docs/research/executorch-window-matrix.md), so stay under that with margin.
+  device_budget_bytes: 5000000000
+  runtime_overhead_bytes: 500000000
+  # Prefill chunk (get_max_seq_len). The app's measured recipe uses 2048.
+  prefill_chunk: 2048
+  xnnpack:
+    qmode: 8da4w
+    group_size: 32
+    embedding_quantize: "8,0"
