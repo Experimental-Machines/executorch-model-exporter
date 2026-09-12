@@ -1,0 +1,3330 @@
+{
+  "models": {
+    "HuggingFaceTB/FineMath-Llama-3B": {
+      "created_at": "2025-01-06T14:14:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "00337b07f25b82ff07eb264cddc45fb7a6a7c02c",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM-1.7B": {
+      "created_at": "2024-07-14T15:56:33+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d7449ff7241c863f3e8accc475155f0f97afa011",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM-1.7B-Instruct": {
+      "created_at": "2024-07-15T23:03:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "69f49d9c36434d6a3f319dadc5bd3b812752b98b",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM-135M": {
+      "created_at": "2024-07-14T21:45:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1d461723eec654e65efdc40cf49301c89c0c92f4",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM-135M-Instruct": {
+      "created_at": "2024-07-15T23:02:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "fcc320f490e08fdb4b99d935b2c58d40bf35b0d0",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM-360M": {
+      "created_at": "2024-07-14T21:48:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "59f7ef243ee09a72cbc14cb054393a3e3b771d41",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM-360M-Instruct": {
+      "created_at": "2024-07-15T21:50:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "73b7144f76331266f5f45d5642fd8da653583b13",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM-360M-Instruct-ONNX-fp16": {
+      "created_at": "2024-08-17T22:45:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a33cec8647056c11bcb534dda2bf8ff39e3704d6",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-1.7B": {
+      "created_at": "2024-10-30T22:50:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "effd688a12921b4cc83e3312b6feb579f70f9c71",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-1.7B-Instruct": {
+      "created_at": "2024-10-31T13:42:06+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "31b70e2e869a7173562077fd711b654946d38674",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-1.7B-Instruct-16k": {
+      "created_at": "2025-02-21T12:36:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e6176739e9ab04f510137531200981d8401263f9",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF": {
+      "created_at": "2024-10-31T20:35:06+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2d4a76a30b4af41ecd395c35725ac11688d4cfe4",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-1.7B-Instruct-Q8-mlx": {
+      "created_at": "2024-11-27T14:05:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2bb0b4cebf6f2e93b23779a44f8b93e185609046",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-1.7B-intermediate-checkpoints": {
+      "created_at": "2025-02-26T12:08:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1d5d66907e30df55193af3afdabb1b316e9f063d",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-1.7B-sft-only": {
+      "created_at": "2024-10-30T23:56:52+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c9c43e73dbb7054658b0b973a30dccd0d23fbc86",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-135M": {
+      "created_at": "2024-10-31T00:46:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "93efa2f097d58c2a74874c7e644dbc9b0cee75a2",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-135M-Instruct": {
+      "created_at": "2024-10-31T13:41:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-135M-Instruct-Q8-mlx": {
+      "created_at": "2024-11-27T14:10:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "df5993fa3ed1b55bee7cede9f04e5139e7677e7f",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-135M-intermediate-checkpoints": {
+      "created_at": "2025-02-26T18:15:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "75017e317f974bcc083dc45e9775de8ac3ed1ebb",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-360M": {
+      "created_at": "2024-10-31T00:43:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f8027fd0eaeea54caa13c31d31b9fdc459c38b49",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-360M-Instruct": {
+      "created_at": "2024-10-31T13:41:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a10cc1512eabd3dde888204e902eca88bddb4951",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-360M-Instruct-GGUF": {
+      "created_at": "2024-10-31T20:37:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "593b5a2e04c8f3e4ee880263f93e0bd2901ad47f",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-360M-Instruct-Q8-mlx": {
+      "created_at": "2024-11-27T14:09:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f490e92c20a48dcfdbb730c1681fc101bfeb5ef9",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-360M-intermediate-checkpoints": {
+      "created_at": "2025-02-26T17:31:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b5cf95e9d73a4c27437fd10fb24d1922353b40c1",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM2-nanotron-ckpt": {
+      "created_at": "2024-11-30T14:10:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1d4b5389c70476e372ebe3666a3040cdc20bbeb0",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM3-3B": {
+      "created_at": "2025-07-08T10:11:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a07cc9a04f16550a088caea529712d1d335b0ac1",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM3-3B-Base": {
+      "created_at": "2025-06-19T11:33:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d78a42f79198603e614095753484a04c10c2b940",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM3-3B-GSM8K-SFT": {
+      "created_at": "2026-04-03T01:31:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "44034b1b8898ad2ad3c5a7034b5bbde1c0b87c0a",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM3-3B-ONNX": {
+      "created_at": "2025-07-08T15:12:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "af50613703fb6f10ffcb21b27ad48edcb8334232",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolLM3-3B-checkpoints": {
+      "created_at": "2025-07-20T22:34:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d7fe5ce9229bb7b793e8d139e929a02788118cbf",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-256M-Base": {
+      "created_at": "2025-01-10T16:53:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "40ead2527dc2a7272c81fa8bc0d3eea81d59ebc1",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-256M-Instruct": {
+      "created_at": "2025-01-17T15:40:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7e3e67edbbed1bf9888184d9df282b700a323964",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-500M-Base": {
+      "created_at": "2025-01-13T13:48:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f76e4be063b7e7c2ca1ea486c068c41f8fb06706",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-500M-Instruct": {
+      "created_at": "2025-01-20T14:24:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a7da5b986cb59b408707209984f360a5f4ad7e47",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-Base": {
+      "created_at": "2024-11-22T16:58:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a576ab7b4354916a0cb5b58a3bd973a9a526ee7c",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-Instruct": {
+      "created_at": "2024-11-18T16:48:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "81cd9a775a4d644f2faf4e7becff4559b46b14c7",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-Instruct-DPO": {
+      "created_at": "2024-11-26T13:53:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "eb8601c89485e333a1028394b90e327279267d62",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM-Synthetic": {
+      "created_at": "2024-11-22T17:20:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "190ae466b533fe88fe9293dae37a4bfe550a90e4",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM2-2.2B-Base": {
+      "created_at": "2025-04-14T12:19:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "312a1101666abee14afd5191926092748504bb19",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM2-2.2B-Instruct": {
+      "created_at": "2025-02-08T19:18:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "482adb537c021c86670beed01cd58990d01e72e4",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM2-256M-Video-Instruct": {
+      "created_at": "2025-02-11T07:06:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "067788b187b95ebe7b2e040b3e4299e342e5b8fd",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/SmolVLM2-500M-Video-Instruct": {
+      "created_at": "2025-02-11T07:06:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7b375e1b73b11138ff12fe22c8f2822d8fe03467",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/cosmo-1b": {
+      "created_at": "2024-02-19T16:14:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e700c4809c319c50fd63f562353ffeb8ea809ea1",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/cosmo2-tokenizer": {
+      "created_at": "2024-06-27T15:37:03+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4ce2318a3628e77279c939ed6a9f3f03034402de",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-3plus-160B": {
+      "created_at": "2024-12-19T08:03:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0bdfe76227501c3d6a92766650cfdf9cdee434ce",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-4plus-160B": {
+      "created_at": "2024-12-19T07:51:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f988c0e771e36e082f6798f6c302b427d8a890e8",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-finemath-3plus": {
+      "created_at": "2024-12-18T17:27:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d5ecb68cc45347eaec3d35090cd2fc2aa1007eb1",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-finemath-4plus": {
+      "created_at": "2024-12-19T07:02:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "938366e8cae790af6f01aa67cb525a2c14f65561",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-finemath-infimath-3plus": {
+      "created_at": "2024-12-14T23:23:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c0feb8799d0aad3d937347b216f9cf1e806b041e",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-finemath-infimath-4plus": {
+      "created_at": "2024-12-13T23:10:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e939392d3288b2bdfef7a01abe726fc2d6f336c2",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-fwedu": {
+      "created_at": "2024-12-19T07:28:19+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "612fb97baa7a93811aa87b8cad1c3d617b34f866",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-infiwebmath": {
+      "created_at": "2024-12-18T17:27:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9b92967ad915bbbb59517fab2d5852238d176616",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-infiwebmath-3plus": {
+      "created_at": "2024-12-18T17:10:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "67d0cce89b98ee9e67de81161662b45a9e72931a",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-infiwebmath-4plus": {
+      "created_at": "2024-12-18T17:30:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "aee206e7d42b4f16c998599c5da24ddf73446ae7",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-ablation-owm": {
+      "created_at": "2024-12-18T17:30:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ce9323115c92dd9951fcd3b1db4f8b7b0681183e",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/finemath-classifier": {
+      "created_at": "2024-10-04T14:28:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bd0b0e330750ccaafb16c47066f875b3fcb707c3",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/nanowhale-100m": {
+      "created_at": "2026-04-24T11:54:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6a3bed5ff8f3ffa23238e146caa003191e6f3c0a",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/nanowhale-100m-base": {
+      "created_at": "2026-04-24T13:33:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8ea74cc04bebfe7feeec74b29018884eec0265d3",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/python-edu-scorer": {
+      "created_at": "2024-06-28T11:24:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "76b46de78d141a37d85f8e6fb7eb5fe9201d4241",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/qwen3-1.7b-gsm8k-sft": {
+      "created_at": "2026-03-25T00:40:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b0a537b73930e835e38b349bba1581202022a945",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm-1.7B-instruct-add-basics-q4f16_1-MLC": {
+      "created_at": "2024-08-18T06:46:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a3afff498390eb79800318b3d85cafd8a247414c",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm-1.7B-instruct-v0.2-Q8_0-GGUF": {
+      "created_at": "2024-08-17T20:10:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "21c643bffffcc401ae24caab373b417de27949a5",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm-135M-instruct-add-basics-q0f16-MLC": {
+      "created_at": "2024-08-18T06:48:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b4904187d326c64bda2c498b37164c6f76065009",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm-135M-instruct-v0.2-Q8_0-GGUF": {
+      "created_at": "2024-08-14T11:12:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "53066c72a815622e28d006aefbe32df6dd4b1835",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm-360M-instruct-add-basics": {
+      "created_at": "2024-08-13T00:17:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ce9dcde69f375449b2aa8c148dc1c5c9732d9c6e",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm-360M-instruct-add-basics-q0f16-MLC": {
+      "created_at": "2024-08-16T14:42:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e9941e67ed89fcdbeffd8af2b1f5d7c5bada794d",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm-360M-instruct-v0.2-Q8_0-GGUF": {
+      "created_at": "2024-08-13T16:02:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ac681f051bd393dc26c5bdacd277c03a7ca5d5d2",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smollm2-135M-SFT-Only": {
+      "created_at": "2024-10-31T07:15:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "79528469cd11749bac3e8e9200fd9c192fbd8979",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/smolvlm-app-config": {
+      "created_at": "2025-02-18T16:13:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "200c85285752ea72ddfe37fda852d9ebb1fa0c57",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-c": {
+      "created_at": "2024-09-17T15:46:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9a6eab4c1d5e96806c88bd90d7a26932ae324f94",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-cpp": {
+      "created_at": "2024-09-17T12:51:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f94a8eded178d49cdb71b1a870a4436db307fb66",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-csharp": {
+      "created_at": "2024-09-23T10:12:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "56003d71241a98b3fba3b69d813c32536bfed6f3",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-go": {
+      "created_at": "2024-09-17T19:27:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e89e98e5629aada1d7a822282755d726fd0b478c",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-java": {
+      "created_at": "2024-09-23T08:57:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "697da1270ea734dbf6f66ecd68d621372d094c24",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-javascript": {
+      "created_at": "2024-09-17T19:27:02+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e332bcaac2114d3500174fd4b558585ee72ad4d9",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-markdown": {
+      "created_at": "2024-09-23T08:57:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "34d397542c7d56894f7122ae4a17029221eaedcf",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-php": {
+      "created_at": "2024-09-23T08:57:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "80128cc09523d8c4d47be29cc84e8b7ff52c140a",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-python": {
+      "created_at": "2024-09-23T08:57:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2b36efbd7a00b5db416d7550c5ad42b561355517",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-ruby": {
+      "created_at": "2024-09-17T19:26:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6716fbb993c7aa27366cd9041af02db09630c5fe",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-rust": {
+      "created_at": "2024-09-17T19:27:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "81156a2b90615db30a79470b3f76fb826f020318",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-shell": {
+      "created_at": "2024-09-23T08:57:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b4f7ecd29fb7019ae11338a3fd50628d9bc21094",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-sql": {
+      "created_at": "2024-09-23T08:57:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ac9d8739af8e1b3878969a34f6b85ac584bfd987",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-swift": {
+      "created_at": "2024-09-23T08:57:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ddd2f1ea3fe9641f194fa85f54d786186b23886c",
+      "status": "seeded"
+    },
+    "HuggingFaceTB/stack-edu-classifier-typescript": {
+      "created_at": "2024-09-23T08:57:19+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2597a60e5e3e8496c47f825489cdb188116cafd5",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-AgentWorld-35B-A3B": {
+      "created_at": "2026-06-22T14:49:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "60d2b0434a53d2e62a7c00a489586815d94ebffb",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Drive-1.0-4B": {
+      "created_at": "2026-08-27T08:14:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "28484089a7cc8c335cf5089fb0745cf7c49b6eaa",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Image": {
+      "created_at": "2025-08-02T04:58:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "75e0b4be04f60ec59a75f475837eced720f823b6",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Image-2512": {
+      "created_at": "2025-12-30T02:29:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "25468b98e3276ca6700de15c6628e51b7de54a26",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Image-Bench": {
+      "created_at": "2026-05-21T04:15:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1b77ff83564ac4e4e8140769eacff7ff73f35f3c",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Image-Edit": {
+      "created_at": "2025-08-17T08:32:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ac7f9318f633fc4b5778c59367c8128225f1e3de",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Image-Edit-2509": {
+      "created_at": "2025-09-22T13:09:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d3968ef930e841f4c73640fb8afa3b306a78167e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Image-Edit-2511": {
+      "created_at": "2025-12-17T05:55:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+      "status": "seeded"
+    },
+    "Qwen/Qwen-Image-Layered": {
+      "created_at": "2025-12-17T06:02:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8f0ca708dfff6ba1dd5f2d85d78f8c108a040bcf",
+      "status": "seeded"
+    },
+    "Qwen/Qwen2.5-Omni-7B-AWQ": {
+      "created_at": "2025-05-14T08:29:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "848615c28dfd87b0f624baea4be1f29bec0d1db1",
+      "status": "seeded"
+    },
+    "Qwen/Qwen2.5-Omni-7B-GPTQ-Int4": {
+      "created_at": "2025-05-14T08:30:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6d33b6bb5114a84de7efd38310779242520e7d4e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-0.6B-GGUF": {
+      "created_at": "2025-05-05T09:16:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "23749fefcc72300e3a2ad315e1317431b06b590a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-0.6B-GPTQ-Int8": {
+      "created_at": "2025-05-08T10:48:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d3f20e7e71825fe57ad32705b396e9e156279107",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-0.6B-MLX-4bit": {
+      "created_at": "2025-05-23T15:45:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "173234aa840d113125e9f2271100ddbaf16c9620",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-0.6B-MLX-6bit": {
+      "created_at": "2025-05-23T15:47:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3818e758c8ed9ec596a5e0c4c426fb81f7c0be18",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-0.6B-MLX-8bit": {
+      "created_at": "2025-05-23T15:51:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e53d3ae02ebc79eac17f1fa9e23a2b65ce227893",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-0.6B-MLX-bf16": {
+      "created_at": "2025-05-23T15:50:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bc82a1060abf25e90be9782b12c00fa55d9bf542",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-1.7B-GGUF": {
+      "created_at": "2025-05-05T09:14:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "90862c4b9d2787eaed51d12237eafdfe7c5f6077",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-1.7B-GPTQ-Int8": {
+      "created_at": "2025-05-08T10:42:06+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "382fed3fa21d1a7e837b42a500564a0c4be4f060",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-1.7B-MLX-4bit": {
+      "created_at": "2025-05-23T23:22:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "21457c6f51ed54a7c16e988c0844db973815c137",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-1.7B-MLX-6bit": {
+      "created_at": "2025-05-23T16:10:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "51d30dc1eaca0a2638a1165dba94fbf79be82809",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-1.7B-MLX-8bit": {
+      "created_at": "2025-05-23T16:13:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "95400cbada1bef81d2c4fb6f9d2b10aa27f1f1a0",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-1.7B-MLX-bf16": {
+      "created_at": "2025-05-23T15:54:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "720c04346ea2b095c801ebbd545c109230964cd4",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-14B-MLX-4bit": {
+      "created_at": "2025-05-23T23:59:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ba63a5141812f9870287df53341123a71ba41433",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-14B-MLX-6bit": {
+      "created_at": "2025-05-23T23:52:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "02c5e9b6ecab3c60eccc9d15b3a9fa2dbf021a35",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-14B-MLX-8bit": {
+      "created_at": "2025-05-23T23:46:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7f11bdbf4e522b155526983c77d33771330d5b8f",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-14B-MLX-bf16": {
+      "created_at": "2025-06-12T01:46:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "edbe64998ef16142f85b440e34e3504dd2325052",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-GGUF": {
+      "created_at": "2025-05-11T01:15:22+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "211e807ecd6d37446a747409108783e39a04e80f",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-GPTQ-Int4": {
+      "created_at": "2025-05-10T13:54:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dff138951f3898772fc0d795a4b5b30f417577f4",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+      "created_at": "2025-07-21T06:46:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ac9c66cc9b46af7306746a9250f23d47083d689e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-Instruct-2507-FP8": {
+      "created_at": "2025-07-21T11:16:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e156cb4efae43fbee1a1ab073f946a1377e6b969",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-MLX-4bit": {
+      "created_at": "2025-06-11T11:09:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b503f28279e60cbcbbb4281da8fa97a12c791869",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-MLX-6bit": {
+      "created_at": "2025-06-11T12:21:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a9b4800972d7b032a3af9fd81bbeb4a6bee6b63f",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-MLX-8bit": {
+      "created_at": "2025-06-11T14:03:02+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "06d7d9cb6602b95aa88f46a9f623fd8731768381",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-MLX-bf16": {
+      "created_at": "2025-06-11T09:03:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "284ea931f422d64380bd650b5fe4a755b14b3e2b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-Thinking-2507": {
+      "created_at": "2025-07-25T04:59:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6cbffae6d8e28b986a6b17bd36f42f9fa0f1f0a5",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-235B-A22B-Thinking-2507-FP8": {
+      "created_at": "2025-07-25T05:44:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f07f63f2bbd7540917118ebdf3812696ef303b03",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-GPTQ-Int4": {
+      "created_at": "2025-05-05T09:03:03+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9b534e4318b7ebc3c961a839f13eb18b1833f441",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-Instruct-2507": {
+      "created_at": "2025-07-28T07:31:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-Instruct-2507-FP8": {
+      "created_at": "2025-07-28T12:25:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5a5a776300a41aaa681dd7ff0106608ef2bc90db",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-MLX-4bit": {
+      "created_at": "2025-06-11T08:51:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4e2776a4cc73a8a251d0b797010a5b07fd541a3e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-MLX-6bit": {
+      "created_at": "2025-06-11T08:43:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b92024737fc38f0bce249aaefb7611dd22c38b58",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-MLX-8bit": {
+      "created_at": "2025-06-11T08:26:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ef6823f1ecb032a5661f97806d920d270803a1b9",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-MLX-bf16": {
+      "created_at": "2025-06-11T07:59:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c8e239e419e3b086961216a88e541228106db3cd",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-Thinking-2507": {
+      "created_at": "2025-07-29T11:05:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "144afc2f379b542fdd4e85a1fcd5e1f79112d95d",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-30B-A3B-Thinking-2507-FP8": {
+      "created_at": "2025-07-29T11:29:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "60d80c83c53c3b611c642dbb8c942b3f90c5948a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-32B-MLX-4bit": {
+      "created_at": "2025-06-11T07:54:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ceb4c4aad0164033af0c8dd37a0641693d0d6321",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-32B-MLX-6bit": {
+      "created_at": "2025-06-11T07:19:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "864389199428709a0af1119f9647823926864b58",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-32B-MLX-8bit": {
+      "created_at": "2025-06-11T06:56:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5fd4a0905f0e34cc45682cf9e52769681727e38c",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-32B-MLX-bf16": {
+      "created_at": "2025-06-11T06:40:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cf84a682b91f6fe200f1000764405a6dded44f4f",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-AWQ": {
+      "created_at": "2025-05-05T14:41:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "74d4bd2bd4bff9cafc9345221320bffb08b406a3",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-Instruct-2507": {
+      "created_at": "2025-08-05T10:58:03+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cdbee75f17c01a7cc42f958dc650907174af0554",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-Instruct-2507-FP8": {
+      "created_at": "2025-08-06T06:51:43+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8591804019c8b22094c3b5b4454e0edc05dffc98",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-MLX-4bit": {
+      "created_at": "2025-05-23T23:58:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "52a5ab34fa604bc8af6d3ce0cac0cab10b7eb495",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-MLX-6bit": {
+      "created_at": "2025-05-23T23:53:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d73d5dba88e4b0356f224d778fdd88d973ec217f",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-MLX-8bit": {
+      "created_at": "2025-05-23T23:47:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "315fb4813e1d13d630f4ee43ea06eb03c6150afb",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-MLX-bf16": {
+      "created_at": "2025-05-23T23:41:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "94e68620a4b9db944b2f5b3c3633fbdf621d871b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-SafeRL": {
+      "created_at": "2025-09-30T10:25:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1b95ccb88cabaf284ffb6968719c40ae6cd4085b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-Thinking-2507": {
+      "created_at": "2025-08-05T11:02:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "768f209d9ea81521153ed38c47d515654e938aea",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-4B-Thinking-2507-FP8": {
+      "created_at": "2025-08-06T06:16:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "953532f942706930ec4bb870569932ef63038fdf",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-8B-MLX-4bit": {
+      "created_at": "2025-05-23T23:24:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "383413e909f3bc5303ce195ebbdf0339c5a1a2a3",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-8B-MLX-6bit": {
+      "created_at": "2025-05-23T16:03:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dccec1206305048d1beee830b25c2098530ecfd8",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-8B-MLX-8bit": {
+      "created_at": "2025-05-23T23:26:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6a20f8c9329f958e0f2e8e7d92aa002022a9a70d",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-8B-MLX-bf16": {
+      "created_at": "2025-05-23T23:36:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6766fd4b8101fa4201cc55c5a2e464f3d301f792",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-ASR-0.6B": {
+      "created_at": "2026-01-28T03:15:39+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5eb144179a02acc5e5ba31e748d22b0cf3e303b0",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-ASR-0.6B-hf": {
+      "created_at": "2026-06-26T08:39:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7f1569a48a89f3e3f4dc3a5c9d28bddd903bc76c",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-ASR-1.7B": {
+      "created_at": "2026-01-28T03:22:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7278e1e70fe206f11671096ffdd38061171dd6e5",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-ASR-1.7B-hf": {
+      "created_at": "2026-06-26T08:34:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bcd2b5b7f32b480ab5790554cfa8347f246a14f3",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-30B-A3B-Instruct": {
+      "created_at": "2025-07-31T07:04:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b2cff646eb4bb1d68355c01b18ae02e7cf42d120",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-30B-A3B-Instruct-FP8": {
+      "created_at": "2025-07-31T08:14:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dcaee4d4dfc5ee71ad501f01f530e5652438fde0",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-480B-A35B-Instruct": {
+      "created_at": "2025-07-22T14:52:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9d90cf8fca1bf7b7acca42d3fc9ae694a2194069",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8": {
+      "created_at": "2025-07-22T15:23:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "003f183a92fbe5b9a8325aaa8b2ae797c91dd90f",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-Next": {
+      "created_at": "2026-01-30T15:08:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a7fbcb5c0e12d62a448eaa0e260346bf5dcc0feb",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-Next-Base": {
+      "created_at": "2026-02-01T12:42:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1b6df59d5f75ab51edb9ad8cb3ea69c5d0aedd57",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-Next-FP8": {
+      "created_at": "2026-02-01T12:22:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "da6e2ed27304dd39abadd9c82ef50e8de67bdd4c",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Coder-Next-GGUF": {
+      "created_at": "2026-02-02T05:40:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b82fb7382639d97b38fa7672e526c760c2fb358e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Embedding-0.6B": {
+      "created_at": "2025-06-03T14:25:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Embedding-0.6B-GGUF": {
+      "created_at": "2025-06-05T08:34:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "370f27d7550e0def9b39c1f16d3fbaa13aa67728",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Embedding-4B": {
+      "created_at": "2025-06-03T14:31:33+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5cf2132abc99cad020ac570b19d031efec650f2b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Embedding-4B-GGUF": {
+      "created_at": "2025-06-05T08:17:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f4602530db1d980e16da9d7d3a70294cf5c190be",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Embedding-8B": {
+      "created_at": "2025-06-03T14:39:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1d8ad4ca9b3dd8059ad90a75d4983776a23d44af",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Embedding-8B-GGUF": {
+      "created_at": "2025-06-05T07:59:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "69d0e58a13e463cd99a9b83e3f5fee7c10265fab",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-ForcedAligner-0.6B": {
+      "created_at": "2026-01-28T03:29:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c7cbfc2048c462b0d63a45797104fc9db3ad62b7",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-ForcedAligner-0.6B-hf": {
+      "created_at": "2026-06-26T08:42:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c07281df297b9905d24a508279258cccf987a064",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Instruct": {
+      "created_at": "2025-09-09T15:40:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9c7f2fbe84465e40164a94cc16cd30b6999b0cc7",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8": {
+      "created_at": "2025-09-22T03:48:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c5f5f263bdd5cc134092897864e8905d8fe7b928",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Instruct-GGUF": {
+      "created_at": "2025-12-03T06:32:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4c8630cf7af926a9c5095cb4bbbbc65d36e20f77",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Thinking": {
+      "created_at": "2025-09-09T15:45:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e502dd4100cc68c0de57643fd4317ec93a128670",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Thinking-FP8": {
+      "created_at": "2025-09-22T03:49:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1a28d48a94e799860201879be67616b9e21c4bd2",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Thinking-GGUF": {
+      "created_at": "2025-12-03T06:54:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "de5795cd9a4f5538d1dd5c9823fdd73eacfae3fe",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Omni-30B-A3B-Captioner": {
+      "created_at": "2025-09-15T15:26:43+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a2bd106cbf527db5676e79662674da22b0545ec0",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Omni-30B-A3B-Instruct": {
+      "created_at": "2025-09-20T03:16:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "26291f793822fb6be9555850f06dfe95f2d7e695",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Omni-30B-A3B-Thinking": {
+      "created_at": "2025-09-15T15:39:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2f443cfc4c54b14a815c0e2bb9a9d6cbcd9a748b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Reranker-0.6B": {
+      "created_at": "2025-05-29T13:30:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Reranker-4B": {
+      "created_at": "2025-06-03T14:46:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-Reranker-8B": {
+      "created_at": "2025-05-29T13:30:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "77d193c791ed757ca307ee72715aa132723da912",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-TTS-12Hz-0.6B-Base": {
+      "created_at": "2026-01-21T08:58:06+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5d83992436eae1d760afd27aff78a71d676296fc",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice": {
+      "created_at": "2026-01-21T08:57:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "85e237c12c027371202489a0ec509ded67b5e4b5",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-TTS-12Hz-1.7B-Base": {
+      "created_at": "2026-01-21T08:57:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "fd4b254389122332181a7c3db7f27e918eec64e3",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice": {
+      "created_at": "2026-01-21T08:56:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0c0e3051f131929182e2c023b9537f8b1c68adfe",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign": {
+      "created_at": "2026-01-21T08:55:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5ecdb67327fd37bb2e042aab12ff7391903235d3",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-TTS-Tokenizer-12Hz": {
+      "created_at": "2026-01-21T08:56:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7dd38ad4e9bad454aae9cd937d0cd577604fe229",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Instruct": {
+      "created_at": "2025-09-22T03:54:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "710c13861be6c466e66de3f484069440b8f31389",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Instruct-FP8": {
+      "created_at": "2025-10-01T13:57:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7fbcd8c9e2ad011808ed8a57d64c462605c3e381",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Instruct-GGUF": {
+      "created_at": "2025-10-31T08:39:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cbf7709dad5de4632836beb8969d51f1eff0f48b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Thinking": {
+      "created_at": "2025-09-22T03:54:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6664affde68449468deb7527186455c7450c13c0",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Thinking-FP8": {
+      "created_at": "2025-10-01T14:31:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4208801232c8ef5e6faea2ea1e4066193958776d",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Thinking-GGUF": {
+      "created_at": "2025-10-31T09:57:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e3423a389728d101f209c908b79b68367fdfa062",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-2B-Instruct": {
+      "created_at": "2025-10-19T13:13:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-2B-Instruct-FP8": {
+      "created_at": "2025-10-19T13:14:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "46485250d8854c0a9be4f1adbc67ca47e5bb6fa5",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-2B-Instruct-GGUF": {
+      "created_at": "2025-10-31T02:49:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "52d6c8ffea26cc873ac5ad116f8631268d7eb503",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-2B-Thinking": {
+      "created_at": "2025-10-19T14:44:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "33e0ad94c327808ebc7d3bbc97e78e600f1eeecd",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-2B-Thinking-FP8": {
+      "created_at": "2025-10-20T07:51:14+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bc71e10812c1bba5532bd2eca46a4166f3b7fffd",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-2B-Thinking-GGUF": {
+      "created_at": "2025-10-31T03:17:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "76646427920e08bd278e46af11c5db8532e6a657",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-30B-A3B-Instruct": {
+      "created_at": "2025-09-30T10:52:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9c4b90e1e4ba969fd3b5378b57d966d725f1b86c",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-30B-A3B-Instruct-FP8": {
+      "created_at": "2025-10-01T14:49:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d9748a51ae66354c4dad665aab2c71f26cf2c8cd",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-30B-A3B-Instruct-GGUF": {
+      "created_at": "2025-10-31T06:37:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f54435e6cc31258f04b0969105c3f6badb197931",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-30B-A3B-Thinking": {
+      "created_at": "2025-09-30T11:04:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d0ed0380729be07a546fdefafbb4fe411f341e92",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-30B-A3B-Thinking-FP8": {
+      "created_at": "2025-10-01T14:52:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cf3058e421b60f13f81b16c0e3665f8554c03d6a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-30B-A3B-Thinking-GGUF": {
+      "created_at": "2025-10-31T09:25:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "681477a4711f4bcefa0233abeb16a02abc74c14a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-32B-Instruct": {
+      "created_at": "2025-10-19T12:30:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-32B-Instruct-FP8": {
+      "created_at": "2025-10-19T13:01:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4bf2c2f39c37c0fede78bede4056e1f18cdf8109",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-32B-Instruct-GGUF": {
+      "created_at": "2025-10-31T02:54:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e3e1fe0c76de7ee58ea65db420c643adfe2e457c",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-32B-Thinking": {
+      "created_at": "2025-10-19T12:38:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-32B-Thinking-FP8": {
+      "created_at": "2025-10-19T12:39:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3eee143c9b355ba456390568e5970e2e60f5582b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-32B-Thinking-GGUF": {
+      "created_at": "2025-10-31T03:16:02+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a612b3102374e69a892162730ad904b69961f806",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-4B-Instruct": {
+      "created_at": "2025-10-11T07:23:22+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-4B-Instruct-FP8": {
+      "created_at": "2025-10-11T09:23:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "fefbb44cbcce8d1bb7e20b920b94f77432b3446d",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-4B-Instruct-GGUF": {
+      "created_at": "2025-10-31T02:50:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1cd86afb9a95c410a6038ab3b40d8b578c892266",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-4B-Thinking": {
+      "created_at": "2025-10-11T07:24:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1de27d8c51f12e819435303b9e84c4e25ba8401e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-4B-Thinking-FP8": {
+      "created_at": "2025-10-11T09:27:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "219b8e195ea30e383c55c954278767990974bba9",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-4B-Thinking-GGUF": {
+      "created_at": "2025-10-31T03:16:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a55c03cbb1dad5a0c678efa066a8dbccf5a8d30e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-8B-Instruct": {
+      "created_at": "2025-10-11T07:23:39+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-8B-Instruct-FP8": {
+      "created_at": "2025-10-11T09:43:02+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9cdc6310a8cb770ce18efaf4e9935334512aee45",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-8B-Instruct-GGUF": {
+      "created_at": "2025-10-31T02:50:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f982a07559d4a2f6c8744d840bf6fccab30eea96",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-8B-Thinking": {
+      "created_at": "2025-10-11T07:24:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-8B-Thinking-FP8": {
+      "created_at": "2025-10-11T09:42:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a6638e84662f85a17bb8688224541e153d4f6c71",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-8B-Thinking-GGUF": {
+      "created_at": "2025-10-31T03:16:22+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bca5838231f8cc1303cf8810afffcfbdc41bc75a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-Embedding-2B": {
+      "created_at": "2026-01-07T03:03:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9f2f7e710d6d81056aa5c0a4f04764fec6bb7bda",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-Embedding-8B": {
+      "created_at": "2026-01-07T03:02:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2c4565515e0f265c6511776e7193b22c0968ddc7",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-Reranker-2B": {
+      "created_at": "2026-01-07T03:10:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4bd860ac4f15ad1897a214615cccc700f8f71818",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3-VL-Reranker-8B": {
+      "created_at": "2026-01-07T03:11:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b212dc8c91a8164aef1ea2de9c1a867611e75c04",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-0.8B": {
+      "created_at": "2026-02-28T23:57:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2fc06364715b967f1860aea9cf38778875588b17",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-0.8B-Base": {
+      "created_at": "2026-02-28T23:57:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-122B-A10B": {
+      "created_at": "2026-02-24T09:43:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dc4d348443bc740c68e2d77492492c11606384d5",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-122B-A10B-FP8": {
+      "created_at": "2026-02-25T13:01:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a099dee70ccfcd8d5dda56aaa0b60cb8ecadabc9",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-122B-A10B-GPTQ-Int4": {
+      "created_at": "2026-03-03T06:08:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "30cd92cba9707a9aba09d1e490ed4b66b78e9606",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-27B": {
+      "created_at": "2026-02-24T09:41:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-27B-FP8": {
+      "created_at": "2026-02-25T13:20:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "97f5941bf617e31c5e237364a8602ce3f03a551a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-27B-GPTQ-Int4": {
+      "created_at": "2026-03-03T07:08:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8f0c09f227ae570e79617c6d9172b59df9c16081",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-2B": {
+      "created_at": "2026-02-28T23:56:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-2B-Base": {
+      "created_at": "2026-02-28T23:57:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b1485b2fa6dfa1287294f269f5fb618e03d52d7c",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-35B-A3B": {
+      "created_at": "2026-02-24T09:39:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-35B-A3B-Base": {
+      "created_at": "2026-02-24T09:42:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0f0813072d2358973511097385626f21fcb6d422",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-35B-A3B-FP8": {
+      "created_at": "2026-02-25T13:34:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9d1823d2dee688a6b25e77009dc727688c44936e",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-35B-A3B-GPTQ-Int4": {
+      "created_at": "2026-03-03T07:18:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3af5ca2972faf6de1fd6f4efc4d8d319ca751e8b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-397B-A17B": {
+      "created_at": "2026-02-16T04:55:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8472618112abcbd45acbcdc58436aff4233c23f7",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-397B-A17B-FP8": {
+      "created_at": "2026-02-18T13:01:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ea5b4f81096f3901c91dea97f81324302495781d",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-397B-A17B-GPTQ-Int4": {
+      "created_at": "2026-03-03T06:25:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "df333de344e06b492063d1ca04e2d4ee878f7595",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-4B": {
+      "created_at": "2026-02-27T14:45:03+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-4B-Base": {
+      "created_at": "2026-02-27T13:20:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1001bb4d826a52d1f399e183466143f4da7b741b",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-9B": {
+      "created_at": "2026-02-27T12:58:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.5-9B-Base": {
+      "created_at": "2026-02-26T16:20:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "68c46c4b3498877f3ef123c856ecfde50c39f404",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.6-27B": {
+      "created_at": "2026-04-21T07:50:43+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.6-27B-FP8": {
+      "created_at": "2026-04-21T07:51:33+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e89b16ebf1988b3d6befa7de50abc2d76f26eb09",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.6-35B-A3B": {
+      "created_at": "2026-04-15T05:59:19+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "995ad96eacd98c81ed38be0c5b274b04031597b0",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.6-35B-A3B-FP8": {
+      "created_at": "2026-04-15T06:05:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "95a723d08a9490559dae23d0cff1d9466213d989",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.8-2.4T-A95B": {
+      "created_at": "2026-08-08T01:50:52+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "207bd685a7e3696cfaff12ded7c6a7ea0f88c996",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.8-2.4T-A95B-FP8": {
+      "created_at": "2026-08-08T01:49:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d2dc35658bcf77e66643428cb52e774cc3b5bd29",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.8-27B": {
+      "created_at": "2026-08-05T08:22:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.8-27B-FP8": {
+      "created_at": "2026-08-13T08:01:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "017b9c7af6b5689d5dd426a76e0bc077eb5ca20a",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.8-Flash-Next": {
+      "created_at": "2026-08-24T08:24:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "de4b8e4d43b917e7706784d8bb445c9af86a3540",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3.8-Flash-Next-FP8": {
+      "created_at": "2026-08-24T08:25:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "236dfdf285828023ca3bcd3f37366c58a3469b13",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3Guard-Gen-0.6B": {
+      "created_at": "2025-09-23T11:35:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "fada3b2f655b89601929198343c94cd2f64d93cc",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3Guard-Gen-4B": {
+      "created_at": "2025-09-23T11:37:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6ec42827da0c1ff11e7a49dc269d2e810d27e108",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3Guard-Gen-8B": {
+      "created_at": "2025-09-23T11:40:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4505cb1a6f1864f21f8b27f7daf1b9a1aab6edbb",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3Guard-Stream-0.6B": {
+      "created_at": "2025-09-23T11:46:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "419364a715de9840d47b1457982f64ff37f90ed4",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3Guard-Stream-4B": {
+      "created_at": "2025-09-23T11:49:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "27a8f4e52e66dc01a03d20f41e362bb9c9bda7bf",
+      "status": "seeded"
+    },
+    "Qwen/Qwen3Guard-Stream-8B": {
+      "created_at": "2025-09-23T11:52:50+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f14fba01154127167c77c0e9f80536cec56e7b69",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3-1.7B-Base-W32K-L0_100": {
+      "created_at": "2026-04-27T03:39:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2756a49850d1d0288a18e561783deae0d810791e",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3-1.7B-Base-W32K-L0_50": {
+      "created_at": "2026-04-27T03:39:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ce1a79d9c5163932d65c417380e53230e1086370",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3-30B-A3B-Base-W128K-L0_100": {
+      "created_at": "2026-04-27T03:39:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4ec13070d3b7e41a8536ec36de3a28209c032b25",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3-30B-A3B-Base-W32K-L0_50": {
+      "created_at": "2026-04-27T03:39:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "efd0026557c5dcd91509652a3073689faa24abb8",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3-8B-Base-W64K-L0_100": {
+      "created_at": "2026-04-27T03:39:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f308c1df7c9746544f0af047fd00d6cf374627bd",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3-8B-Base-W64K-L0_50": {
+      "created_at": "2026-04-27T03:39:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9b7d647127c303dd371e5dbd992236bd9799b171",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-27B-W80K-L0_100": {
+      "created_at": "2026-04-27T03:39:43+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "82852e98c9b33d02194e92dd514b12fafd09ed25",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-27B-W80K-L0_50": {
+      "created_at": "2026-04-27T03:39:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "13d4221569f7ca5d3c1e605e3e3dc95117e4807c",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-2B-Base-W32K-L0_100": {
+      "created_at": "2026-04-27T03:39:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "027267657257a8d490296286e8fab41e1c1a1a3d",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-2B-Base-W32K-L0_50": {
+      "created_at": "2026-04-27T03:39:39+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "132ea3697b591df9ee46d738aa1d528e3c6082f7",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-35B-A3B-Base-W128K-L0_100": {
+      "created_at": "2026-04-27T03:39:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c960d05effbd7e5e5839886ddbe221a6144e8d86",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-35B-A3B-Base-W32K-L0_50": {
+      "created_at": "2026-04-27T03:39:46+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6af81a5a1b16ac821e5a9267fb461493ccfe2770",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-9B-Base-W64K-L0_100": {
+      "created_at": "2026-04-27T03:39:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "82761c1ce15887d3da629340cb9c1826bc71dc21",
+      "status": "seeded"
+    },
+    "Qwen/SAE-Res-Qwen3.5-9B-Base-W64K-L0_50": {
+      "created_at": "2026-04-27T03:39:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7bb2370d360e566b2d8acb8b3d15a0b2b88f52a8",
+      "status": "seeded"
+    },
+    "Qwen/WebWorld-14B": {
+      "created_at": "2026-02-13T14:14:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0212f4ed8a4bcd3e299d902f0dbf48b2255611d4",
+      "status": "seeded"
+    },
+    "Qwen/WebWorld-32B": {
+      "created_at": "2026-02-13T14:14:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e7fceedc8713450842f9bc9b122c1759c40bcc5b",
+      "status": "seeded"
+    },
+    "Qwen/WebWorld-8B": {
+      "created_at": "2026-02-13T14:13:39+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "26c65891f0a59c9b1dcc435eaadcc08ce6102a94",
+      "status": "seeded"
+    },
+    "Qwen/WorldPM-72B": {
+      "created_at": "2025-05-16T08:14:06+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8d62143e5264dc458ab23221874577a26eb07146",
+      "status": "seeded"
+    },
+    "Qwen/WorldPM-72B-HelpSteer2": {
+      "created_at": "2025-05-16T08:16:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f148c293dc30570d37a85cb3dcc2e5468047fcf3",
+      "status": "seeded"
+    },
+    "Qwen/WorldPM-72B-RLHFLow": {
+      "created_at": "2025-05-16T08:17:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "da08c94c72b930ff307f9ba6af302c2b2b3ad1ed",
+      "status": "seeded"
+    },
+    "Qwen/WorldPM-72B-UltraFeedback": {
+      "created_at": "2025-05-16T08:16:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7a21e7fd8426502017457e64f096c620ac048ee7",
+      "status": "seeded"
+    },
+    "google/alphagenome-all-folds": {
+      "created_at": "2026-01-14T14:32:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a8f293a76ee73d5b57f3bf2ae146510589fcf187",
+      "status": "seeded"
+    },
+    "google/alphagenome-fold-0": {
+      "created_at": "2026-01-15T12:11:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4ce9fd40aa9a3161644efcb69c47551454c6e5ad",
+      "status": "seeded"
+    },
+    "google/alphagenome-fold-1": {
+      "created_at": "2026-01-16T12:08:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ebbc6ab6e61d1e5a1dfe6e19a67379e45eb95116",
+      "status": "seeded"
+    },
+    "google/alphagenome-fold-2": {
+      "created_at": "2026-01-16T12:10:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8b7e73c4287c9986d265e77db0edd42ddaaf8ce9",
+      "status": "seeded"
+    },
+    "google/alphagenome-fold-3": {
+      "created_at": "2026-01-16T12:10:39+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "75fa73c8c40a3411b99cbd600f940c8aaf5d0aff",
+      "status": "seeded"
+    },
+    "google/diffusiongemma-26B-A4B-it": {
+      "created_at": "2026-06-09T12:40:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+      "status": "seeded"
+    },
+    "google/embeddinggemma-300m": {
+      "created_at": "2025-07-17T19:53:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "57c266a740f537b4dc058e1b0cda161fd15afa75",
+      "status": "seeded"
+    },
+    "google/embeddinggemma-300m-qat-q4_0-unquantized": {
+      "created_at": "2025-08-22T15:51:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7740c61c3ad98a9deb8423a20388ab6c3c5c45f2",
+      "status": "seeded"
+    },
+    "google/embeddinggemma-300m-qat-q8_0-unquantized": {
+      "created_at": "2025-08-27T13:47:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7b5b24595322ab0ea4d08827066860a6df8cb0aa",
+      "status": "seeded"
+    },
+    "google/functiongemma-270m-it": {
+      "created_at": "2025-10-08T17:33:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "39eccb091651513a5dfb56892d3714c1b5b8276c",
+      "status": "seeded"
+    },
+    "google/gemma-3-12b-it": {
+      "created_at": "2025-03-01T19:11:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "96b6f1eccf38110c56df3a15bffe176da04bfd80",
+      "status": "seeded"
+    },
+    "google/gemma-3-12b-it-qat-int4-unquantized": {
+      "created_at": "2025-04-09T11:52:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "617253f65292fdbbe87c693e72d8620acf7f3f8f",
+      "status": "seeded"
+    },
+    "google/gemma-3-12b-it-qat-q4_0-gguf": {
+      "created_at": "2025-03-12T12:32:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7929e34ac7c459bbfd1f38d7358e6839f204578b",
+      "status": "seeded"
+    },
+    "google/gemma-3-12b-it-qat-q4_0-unquantized": {
+      "created_at": "2025-04-08T13:29:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "68f7ee4fbd59087436ada77ed2d62f373fdd4482",
+      "status": "seeded"
+    },
+    "google/gemma-3-12b-pt": {
+      "created_at": "2025-03-01T19:11:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "295efb63d01a7017928f273a94ebb86105c9526f",
+      "status": "seeded"
+    },
+    "google/gemma-3-12b-pt-qat-q4_0-gguf": {
+      "created_at": "2025-03-12T21:47:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "063e301b66eb5da97e0eb4526bda272a23c8457a",
+      "status": "seeded"
+    },
+    "google/gemma-3-1b-it": {
+      "created_at": "2025-03-10T12:09:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dcc83ea841ab6100d6b47a070329e1ba4cf78752",
+      "status": "seeded"
+    },
+    "google/gemma-3-1b-it-qat-int4-unquantized": {
+      "created_at": "2025-04-09T07:58:37+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "aa30b729dbdae6e6d90852f16845044a2ba0680d",
+      "status": "seeded"
+    },
+    "google/gemma-3-1b-it-qat-q4_0-gguf": {
+      "created_at": "2025-03-10T22:42:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d1be121d36172a4b0b964657e2ee859d61138593",
+      "status": "seeded"
+    },
+    "google/gemma-3-1b-it-qat-q4_0-unquantized": {
+      "created_at": "2025-04-08T13:39:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a6692c1945954f4aa39a17b8dfba4a7e62db3d4f",
+      "status": "seeded"
+    },
+    "google/gemma-3-1b-pt": {
+      "created_at": "2025-02-20T21:21:06+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "fcf18a2a879aab110ca39f8bffbccd5d49d8eb29",
+      "status": "seeded"
+    },
+    "google/gemma-3-1b-pt-qat-q4_0-gguf": {
+      "created_at": "2025-03-12T11:51:52+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "67b1ebd5b416c6fd9d27f5304ffa655efc3bc2c4",
+      "status": "seeded"
+    },
+    "google/gemma-3-270m": {
+      "created_at": "2025-08-05T18:50:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9b0cfec892e2bc2afd938c98eabe4e4a7b1e0ca1",
+      "status": "seeded"
+    },
+    "google/gemma-3-270m-it": {
+      "created_at": "2025-07-30T18:06:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ac82b4e820549b854eebf28ce6dedaf9fdfa17b3",
+      "status": "seeded"
+    },
+    "google/gemma-3-270m-it-qat-q4_0-unquantized": {
+      "created_at": "2025-08-07T22:51:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8f726c6a497fd439f0d6f726e52f8e3b439a26e5",
+      "status": "seeded"
+    },
+    "google/gemma-3-270m-qat-q4_0-unquantized": {
+      "created_at": "2025-08-06T16:30:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "934ddacdc9b97cfaae508da318214d5b7ed71856",
+      "status": "seeded"
+    },
+    "google/gemma-3-27b-it": {
+      "created_at": "2025-03-01T19:10:19+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "005ad3404e59d6023443cb575daa05336842228a",
+      "status": "seeded"
+    },
+    "google/gemma-3-27b-it-qat-q4_0-gguf": {
+      "created_at": "2025-03-20T22:44:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "17cf0f6ad611f1a57a1640daa57eb427d6e67ed6",
+      "status": "seeded"
+    },
+    "google/gemma-3-27b-it-qat-q4_0-unquantized": {
+      "created_at": "2025-04-15T09:53:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "05a046eb83fc832d304c5b187526ebe261115955",
+      "status": "seeded"
+    },
+    "google/gemma-3-27b-pt": {
+      "created_at": "2025-03-01T19:10:03+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9fe3c4ebc93fbadb14913801536d022054ef11cc",
+      "status": "seeded"
+    },
+    "google/gemma-3-27b-pt-qat-q4_0-gguf": {
+      "created_at": "2025-03-20T22:45:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6f8f3d1a2c731ae024dab9f34e43a273d2a16920",
+      "status": "seeded"
+    },
+    "google/gemma-3-4b-it": {
+      "created_at": "2025-02-20T21:20:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "093f9f388b31de276ce2de164bdc2081324b9767",
+      "status": "seeded"
+    },
+    "google/gemma-3-4b-it-qat-int4-unquantized": {
+      "created_at": "2025-04-09T08:00:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "554bd242505753eef6dfae71f76ddd50c335fc46",
+      "status": "seeded"
+    },
+    "google/gemma-3-4b-it-qat-q4_0-gguf": {
+      "created_at": "2025-03-12T20:43:28+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "15f73f5eee9c28f53afefef5723e29680c2fc78a",
+      "status": "seeded"
+    },
+    "google/gemma-3-4b-it-qat-q4_0-unquantized": {
+      "created_at": "2025-04-08T13:24:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7c0881d809c27a8356951b1abbf5be1b827e875c",
+      "status": "seeded"
+    },
+    "google/gemma-3-4b-pt": {
+      "created_at": "2025-02-20T21:19:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cc012e0a6d0787b4adcc0fa2c4da74402494554d",
+      "status": "seeded"
+    },
+    "google/gemma-3-4b-pt-qat-q4_0-gguf": {
+      "created_at": "2025-03-12T17:10:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "493250c318e3c56ce61643ba066bb38fa7d5c371",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E2B": {
+      "created_at": "2025-06-12T17:43:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c0ad2723802bade99f427667a609a03ae17a6a66",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E2B-it": {
+      "created_at": "2025-06-12T17:44:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5e092ebca197cdcd8d8b195040accf22693501bc",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E2B-it-litert-lm": {
+      "created_at": "2025-06-06T22:25:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c03b6f60b8da6c5400b6838a2cf26420f80c0a01",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E2B-it-litert-preview": {
+      "created_at": "2025-05-18T19:10:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "66c93e118deff9961db659f241678e61b847d165",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E4B": {
+      "created_at": "2025-06-03T18:16:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "af70430f84ea4d7ac191aaa2bd8e14d2a5e8f6ee",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E4B-it": {
+      "created_at": "2025-06-03T18:17:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c1221e9c62e34a43ab7ffacd1be0ea71f126ef10",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E4B-it-litert-lm": {
+      "created_at": "2025-06-06T22:25:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "297ed75955702dec3503e00c2c2ecbbf475300bc",
+      "status": "seeded"
+    },
+    "google/gemma-3n-E4B-it-litert-preview": {
+      "created_at": "2025-05-18T19:24:14+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "13fcf7532a87d6c3493f4b9b71af4e0842ceac5c",
+      "status": "seeded"
+    },
+    "google/gemma-4-12B": {
+      "created_at": "2026-05-23T02:43:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "023679ed352de9bb66cc873c9009ce3482585c08",
+      "status": "seeded"
+    },
+    "google/gemma-4-12B-it": {
+      "created_at": "2026-05-23T01:17:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7",
+      "status": "seeded"
+    },
+    "google/gemma-4-12B-it-assistant": {
+      "created_at": "2026-05-23T01:17:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "46d4c6f13f0ac0ad827b915669b8df9b81c64c51",
+      "status": "seeded"
+    },
+    "google/gemma-4-12B-it-qat-q4_0-gguf": {
+      "created_at": "2026-06-05T00:28:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "29d097773436b69ff9feafd636ab4cf873786537",
+      "status": "seeded"
+    },
+    "google/gemma-4-12B-it-qat-q4_0-unquantized": {
+      "created_at": "2026-06-04T05:20:28+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b6ed86275a6a5735884e208bfed95b445a684ca2",
+      "status": "seeded"
+    },
+    "google/gemma-4-12B-it-qat-q4_0-unquantized-assistant": {
+      "created_at": "2026-06-04T22:58:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "18934064dd4c5c6cc3621f6381e7d377fc8cb7bd",
+      "status": "seeded"
+    },
+    "google/gemma-4-12B-it-qat-w4a16-ct": {
+      "created_at": "2026-06-05T02:50:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1d2c2d7f2466070e69d6fb3fd5ce9a7d75f2f6ee",
+      "status": "seeded"
+    },
+    "google/gemma-4-26B-A4B": {
+      "created_at": "2026-03-12T00:38:03+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "24548b62aa021d562695c04aaf7758a1ea47990b",
+      "status": "seeded"
+    },
+    "google/gemma-4-26B-A4B-it": {
+      "created_at": "2026-03-11T21:25:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4d7ae4984b7db7de8f8457170b3f1a419ee76d52",
+      "status": "seeded"
+    },
+    "google/gemma-4-26B-A4B-it-assistant": {
+      "created_at": "2026-04-23T20:16:46+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6e5aaaf4c42b98394530b8fda2e95cadd65c151c",
+      "status": "seeded"
+    },
+    "google/gemma-4-26B-A4B-it-qat-q4_0-gguf": {
+      "created_at": "2026-05-01T04:26:14+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d1c082be9cf3c8a514acf63b8761f4b41935842e",
+      "status": "seeded"
+    },
+    "google/gemma-4-26B-A4B-it-qat-q4_0-unquantized": {
+      "created_at": "2026-04-29T21:55:52+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f1e06dc520982d9b9edd76859fdb7ab209449949",
+      "status": "seeded"
+    },
+    "google/gemma-4-26B-A4B-it-qat-q4_0-unquantized-assistant": {
+      "created_at": "2026-05-29T19:19:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9537141506fe8875b3ed45b264af13580cb29166",
+      "status": "seeded"
+    },
+    "google/gemma-4-31B": {
+      "created_at": "2026-03-12T00:38:28+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5bbc2fb1c1b2c611d06e3d9f23c170ba21659d89",
+      "status": "seeded"
+    },
+    "google/gemma-4-31B-it": {
+      "created_at": "2026-03-11T18:22:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "842da3794eaa0b77d5f08bae87a17459d91ff475",
+      "status": "seeded"
+    },
+    "google/gemma-4-31B-it-assistant": {
+      "created_at": "2026-04-23T18:55:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "627c5ec1458b9086b841a91e0512fd31fd2fbbf1",
+      "status": "seeded"
+    },
+    "google/gemma-4-31B-it-qat-q4_0-gguf": {
+      "created_at": "2026-05-01T04:27:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "59dde24573e7e61570dba08b18a2e1fe246955ed",
+      "status": "seeded"
+    },
+    "google/gemma-4-31B-it-qat-q4_0-unquantized": {
+      "created_at": "2026-04-28T20:55:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1e4d8beecacb8b7590c1d8bedd7335f687bf311f",
+      "status": "seeded"
+    },
+    "google/gemma-4-31B-it-qat-q4_0-unquantized-assistant": {
+      "created_at": "2026-05-29T19:19:43+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "96d4c8ca3cb38c107a8478587878124895d1e844",
+      "status": "seeded"
+    },
+    "google/gemma-4-31B-it-qat-w4a16-ct": {
+      "created_at": "2026-06-04T22:30:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "52f3f65bc7a02d555763bc923bd1d9094898219d",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B": {
+      "created_at": "2026-03-02T19:59:14+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it": {
+      "created_at": "2026-03-02T19:58:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it-assistant": {
+      "created_at": "2026-04-23T18:35:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2d874ef7d29f9a30599a1e4b3c1cbc9595f005df",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it-qat-mobile-ct": {
+      "created_at": "2026-06-01T23:40:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "594b1c7919e98f8275aefdc844c306d709e61727",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it-qat-mobile-transformers": {
+      "created_at": "2026-06-02T23:54:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dd693ff40353f057ca5f07e945ad867f4afbf2ec",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it-qat-q4_0-gguf": {
+      "created_at": "2026-05-01T04:15:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "675cff42a74c774d6cb76f76d8eacb49b48c9b93",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it-qat-q4_0-unquantized": {
+      "created_at": "2026-04-29T23:37:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6befbaca7398925921802abd1f277b495b78b738",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it-qat-q4_0-unquantized-assistant": {
+      "created_at": "2026-05-29T19:18:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ebc7e1a211354561464cb82ed6d886792138dcb6",
+      "status": "seeded"
+    },
+    "google/gemma-4-E2B-it-qat-w4a16-ct": {
+      "created_at": "2026-06-04T22:29:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "971342c08f607aa7779983f6b5289778b5d271a7",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B": {
+      "created_at": "2026-03-02T19:57:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "411aa17b749aa952df1359d2dcea73917a544d9a",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it": {
+      "created_at": "2026-03-02T19:57:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ee0ef6023621cff504d758262d4e04895a5af4a2",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it-assistant": {
+      "created_at": "2026-04-23T18:44:33+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8d0031ea8c2109e2b1e86bb9368a4539b537f80a",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it-qat-mobile-ct": {
+      "created_at": "2026-06-01T23:41:22+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3624117cf04528e099519f93839f0f0b7a18913d",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it-qat-mobile-transformers": {
+      "created_at": "2026-06-02T23:55:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8e3ac78f1a4a97c19f5f194ab362a2206f71d961",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it-qat-q4_0-gguf": {
+      "created_at": "2026-05-01T04:25:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4b4a2c1d584be7264f87aac328a1bc739ce81b6c",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it-qat-q4_0-unquantized": {
+      "created_at": "2026-04-30T03:39:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "476025a01dbf99361c062bbeca3d6a76bb4c4566",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant": {
+      "created_at": "2026-05-29T19:19:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "27f8d204f09f2be353d6ff0bf0d012792b13c79f",
+      "status": "seeded"
+    },
+    "google/gemma-4-E4B-it-qat-w4a16-ct": {
+      "created_at": "2026-06-04T22:28:22+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6cd26aaa2357fb2bad8c51699a7558a4d1a965bb",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2": {
+      "created_at": "2025-12-15T09:07:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dfb54a8ece1fcc9c80152781289ab347ad9bfa88",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-12b-it": {
+      "created_at": "2025-12-15T09:07:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4c419f1ba0be8b7754d4151d4f26c23b92a9029e",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-12b-pt": {
+      "created_at": "2025-12-15T09:07:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bbabd1e4a3964914f5bf0f5f99b56c2a2da09802",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-1b-it": {
+      "created_at": "2025-12-15T09:06:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b0fa29457c3601df0a70c48a15534c738d7c10e0",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-1b-pt": {
+      "created_at": "2025-12-15T09:06:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b738dc06961818c011fb2e44a316352ca0f4e873",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-270m-it": {
+      "created_at": "2025-12-15T09:06:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "49801301620db3e196553c903380aa21f42506fa",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-270m-pt": {
+      "created_at": "2025-12-12T17:45:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b218cd5d69dc2fa71cff448b68d625e6c9702d49",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-27b-it": {
+      "created_at": "2025-12-15T09:07:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5c58dd4cddd52cef653059d85e12a86bf6222a28",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-27b-pt": {
+      "created_at": "2025-12-15T09:07:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5bf702afc144f3ba57b65bb3f76b12616385a213",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-4b-it": {
+      "created_at": "2025-12-15T09:07:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3e94b68be95290aada5b7525cf431d3040f81bb1",
+      "status": "seeded"
+    },
+    "google/gemma-scope-2-4b-pt": {
+      "created_at": "2025-12-15T09:07:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a0ffd6132a985bc84077a66d1a1033e10b604fa8",
+      "status": "seeded"
+    },
+    "google/gnm-v3": {
+      "created_at": "2026-09-01T17:03:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c01e90d298d82301f9fd18f54806be751775cb7c",
+      "status": "seeded"
+    },
+    "google/hear-pytorch": {
+      "created_at": "2025-04-08T21:05:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f791cd42437c3e268c8ac84707e3508900f65f1a",
+      "status": "seeded"
+    },
+    "google/magenta-realtime": {
+      "created_at": "2025-06-17T13:09:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c05f8d6d608afd588469b7a8ef0929d5a1f8f6bb",
+      "status": "seeded"
+    },
+    "google/magenta-realtime-2": {
+      "created_at": "2026-05-28T21:55:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "010aa0dcb0dfd27b24f0ad07b4dad63e8f9521cc",
+      "status": "seeded"
+    },
+    "google/medasr": {
+      "created_at": "2025-12-18T23:05:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ae1e4845b4b07479735d93e1e591e566435b7104",
+      "status": "seeded"
+    },
+    "google/medgemma-1.5-4b-it": {
+      "created_at": "2026-01-07T23:07:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "91850547d9f0b2fdd21aa7c5f4f3d1a8a52c243b",
+      "status": "seeded"
+    },
+    "google/medgemma-27b-it": {
+      "created_at": "2025-07-09T17:00:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2d3e00ea38b50018bf5dd3aa1009457cd2d5a48f",
+      "status": "seeded"
+    },
+    "google/medgemma-27b-text-it": {
+      "created_at": "2025-05-19T20:53:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5b667cf2ddcf064085bc90952edb35a0edbfb79c",
+      "status": "seeded"
+    },
+    "google/medgemma-4b-it": {
+      "created_at": "2025-05-19T20:52:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "290cda5eeccbee130f987c4ad74a59ae6f196408",
+      "status": "seeded"
+    },
+    "google/medgemma-4b-pt": {
+      "created_at": "2025-05-19T20:52:22+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1b7b4a7e462da7ab2bc40591ec86ca449edc388a",
+      "status": "seeded"
+    },
+    "google/medsiglip-448": {
+      "created_at": "2025-07-09T17:04:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9cea28a1a1195f665105faa6e8544c112fd960a4",
+      "status": "seeded"
+    },
+    "google/shieldgemma-2-4b-it": {
+      "created_at": "2025-03-04T16:39:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "eaf60452b5fc41a911338a022e628b0c15283897",
+      "status": "seeded"
+    },
+    "google/siglip2-base-patch16-224-jax": {
+      "created_at": "2025-02-20T17:28:01+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1e0b7810b6d6afec5e8ba5fdc17378239b8e51d5",
+      "status": "seeded"
+    },
+    "google/siglip2-base-patch16-256-jax": {
+      "created_at": "2025-02-20T17:33:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "eea5a82024bcf2f4e74a6a766b9c241522706cd9",
+      "status": "seeded"
+    },
+    "google/siglip2-base-patch16-384-jax": {
+      "created_at": "2025-02-20T17:35:38+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dfdb2391e0313c3fad36a889e3a9ea776d90a828",
+      "status": "seeded"
+    },
+    "google/siglip2-base-patch16-512-jax": {
+      "created_at": "2025-02-20T17:37:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "efc7e06d790f5890e94ebe6c243282d6ad058a18",
+      "status": "seeded"
+    },
+    "google/siglip2-base-patch16-naflex": {
+      "created_at": "2025-02-18T11:39:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b53b807d3a2d5e2b3911292f2d69e5341cdc064c",
+      "status": "seeded"
+    },
+    "google/siglip2-base-patch16-naflex-jax": {
+      "created_at": "2025-02-20T17:38:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "aa5a5093bac6445a3ae176bb720285a48e2f1797",
+      "status": "seeded"
+    },
+    "google/siglip2-base-patch32-256-jax": {
+      "created_at": "2025-02-20T17:40:09+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6d0e22179d8d936e59cac43006b7cbc07d95be14",
+      "status": "seeded"
+    },
+    "google/siglip2-giant-opt-patch16-256-jax": {
+      "created_at": "2025-02-20T17:50:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "09930386597be3bee7341cb4e2a89edbd69f7e0d",
+      "status": "seeded"
+    },
+    "google/siglip2-giant-opt-patch16-384-jax": {
+      "created_at": "2025-02-20T17:59:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "aa27140b920baea4ac1c63e35c5004db08e7c9f3",
+      "status": "seeded"
+    },
+    "google/siglip2-large-patch16-256-jax": {
+      "created_at": "2025-02-20T18:07:50+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "38da31e0a76fe8ca5064d8771775d02376d13616",
+      "status": "seeded"
+    },
+    "google/siglip2-large-patch16-384-jax": {
+      "created_at": "2025-02-20T18:11:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c12eda89bb83d390a01f996b2dc4529a1339455c",
+      "status": "seeded"
+    },
+    "google/siglip2-large-patch16-512-jax": {
+      "created_at": "2025-02-20T18:13:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "82ff7e3f4114ad885299eb52b4620a9b376b3b20",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch14-224": {
+      "created_at": "2025-02-17T20:52:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "78e403963a4f6a3640d07803284752326fdf4edf",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch14-224-jax": {
+      "created_at": "2025-02-20T18:18:18+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1ecd09c8063ca9a2b1447e3801728af0ff4ca2d2",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch14-384": {
+      "created_at": "2025-02-17T20:54:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e8e487298228002f3d8a82e0cd5c8ea9c567f57f",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch14-384-jax": {
+      "created_at": "2025-02-20T18:21:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8e89eb6818c360e0be61b8733a6b9564059adf32",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-256": {
+      "created_at": "2025-02-17T20:56:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e8708ab72d125807e45b36fb7d4e0aacbb59f379",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-256-jax": {
+      "created_at": "2025-02-21T09:06:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b1513e5f87899ae494c650e9f776462e65a1a958",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-384": {
+      "created_at": "2025-02-17T21:03:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dd658faac399427308559e2c3ac1e99cbe43845d",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-384-jax": {
+      "created_at": "2025-02-21T09:10:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a95babb5e553aa65d9db86f52c26f2fa6e0e7664",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-512": {
+      "created_at": "2025-02-17T21:05:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ceea1cba8130d8271436da4828633198c176a775",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-512-jax": {
+      "created_at": "2025-02-21T09:14:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bc946afd637a5de56d4f417c73d0764e9c51d481",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-naflex": {
+      "created_at": "2025-02-18T11:45:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cc24074f717b612951c2dead130904ab9b65a81e",
+      "status": "seeded"
+    },
+    "google/siglip2-so400m-patch16-naflex-jax": {
+      "created_at": "2025-02-21T09:19:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "eed610076255ee9a5b5fff347ebda8f6fd0ceb4f",
+      "status": "seeded"
+    },
+    "google/svq": {
+      "created_at": "2025-05-22T22:27:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d2b6bbf6d00e251268e500941bd5363ec9c453d1",
+      "status": "seeded"
+    },
+    "google/t5gemma-2-1b-1b": {
+      "created_at": "2025-10-25T15:42:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dd0a2683227859151b1730ca3a63087df5b5f39b",
+      "status": "seeded"
+    },
+    "google/t5gemma-2-270m-270m": {
+      "created_at": "2025-10-25T15:42:14+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7c38f16641f455ef0685b18431faf1b17722d5a1",
+      "status": "seeded"
+    },
+    "google/t5gemma-2-4b-4b": {
+      "created_at": "2025-10-25T15:43:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "487d4acf21a4d70c70bf534265b5263c9424979e",
+      "status": "seeded"
+    },
+    "google/t5gemma-2b-2b-prefixlm": {
+      "created_at": "2025-06-19T19:56:55+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cdb809cc2bc120ed914cc47bb3c2e4d0878e7b9b",
+      "status": "seeded"
+    },
+    "google/t5gemma-2b-2b-prefixlm-it": {
+      "created_at": "2025-06-19T20:01:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "15b741f942d0fd9912cbb2a894e350e80475c802",
+      "status": "seeded"
+    },
+    "google/t5gemma-2b-2b-ul2": {
+      "created_at": "2025-06-19T19:54:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f7593b977d03307f371ad1e45d23a4ef83321435",
+      "status": "seeded"
+    },
+    "google/t5gemma-2b-2b-ul2-it": {
+      "created_at": "2025-06-19T19:59:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6a196a58ce2786cd139a1217a85d1f7b9984e330",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-2b-prefixlm": {
+      "created_at": "2025-06-19T20:32:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "967ca821b5221c173952d2da6801d251d63e43ad",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-2b-prefixlm-it": {
+      "created_at": "2025-06-19T20:39:10+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "12c44c082d598e650caf023aad86ad316c457f05",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-2b-ul2": {
+      "created_at": "2025-06-19T20:29:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "83914df2e5984886b5ac10b456e1d8404570a2a3",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-2b-ul2-it": {
+      "created_at": "2025-06-19T20:35:46+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "99b9b9da34b8e66e2290c5c6d17306231c5b2566",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-9b-prefixlm": {
+      "created_at": "2025-06-19T20:10:52+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "75d54486217ce6c6a31b908c46f2223753995384",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-9b-prefixlm-it": {
+      "created_at": "2025-06-19T20:23:05+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b72b180286acafe42287e8287684dd49e0a7b846",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-9b-ul2": {
+      "created_at": "2025-06-19T20:04:33+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7071a2ace9c8353e12e723e5382cc7256ee41d9f",
+      "status": "seeded"
+    },
+    "google/t5gemma-9b-9b-ul2-it": {
+      "created_at": "2025-06-19T20:16:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b894e16b702ca355b57f4b77e7e5629cedb13fcb",
+      "status": "seeded"
+    },
+    "google/t5gemma-b-b-prefixlm": {
+      "created_at": "2025-06-19T20:44:26+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "df5e1422c2a53948a57901c54bfcf397c92bfa1d",
+      "status": "seeded"
+    },
+    "google/t5gemma-b-b-prefixlm-it": {
+      "created_at": "2025-06-19T20:45:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f0debd90994f48ce76b61fff03330b353c00eafc",
+      "status": "seeded"
+    },
+    "google/t5gemma-b-b-ul2": {
+      "created_at": "2025-06-19T20:43:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "97ea9b7e92738bb57437867277ae38e65345b8d7",
+      "status": "seeded"
+    },
+    "google/t5gemma-b-b-ul2-it": {
+      "created_at": "2025-06-19T20:44:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "72899bc3fc4fe37f5d1f4f92bee2f63cf7c4c9cf",
+      "status": "seeded"
+    },
+    "google/t5gemma-l-l-prefixlm": {
+      "created_at": "2025-06-19T20:47:30+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "221362432a9bdf021366b6e5617d4f0e705f6d0e",
+      "status": "seeded"
+    },
+    "google/t5gemma-l-l-prefixlm-it": {
+      "created_at": "2025-06-19T20:49:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2d11142d86a4e1b20fc72f0b3f257a4fbd165b20",
+      "status": "seeded"
+    },
+    "google/t5gemma-l-l-ul2": {
+      "created_at": "2025-06-19T20:46:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0b3ff60446397c22003cea08aa22a7da4dcf1d32",
+      "status": "seeded"
+    },
+    "google/t5gemma-l-l-ul2-it": {
+      "created_at": "2025-06-19T20:48:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ddd0c8a68e3b95e069b17c15e36e7fab3ae48f05",
+      "status": "seeded"
+    },
+    "google/t5gemma-ml-ml-prefixlm": {
+      "created_at": "2025-06-19T20:52:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1b6bec03395747d8beabcd7afd2cffd3f355cfca",
+      "status": "seeded"
+    },
+    "google/t5gemma-ml-ml-prefixlm-it": {
+      "created_at": "2025-06-19T20:56:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1a2184fff47f86d373b578e1065407a930604d84",
+      "status": "seeded"
+    },
+    "google/t5gemma-ml-ml-ul2": {
+      "created_at": "2025-06-19T20:50:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "60ae22be3af7bbcdad039d5d1bcc962e6263208b",
+      "status": "seeded"
+    },
+    "google/t5gemma-ml-ml-ul2-it": {
+      "created_at": "2025-06-19T20:54:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "feab116d1fb86474e53180a136c3743f2aecc449",
+      "status": "seeded"
+    },
+    "google/t5gemma-s-s-prefixlm": {
+      "created_at": "2025-06-19T20:42:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7b875178ee4c8a97a5df548972b10cfe200ee695",
+      "status": "seeded"
+    },
+    "google/t5gemma-s-s-prefixlm-it": {
+      "created_at": "2025-06-19T20:43:36+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8947426e4f535a4cfd3e063644f0d1e381c0ef9a",
+      "status": "seeded"
+    },
+    "google/t5gemma-s-s-ul2": {
+      "created_at": "2025-06-19T20:42:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "40c99423281545bab24762d48cea3fa09e19071f",
+      "status": "seeded"
+    },
+    "google/t5gemma-s-s-ul2-it": {
+      "created_at": "2025-06-19T20:43:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9154e2f2952b9e682c96d3204f6d11b404470448",
+      "status": "seeded"
+    },
+    "google/t5gemma-xl-xl-prefixlm": {
+      "created_at": "2025-06-19T21:01:06+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "168ccca7965d93ff2f3d57e0f71472ce8d466998",
+      "status": "seeded"
+    },
+    "google/t5gemma-xl-xl-prefixlm-it": {
+      "created_at": "2025-06-19T21:05:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6fa34b4bbac62058c6329441463126435bfc4714",
+      "status": "seeded"
+    },
+    "google/t5gemma-xl-xl-ul2": {
+      "created_at": "2025-06-19T20:58:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c3139068a3e9290ab36b44e489c6dabc58e9e0f1",
+      "status": "seeded"
+    },
+    "google/t5gemma-xl-xl-ul2-it": {
+      "created_at": "2025-06-19T21:03:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "110112b1512434b4c64add3416e5b9dcba62ed42",
+      "status": "seeded"
+    },
+    "google/tabfm-1.0.0-jax": {
+      "created_at": "2026-06-29T23:04:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d5e74033fcf257699fab013e2cdd7edf424ff904",
+      "status": "seeded"
+    },
+    "google/tabfm-1.0.0-pytorch": {
+      "created_at": "2026-06-29T23:04:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "77cb9cc1b4fd3a9c77fbb9552c218200bb4dab83",
+      "status": "seeded"
+    },
+    "google/tapnet": {
+      "created_at": "2025-05-01T07:18:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5d3fb48e76c5422841e38501514121e251beabb7",
+      "status": "seeded"
+    },
+    "google/timesfm-2.5-200m-flax": {
+      "created_at": "2025-09-02T19:45:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b99e9f6c457ee0d14d563e4800cb63e239ffeda0",
+      "status": "seeded"
+    },
+    "google/timesfm-2.5-200m-pytorch": {
+      "created_at": "2025-09-02T18:55:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1d952420fba87f3c6dee4f240de0f1a0fbc790e3",
+      "status": "seeded"
+    },
+    "google/timesfm-2.5-200m-transformers": {
+      "created_at": "2026-02-19T22:08:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5a9806b9b291fad9233b5249d88263f1846304d3",
+      "status": "seeded"
+    },
+    "google/timesfm-3.0-pytorch": {
+      "created_at": "2026-08-24T22:05:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "43046b85ec22d584a13f8098c2ed39c889e129c2",
+      "status": "seeded"
+    },
+    "google/tipsv1-b14": {
+      "created_at": "2026-08-19T14:48:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "424f5e0ee56557079d99419c729a655e2cbcc7b1",
+      "status": "seeded"
+    },
+    "google/tipsv1-g14": {
+      "created_at": "2026-08-19T16:40:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "79a0b1548c1d6da931ba4c9ef5fd9251744ca4b9",
+      "status": "seeded"
+    },
+    "google/tipsv1-g14-lowres": {
+      "created_at": "2026-08-19T16:41:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a8c59ff3ac1b229c7178e8d7f626036d812358a4",
+      "status": "seeded"
+    },
+    "google/tipsv1-l14": {
+      "created_at": "2026-08-19T14:56:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "05c1dd400ade562d318d00d63c5474f21dfe2a72",
+      "status": "seeded"
+    },
+    "google/tipsv1-s14": {
+      "created_at": "2026-08-19T14:43:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "109d6693a2a0263be13309c193eb7427ce13a386",
+      "status": "seeded"
+    },
+    "google/tipsv1-so400m14": {
+      "created_at": "2026-08-19T15:02:28+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9bf0d1426d430e0ce9b19fc84692d9b3d74b3355",
+      "status": "seeded"
+    },
+    "google/tipsv2-b14": {
+      "created_at": "2026-04-09T06:28:59+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "ed1e4dc6b74bf3935ae099e9d5eb30fa96528454",
+      "status": "seeded"
+    },
+    "google/tipsv2-b14-dpt": {
+      "created_at": "2026-04-09T06:50:51+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "da81b552538c453432e7a1efea39737c89580424",
+      "status": "seeded"
+    },
+    "google/tipsv2-g14": {
+      "created_at": "2026-04-09T06:29:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3b894860ec66202924d6938cfc6c4a7b780e19e1",
+      "status": "seeded"
+    },
+    "google/tipsv2-g14-dpt": {
+      "created_at": "2026-04-09T06:52:14+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "997dbf2d57f2035cc7d6e0abaa625a6e34fbd51f",
+      "status": "seeded"
+    },
+    "google/tipsv2-l14": {
+      "created_at": "2026-04-09T05:55:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "52847a71eb02a3082c370fbcd98cd799687bd4d0",
+      "status": "seeded"
+    },
+    "google/tipsv2-l14-dpt": {
+      "created_at": "2026-04-09T06:51:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "eaca790d7d78a4aae1e94c885846d03e81f909df",
+      "status": "seeded"
+    },
+    "google/tipsv2-so400m14": {
+      "created_at": "2026-04-09T06:29:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9b102a53330ded7d64a5ba5d743fbf333f23fc95",
+      "status": "seeded"
+    },
+    "google/tipsv2-so400m14-dpt": {
+      "created_at": "2026-04-09T06:51:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "545c26eaa6a4ce74a54d9ba287eee015635b94d4",
+      "status": "seeded"
+    },
+    "google/translategemma-12b-it": {
+      "created_at": "2026-01-12T16:11:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d1b225e1caa17f1ddc7e62065d8637d0923f34e2",
+      "status": "seeded"
+    },
+    "google/translategemma-27b-it": {
+      "created_at": "2026-01-12T16:12:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7d10f0b72f89a2d0f268cea30727d8b77c0d25c2",
+      "status": "seeded"
+    },
+    "google/translategemma-4b-it": {
+      "created_at": "2026-01-12T16:11:41+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "10042cb0e6e7fdce748996a71dc3dc432a4e0c89",
+      "status": "seeded"
+    },
+    "google/txgemma-27b-chat": {
+      "created_at": "2025-03-21T16:32:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1e0e71c586dc7bf63e5c7cef7b26e6bcc4d3fa0d",
+      "status": "seeded"
+    },
+    "google/txgemma-27b-predict": {
+      "created_at": "2025-03-21T16:33:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7e4cce26c19a384b5c19f122618e8e1f4c96b231",
+      "status": "seeded"
+    },
+    "google/txgemma-2b-predict": {
+      "created_at": "2025-03-21T16:29:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6b0eb81135ad9e73c9c18409c03e315a5a23a18f",
+      "status": "seeded"
+    },
+    "google/txgemma-9b-chat": {
+      "created_at": "2025-03-21T16:32:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bc45665ceb345eea6acfc44d82706e8d8b689209",
+      "status": "seeded"
+    },
+    "google/txgemma-9b-predict": {
+      "created_at": "2025-03-21T16:31:32+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d8e65c274206c96631276df0ac009a5c6c24b293",
+      "status": "seeded"
+    },
+    "google/vaultgemma-1b": {
+      "created_at": "2025-09-05T18:27:46+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f9624dafc1760cb2f6039e86e12055d6559d7abb",
+      "status": "seeded"
+    },
+    "google/videoprism-base-f16r288": {
+      "created_at": "2025-06-14T21:58:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "be719a406d563b66f0ac969e7c94bab8e997c81a",
+      "status": "seeded"
+    },
+    "google/videoprism-large-f8r288": {
+      "created_at": "2025-07-09T14:41:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8e5ab1916e7930896d38f67f4afb92642b316986",
+      "status": "seeded"
+    },
+    "google/videoprism-lvt-base-f16r288": {
+      "created_at": "2025-07-16T00:49:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0119cca7d1fe61aa1d5718e1f71605703e1562e7",
+      "status": "seeded"
+    },
+    "google/videoprism-lvt-large-f8r288": {
+      "created_at": "2025-07-16T00:54:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1eda021e2bae000eaae7f763bb9b50d65bdda6af",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-13b-Instruct-hf": {
+      "created_at": "2024-03-13T20:12:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c24689b733f841ab1a6cce35bccb729f3f7b23fd",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-13b-Python-hf": {
+      "created_at": "2024-03-13T20:01:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c5d87c656d73f4be12d6e0886ce10661ad32669b",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-13b-hf": {
+      "created_at": "2024-03-13T19:51:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "bed8c603d9ad262851259de64609337fea3b620d",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-34b-Instruct-hf": {
+      "created_at": "2024-03-14T01:16:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "edf62e7a0389eafc71b8fb1da96008817c0c9edb",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-34b-Python-hf": {
+      "created_at": "2024-03-14T00:50:31+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2462f4ca0933c022374e2cac879cc6d296b3f3b1",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-34b-hf": {
+      "created_at": "2024-03-14T00:24:52+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d5270a637cc64c394ad5369880f511c6440dd4cd",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-70b-Instruct-hf": {
+      "created_at": "2024-03-13T21:50:19+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2826050dce6c8271bb9f667083b64e8254bd374f",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-70b-Python-hf": {
+      "created_at": "2024-03-13T21:15:50+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b916062ff81cbd5d51efe623b1b3f6ee3b07b7e6",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-70b-hf": {
+      "created_at": "2024-03-13T20:22:50+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "388132564ff6637a3febc199e63aedc967f126ee",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-7b-Instruct-hf": {
+      "created_at": "2024-03-13T19:44:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4ce0c40b2ea823bd1d8f1f3fd5bc8a7e80d749bc",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-7b-Python-hf": {
+      "created_at": "2024-03-13T19:37:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b97340ccba60c3ccaf91882ffe470a1bbc32e32c",
+      "status": "seeded"
+    },
+    "meta-llama/CodeLlama-7b-hf": {
+      "created_at": "2024-03-13T19:27:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b462c3c99b077d341db691ec780a33156f3c1472",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-13b": {
+      "created_at": "2023-07-09T17:49:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5a3ad81c857aaf765c7a229a449490745a9004c9",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-13b-chat": {
+      "created_at": "2023-07-09T17:50:53+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9d1dbc9c82b4eed25bd5b0c9805898c66dcd1db9",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-13b-chat-hf": {
+      "created_at": "2023-07-13T15:11:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a2cb7a712bb6e5e736ca7f8cd98167f81a0b5bd8",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-13b-hf": {
+      "created_at": "2023-07-13T15:49:56+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "5c31dfb671ce7cfe2d7bb7c04375e44c55e815b1",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-70b": {
+      "created_at": "2023-07-09T18:14:29+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1cb35477a31460038a66e8942e1d7a9a9d2162cb",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-70b-chat": {
+      "created_at": "2023-07-14T15:34:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e7b9211c4cfe4de48aaea6edc519d1039d161394",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-70b-chat-hf": {
+      "created_at": "2023-07-14T18:02:07+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e9149a12809580e8602995856f8098ce973d1080",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-70b-hf": {
+      "created_at": "2023-07-11T08:56:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3aba440b59558f995867ba6e1f58f21d0336b5bb",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-7b": {
+      "created_at": "2023-07-09T07:34:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "69656aac4cb47911a639f5890ff35b41ceb82e98",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-7b-chat": {
+      "created_at": "2023-07-09T07:35:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "617522e5466cec3391aac2de97f4f9d5672ed05b",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-7b-chat-hf": {
+      "created_at": "2023-07-13T16:45:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "f5db02db724555f92da89c216ac04704f23d4590",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-2-7b-hf": {
+      "created_at": "2023-07-13T16:16:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "01c7f73d771dfac7d292323805ebc428287df4f9",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-405B": {
+      "created_at": "2024-07-16T01:29:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b906e4dc842aa489c962f9db26554dcfdde901fe",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-405B-FP8": {
+      "created_at": "2024-07-20T03:20:19+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "cb4739810a51170037906b5daa2bb78ed13cd43c",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-405B-Instruct": {
+      "created_at": "2024-07-16T18:24:44+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "be673f326cab4cd22ccfef76109faf68e41aa5f1",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-405B-Instruct-FP8": {
+      "created_at": "2024-07-20T03:06:04+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "64a54b704768dfd589a3e4ac05d546052f67f4fd",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-70B": {
+      "created_at": "2024-07-14T22:23:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "349b2ddb53ce8f2849a6c168a81980ab25258dac",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-70B-Instruct": {
+      "created_at": "2024-07-16T16:07:46+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1605565b47bb9346c5515c34102e054115b4f98b",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-8B": {
+      "created_at": "2024-07-14T22:20:15+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.1-8B-Instruct": {
+      "created_at": "2024-07-18T08:56:00+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-11B-Vision": {
+      "created_at": "2024-09-18T16:46:21+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3f2e93603aaa5dd142f27d34b06dfa2b6e97b8be",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-11B-Vision-Instruct": {
+      "created_at": "2024-09-18T16:47:28+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9eb2daaa8597bf192a8b0e73f848f3a102794df5",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-1B": {
+      "created_at": "2024-09-18T15:03:14+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "4e20de362430cd3b72f300e6b0f18e50e7166e08",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-1B-Instruct": {
+      "created_at": "2024-09-18T15:12:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "9213176726f574b556790deb65791e0c5aa438b6",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-1B-Instruct-QLORA_INT4_EO8": {
+      "created_at": "2024-10-23T21:29:57+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "3fdf98b6bc1069f632a468b0676299a0a1b65071",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-1B-Instruct-SpinQuant_INT4_EO8": {
+      "created_at": "2024-10-23T21:30:23+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "b8c08c95d0476ccb6fc86e9410818d602ecca19d",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-3B": {
+      "created_at": "2024-09-18T15:23:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "13afe5124825b4f3751f836b40dafda64c1ed062",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-3B-Instruct": {
+      "created_at": "2024-09-18T15:19:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "0cb88a4f764b7a12671c53f0838cd831a0843b95",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-3B-Instruct-QLORA_INT4_EO8": {
+      "created_at": "2024-10-23T21:30:48+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "2b442a6ebe9dcf816f7b16eaa84a07fec6b6ff7f",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-3B-Instruct-SpinQuant_INT4_EO8": {
+      "created_at": "2024-10-23T21:39:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "03820fea9e793d2778564a0242f6b4e4f7b144dc",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-90B-Vision": {
+      "created_at": "2024-09-19T11:32:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "38850089f6a42b7394680c4e4bbd4c40fb62404f",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.2-90B-Vision-Instruct": {
+      "created_at": "2024-09-19T16:03:11+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "e305d2a43a4adc6987308fe7d896fb8ec5f1a5d8",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-3.3-70B-Instruct": {
+      "created_at": "2024-11-26T16:08:47+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "6f6073b423013f6a7d4d9f39144961bfbfbc386b",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E": {
+      "created_at": "2025-04-02T17:35:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "10751cb97a4d7c90f7ed89196b98eb8220cfa1c2",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct": {
+      "created_at": "2025-04-01T22:17:20+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "73d14711bcc77c16df3470856949c3764056b617",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": {
+      "created_at": "2025-04-01T20:47:02+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "94125d2bd83076b21eed33119525e29eaf3894f4",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8-Original": {
+      "created_at": "2025-04-04T10:03:43+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a9fb9bc25a0f8eabc6b1d523c8605bbc2dd5135b",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-Original": {
+      "created_at": "2025-04-04T08:02:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "67c56dfc0e87cd4ade6ec403b59fa7922b762b13",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E-Original": {
+      "created_at": "2025-04-03T15:51:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "75aef8815de2a5f56187cded0c90eb99584449d0",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Scout-17B-16E": {
+      "created_at": "2025-04-02T17:03:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "14d516bdff6ac06cec40678529222f193386189c",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Scout-17B-16E-Instruct": {
+      "created_at": "2025-04-02T13:34:17+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "92f3b1597a195b523d8d9e5700e57e4fbb8f20d3",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Scout-17B-16E-Instruct-Original": {
+      "created_at": "2025-04-03T15:39:52+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7f5043965c80ac0318b2e36c37a559a6a4d6b105",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-4-Scout-17B-16E-Original": {
+      "created_at": "2025-04-03T15:06:08+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "80eeefb1d87c2cef9341b7e63f53318404e7cb3f",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Guard-3-11B-Vision": {
+      "created_at": "2024-09-20T15:42:27+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "62d4275543ec7503de66c486de1c0c2103e365ac",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Guard-3-1B": {
+      "created_at": "2024-09-20T16:04:40+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "acf7aafa60f0410f8f42b1fa35e077d705892029",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Guard-3-1B-INT4": {
+      "created_at": "2024-09-20T16:07:42+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "d6c11bd8f851ceebb762bd2adbfc45e6d40c0991",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Guard-3-8B": {
+      "created_at": "2024-07-22T08:10:45+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7327bd9f6efbbe6101dc6cc4736302b3cbb6e425",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Guard-3-8B-INT8": {
+      "created_at": "2024-07-21T19:20:24+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "951579e66b562c4ca221903eaae3378f4abfa6af",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Guard-4-12B": {
+      "created_at": "2025-04-23T11:30:25+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "87acb4b94e930c3d679e6e7ee9d57e2feab9ea71",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Prompt-Guard-2-22M": {
+      "created_at": "2025-04-28T07:15:58+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "11614a155199674a0a95e6602d6ab0417b790ed0",
+      "status": "seeded"
+    },
+    "meta-llama/Llama-Prompt-Guard-2-86M": {
+      "created_at": "2025-04-28T07:16:35+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "a8ded8e697ce7c355e395a0df51f94adb4a2fd27",
+      "status": "seeded"
+    },
+    "meta-llama/LlamaGuard-7b": {
+      "created_at": "2023-12-05T22:29:49+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "dfcfa3409b9994a4722d44e05f82e81ea73c5106",
+      "status": "seeded"
+    },
+    "meta-llama/Meta-Llama-3-70B": {
+      "created_at": "2024-04-17T09:25:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "c82494877ce7f6d7d317c56ec081328e382c72fe",
+      "status": "seeded"
+    },
+    "meta-llama/Meta-Llama-3-70B-Instruct": {
+      "created_at": "2024-04-17T09:34:54+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "50fd307e57011801c7833c87efa1984ddf2db42f",
+      "status": "seeded"
+    },
+    "meta-llama/Meta-Llama-3-8B": {
+      "created_at": "2024-04-17T09:35:16+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8cde5ca8380496c9a6cc7ef3a8b46a0372a1d920",
+      "status": "seeded"
+    },
+    "meta-llama/Meta-Llama-3-8B-Instruct": {
+      "created_at": "2024-04-17T09:35:12+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "8afb486c1db24fe5011ec46dfbe5b5dccdb575c2",
+      "status": "seeded"
+    },
+    "meta-llama/Meta-Llama-Guard-2-8B": {
+      "created_at": "2024-04-17T09:35:34+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "7d257f3c1a0ec6ed99b2cb715027149dfb9784ef",
+      "status": "seeded"
+    },
+    "meta-llama/Prompt-Guard-86M": {
+      "created_at": "2024-07-21T19:18:13+00:00",
+      "first_seen": "2026-09-12T14:29:14+00:00",
+      "sha": "1209add6ca7d9c1d815171b8e5571587fe3e7b03",
+      "status": "seeded"
+    }
+  },
+  "seeded_at": "2026-09-12T14:29:14+00:00",
+  "version": 1
+}
