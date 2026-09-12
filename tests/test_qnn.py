@@ -1,4 +1,6 @@
 import json
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -67,6 +69,20 @@ def test_copied_params_describe_the_hf_checkpoint(decoder, hf_fixture):
     assert params["hidden_dim"] == arch.intermediate
     assert params["vocab_size"] == arch.vocab_size
     assert params.get("head_dim", arch.dim // arch.n_heads) == arch.head_dim
+
+
+def test_qairt_version_is_probed_in_a_child_so_this_process_keeps_its_environment(monkeypatch):
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout="2.37.0.250724\n", stderr="Loaded libc++.so.1.0\n")
+
+    monkeypatch.setattr(export_qnn.subprocess, "run", fake_run)
+    monkeypatch.delenv("QNN_SDK_ROOT", raising=False)
+    assert export_qnn.qairt_version() == "2.37.0.250724"
+    assert calls and calls[0][1] == "-c"
+    assert "QNN_SDK_ROOT" not in os.environ
 
 
 def test_decoder_pte_is_found_by_mode(tmp_path):

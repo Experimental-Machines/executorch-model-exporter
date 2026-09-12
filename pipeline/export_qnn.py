@@ -152,12 +152,17 @@ def structural_check(pte: Path, model_mode: str) -> dict:
 
 
 def qairt_version() -> str | None:
-    """The QAIRT SDK the executorch wheel pins (and downloads on first import)."""
-    try:
-        from executorch.backends.qualcomm.scripts.download_qnn_sdk import QNN_VERSION
-    except Exception:
+    """The QAIRT SDK the executorch wheel pins (and downloads on first import).
+
+    Asked of a separate interpreter: importing executorch.backends.qualcomm sets QNN_SDK_ROOT
+    and preloads libc++ in the importing process, and a child that inherits QNN_SDK_ROOT
+    skips that preload, so libQnnHtp.so then fails to find libc++.so.1.
+    """
+    probe = "from executorch.backends.qualcomm.scripts.download_qnn_sdk import QNN_VERSION; print(QNN_VERSION)"
+    result = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True)
+    if result.returncode != 0:
         return None
-    return QNN_VERSION
+    return result.stdout.strip().splitlines()[-1]
 
 
 def run(
