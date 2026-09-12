@@ -151,18 +151,55 @@ def structural_check(pte: Path, model_mode: str) -> dict:
     }
 
 
-def qairt_version() -> str | None:
-    """The QAIRT SDK the executorch wheel pins (and downloads on first import).
+_SDK_PROBE = """
+import json
+from executorch.backends.qualcomm.scripts import download_qnn_sdk as d
+print(json.dumps({
+    "version": d.QNN_VERSION,
+    "root": str(d._get_sdk_dir()),
+    "libcxx_dir": str(d._get_staging_dir(f"libcxx-{d.LLVM_VERSION}")),
+    "libcxx_files": list(d.REQUIRED_LIBCXX_LIBS),
+}))
+"""
 
-    Asked of a separate interpreter: importing executorch.backends.qualcomm sets QNN_SDK_ROOT
-    and preloads libc++ in the importing process, and a child that inherits QNN_SDK_ROOT
-    skips that preload, so libQnnHtp.so then fails to find libc++.so.1.
+
+def qnn_sdk() -> dict:
+    """Where the executorch wheel keeps the QAIRT SDK it pins, and the libc++ that SDK needs.
+
+    Asked of a separate interpreter, whose import downloads both on first use: importing
+    executorch.backends.qualcomm edits os.environ and preloads libraries in the importing
+    process, which must not leak into this one.
     """
-    probe = "from executorch.backends.qualcomm.scripts.download_qnn_sdk import QNN_VERSION; print(QNN_VERSION)"
-    result = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True)
+    result = subprocess.run([sys.executable, "-c", _SDK_PROBE], capture_output=True, text=True)
     if result.returncode != 0:
-        return None
-    return result.stdout.strip().splitlines()[-1]
+        raise ExportError(f"could not set up the QAIRT SDK:\n{result.stderr[-4000:]}")
+    return json.loads(result.stdout.strip().splitlines()[-1])
+
+
+def soname(filename: str) -> str:
+    """``libc++.so.1.0`` -> ``libc++.so.1``, the name the SDK's libraries ask the loader for."""
+    head, _, version = filename.partition(".so.")
+    return f"{head}.so.{version.split('.')[0]}" if version else filename
+
+
+def qnn_env(sdk: dict, links: Path, base: dict[str, str]) -> dict[str, str]:
+    """Environment for the Qualcomm script: the SDK and its libc++ on the loader path from the start.
+
+    ExecuTorch's import-time setup only changes os.environ and ctypes-loads libQnnHtp.so and
+    libc++ by path. The dynamic loader reads LD_LIBRARY_PATH once, at process start, so what
+    QNN later opens by bare name (libQnnSystem.so) is not found, and a process started with
+    QNN_SDK_ROOT set skips the libc++ preload. Setting both up front is ExecuTorch's documented
+    manual setup; the soname links make the wheel's libc++ copy findable by name.
+    """
+    links.mkdir(parents=True, exist_ok=True)
+    for filename in sdk["libcxx_files"]:
+        link = links / soname(filename)
+        if link.is_symlink() or link.exists():
+            link.unlink()
+        link.symlink_to(Path(sdk["libcxx_dir"]) / filename)
+    sdk_lib = Path(sdk["root"]) / "lib" / "x86_64-linux-clang"
+    paths = [str(sdk_lib), str(links)] + [p for p in base.get("LD_LIBRARY_PATH", "").split(":") if p]
+    return {**base, "QNN_SDK_ROOT": sdk["root"], "LD_LIBRARY_PATH": ":".join(paths), "PYTHONUNBUFFERED": "1"}
 
 
 def run(
@@ -199,10 +236,12 @@ def run(
     meta = decoder in families.QNN_META_CHECKPOINT
     print(f"==> {model_id}@{source.sha[:12]}: --decoder_model {decoder}, {soc}, window {window}")
 
-    qairt = qairt_version()
+    sdk = qnn_sdk()
+    qairt = sdk["version"]
     expected = settings.read_env_file(settings.CONFIG_DIR / "versions.env").get("QAIRT_VERSION")
     if qairt != expected:
         raise ExportError(f"executorch's QAIRT is {qairt}, config/versions.env pins {expected}")
+    env = qnn_env(sdk, work_dir / "qnn-libs", dict(os.environ))
 
     started = time.time()
     # The script fetches the weights itself (repo_id in its registry); only Llama 3.2 needs
@@ -213,7 +252,7 @@ def run(
     command = llama_command(decoder, soc, recipe, artifact, src_dir / "original" if meta else None)
     print("==> " + " ".join(command))
     export_started = time.time()
-    subprocess.run(command, check=True, cwd=work_dir, env={**os.environ, "PYTHONUNBUFFERED": "1"})
+    subprocess.run(command, check=True, cwd=work_dir, env=env)
     export_seconds = time.time() - export_started
 
     built = decoder_pte(artifact, recipe.model_mode)

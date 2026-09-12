@@ -71,18 +71,45 @@ def test_copied_params_describe_the_hf_checkpoint(decoder, hf_fixture):
     assert params.get("head_dim", arch.dim // arch.n_heads) == arch.head_dim
 
 
-def test_qairt_version_is_probed_in_a_child_so_this_process_keeps_its_environment(monkeypatch):
+SDK = {
+    "version": "2.37.0.250724",
+    "root": "/home/runner/.cache/executorch/qnn/sdk-2.37.0.250724",
+    "libcxx_dir": "/home/runner/.cache/executorch/qnn/libcxx-14.0.0",
+    "libcxx_files": ["libc++.so.1.0", "libc++abi.so.1.0", "libunwind.so.1"],
+}
+
+
+def test_the_sdk_is_probed_in_a_child_so_this_process_keeps_its_environment(monkeypatch):
     calls = []
 
     def fake_run(command, **kwargs):
         calls.append(command)
-        return subprocess.CompletedProcess(command, 0, stdout="2.37.0.250724\n", stderr="Loaded libc++.so.1.0\n")
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps(SDK) + "\n", stderr="Loaded libc++.so.1.0\n")
 
     monkeypatch.setattr(export_qnn.subprocess, "run", fake_run)
     monkeypatch.delenv("QNN_SDK_ROOT", raising=False)
-    assert export_qnn.qairt_version() == "2.37.0.250724"
+    assert export_qnn.qnn_sdk() == SDK
     assert calls and calls[0][1] == "-c"
     assert "QNN_SDK_ROOT" not in os.environ
+
+
+def test_sonames():
+    assert export_qnn.soname("libc++.so.1.0") == "libc++.so.1"
+    assert export_qnn.soname("libc++abi.so.1.0") == "libc++abi.so.1"
+    assert export_qnn.soname("libunwind.so.1") == "libunwind.so.1"
+
+
+def test_the_script_starts_with_the_sdk_and_libcxx_on_the_loader_path(tmp_path):
+    if os.name == "nt":
+        pytest.skip("symlinks need privileges on Windows; the export runs on Linux")
+    links = tmp_path / "links"
+    env = export_qnn.qnn_env(SDK, links, {"LD_LIBRARY_PATH": "/opt/x", "HOME": "/h"})
+    assert env["QNN_SDK_ROOT"] == SDK["root"]
+    assert env["LD_LIBRARY_PATH"] == f"{SDK['root']}/lib/x86_64-linux-clang:{links}:/opt/x"
+    assert env["HOME"] == "/h" and env["PYTHONUNBUFFERED"] == "1"
+    assert os.readlink(links / "libc++.so.1") == f"{SDK['libcxx_dir']}/libc++.so.1.0"
+    assert sorted(p.name for p in links.iterdir()) == ["libc++.so.1", "libc++abi.so.1", "libunwind.so.1"]
+    export_qnn.qnn_env(SDK, links, {})  # re-running over existing links is fine
 
 
 def test_decoder_pte_is_found_by_mode(tmp_path):
