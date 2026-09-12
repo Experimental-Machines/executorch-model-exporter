@@ -112,6 +112,9 @@ calling ExecuTorch's own script in compile-only mode:
 - Each registry entry carries its own quantization recipe; the script downloads the weights
   from the entry's repo at `main`. Llama 3.2 entries have no repo, so Meta's original
   checkpoint, params and tokenizer (`original/` in meta-llama's repos) are passed in.
+- The other entries point at params `.json` files in ExecuTorch's source tree, which the
+  wheel does not package; copies from v1.4.0 live in `third_party/executorch/` and are passed
+  with `--params` (`families.QNN_PARAMS`). Tests check them against the HF configs.
 - Calibration dependencies are ExecuTorch's example pins: `transformers==5.0.0rc1`,
   `datasets==3.6.0`, `lm_eval==0.4.5` (`requirements/export-qnn.txt`).
 - No host runtime for HTP binaries, so the check is structural: the program loads, has

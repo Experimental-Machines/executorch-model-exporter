@@ -1,6 +1,8 @@
 import json
+from pathlib import Path
 
 import pytest
+from conftest import load_json
 
 from pipeline import export_qnn, families, manifest, naming, publish, settings
 
@@ -23,6 +25,9 @@ def test_compile_only_command_for_a_registered_checkpoint(tmp_path):
     assert flag(command, "--calib_tasks") == "wikitext"
     assert flag(command, "--build_folder")  # llama.py realpath()s it even when compiling only
     assert "--checkpoint" not in command
+    # The wheel lacks the registry's params .json, so it is always handed over.
+    params = Path(flag(command, "--params"))
+    assert params == settings.ROOT / "third_party/executorch/examples/models/qwen3/config/0_6b_config.json"
 
 
 def test_llama_gets_metas_original_checkpoint(tmp_path):
@@ -31,6 +36,37 @@ def test_llama_gets_metas_original_checkpoint(tmp_path):
     assert flag(command, "--checkpoint") == str(meta / "consolidated.00.pth")
     assert flag(command, "--params") == str(meta / "params.json")
     assert flag(command, "--tokenizer_model") == str(meta / "tokenizer.model")
+    assert command.count("--params") == 1
+
+
+def test_every_registered_checkpoint_has_params_or_metas_checkpoint():
+    for decoder in families.QNN_DECODERS.values():
+        if decoder in families.QNN_META_CHECKPOINT:
+            assert decoder not in families.QNN_PARAMS
+        else:
+            json.loads(export_qnn.params_file(decoder).read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize(
+    "decoder, hf_fixture",
+    [
+        ("qwen3-0_6b", "qwen3-0.6b"),
+        ("qwen3-1_7b", "qwen3-1.7b"),
+        ("qwen2_5-1_5b", "qwen2.5-1.5b"),
+        ("gemma3-1b", "gemma-3-1b-it"),
+        ("smollm2_135m", "smollm2-135m"),
+    ],
+)
+def test_copied_params_describe_the_hf_checkpoint(decoder, hf_fixture):
+    params = json.loads(export_qnn.params_file(decoder).read_text(encoding="utf-8"))
+    arch = families.architecture(load_json(f"{hf_fixture}.config.json"), 1)
+    assert params["n_layers"] == arch.n_layers
+    assert params["n_heads"] == arch.n_heads
+    assert params["n_kv_heads"] == arch.n_kv_heads
+    assert params["dim"] == arch.dim
+    assert params["hidden_dim"] == arch.intermediate
+    assert params["vocab_size"] == arch.vocab_size
+    assert params.get("head_dim", arch.dim // arch.n_heads) == arch.head_dim
 
 
 def test_decoder_pte_is_found_by_mode(tmp_path):

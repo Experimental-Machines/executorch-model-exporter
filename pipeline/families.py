@@ -74,6 +74,17 @@ QNN_DECODERS = {
 # Registry entries with no repo_id: the script needs Meta's original checkpoint, params and
 # tokenizer passed in, which meta-llama's HF repos carry under original/.
 QNN_META_CHECKPOINT = {"llama3_2-1b_instruct", "llama3_2-3b_instruct"}
+# The registry's params_path for the others, relative to the ExecuTorch source tree. The
+# wheel does not ship these .json files; copies live in third_party/executorch.
+QNN_PARAMS = {
+    "qwen3-0_6b": "examples/models/qwen3/config/0_6b_config.json",
+    "qwen3-1_7b": "examples/models/qwen3/config/1_7b_config.json",
+    "qwen2_5-0_5b": "examples/models/qwen2_5/config/0_5b_config.json",
+    "qwen2_5-1_5b": "examples/models/qwen2_5/config/1_5b_config.json",
+    "gemma3-1b": "examples/models/gemma3/config/1b_config.json",
+    "smollm2_135m": "examples/models/smollm2/135M_config.json",
+    "smollm3-3b": "examples/models/smollm3/3b_config.json",
+}
 QNN_UNLISTED = "no entry for this checkpoint in ExecuTorch 1.4.0's Qualcomm LLM scripts"
 
 

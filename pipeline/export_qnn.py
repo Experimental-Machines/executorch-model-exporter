@@ -40,6 +40,15 @@ BACKEND = "qnn"
 HYBRID_METHODS = ("kv_forward", "prefill_forward")
 META_FILES = ("original/consolidated.00.pth", "original/params.json", "original/tokenizer.model")
 SOC_NAMES = {"SM8650": "Snapdragon 8 Gen 3", "SM8750": "Snapdragon 8 Elite"}
+EXECUTORCH_SOURCE_FILES = settings.ROOT / "third_party" / "executorch"
+
+
+def params_file(decoder: str) -> Path:
+    """The registry's params file for ``decoder`` (copied from ExecuTorch; the wheel lacks it)."""
+    path = EXECUTORCH_SOURCE_FILES / families.QNN_PARAMS[decoder]
+    if not path.is_file():
+        raise ExportError(f"missing {path}: copy it from the ExecuTorch source at the pinned version")
+    return path
 
 
 def llama_command(
@@ -92,6 +101,10 @@ def llama_command(
             "--tokenizer_model",
             str(meta_dir / "tokenizer.model"),
         ]
+    else:
+        # Every reader of the params prefers --params over the registry's params_path, which
+        # points into the source tree the wheel does not carry.
+        command += ["--params", str(params_file(decoder))]
     return command
 
 
@@ -214,6 +227,7 @@ def run(
         "toolchain": {**toolchain("transformers", "lm_eval"), "qairt": qairt},
         "recipe": {
             "decoder_model": decoder,
+            "params": f"{model_id}: original/params.json" if meta else f"executorch: {families.QNN_PARAMS[decoder]}",
             "model_mode": recipe.model_mode,
             "prefill_ar_len": recipe.prefill_ar_len,
             "max_context_len": window,

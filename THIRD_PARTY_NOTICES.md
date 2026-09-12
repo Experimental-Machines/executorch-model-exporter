@@ -10,6 +10,10 @@ libraries.
 Installed from PyPI (`requirements/*.txt`). ExecuTorch and PyTorch are under BSD-style
 licenses; torchao under BSD-3-Clause.
 
+`third_party/executorch/` holds a few model params files copied unchanged from the
+ExecuTorch v1.4.0 source (the wheel does not package them), with ExecuTorch's BSD license
+beside them in `third_party/executorch/LICENSE`.
+
 ## Qualcomm AI Runtime SDK (QAIRT) 2.37.0.250724
 
 Used by `export-qnn.yml` to compile QNN HTP context binaries. The executorch 1.4.0 wheel
