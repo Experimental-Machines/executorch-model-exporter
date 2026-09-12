@@ -78,6 +78,21 @@ def test_gated_repo_without_access_says_what_to_do():
     assert not verdict.eligible
 
 
+def test_a_later_generation_on_the_same_architecture_class_is_refused():
+    # "Qwen3.8" normalises onto "qwen3", so the app's own matcher would accept it as Qwen3.
+    verdict = evaluate("Qwen/Qwen3.8-1B", config=hf_config("Qwen/Qwen3-0.6B"))
+    assert any("not named like a qwen3 release" in r for r in verdict.reasons)
+    gemma3n = evaluate("google/gemma-3n-E2B-it", config=hf_config("google/gemma-3-1b-it"))
+    assert any("not named like a gemma3 release" in r for r in gemma3n.reasons)
+
+
+def test_name_reasons_need_no_network():
+    assert eligibility.name_reasons("Qwen/Qwen3-1.7B", CFG) == []
+    assert eligibility.name_reasons("Qwen/Qwen3-1.7B-GGUF", CFG)
+    assert eligibility.name_reasons("Qwen/Qwen3-32B", CFG)
+    assert eligibility.name_reasons("Qwen/Qwen2.5-VL-3B-Instruct", CFG)
+
+
 def test_variant():
     assert eligibility.variant("Qwen/Qwen3-1.7B", "qwen3") == "instruct"
     assert eligibility.variant("Qwen/Qwen3-1.7B-Base", "qwen3") == "base"

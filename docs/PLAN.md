@@ -10,7 +10,7 @@ the [openweights](https://github.com/alpharomercoma/openweights) Android app: XN
 |---|---|
 | Models | Dense (no MoE) text LLMs of the 4B class and smaller (size in the name ≤ 4B; real count < 4.5B, since Qwen3-4B is 4,022,468,096), instruct and base, original bf16/fp16 weights only |
 | Watched orgs | `Qwen`, `google`, `meta-llama`, `HuggingFaceTB` |
-| Trigger | Scheduled watcher; a new eligible model auto-dispatches all three backend workflows |
+| Trigger | Scheduled watcher; a new eligible model auto-dispatches every backend workflow that supports it |
 | First run | Seeds state without exporting; existing models are backfilled by manual dispatch |
 | Runners | Standard GitHub-hosted `ubuntu-latest` (public repo: 4 vCPU, 16 GB RAM), one workflow run per backend |
 | Chips | QNN: SM8650 (8 Gen 3), SM8750 (8 Elite). MediaTek: MT6989 (D9300), MT6991 (D9400) |
@@ -118,7 +118,14 @@ MediaTek code: read the license bundled in the SDK archive and write
    `.pte` and 4-7% above the measured export peaks.
 1. **XNNPACK end to end** (`export-xnnpack.yml`, validated locally in Docker; publishing
    not yet exercised): manual dispatch → export → smoke test → HF + release + artifact.
-2. **Watcher**: cron, state on a `state` branch, seeding, auto-dispatch.
+2. **Watcher** (`watch-hf.yml`, every 6 hours at :17, plus manual dispatch with `backfill`
+   and `dry_run` inputs). Lists each org's 200 newest repos; a repo not yet in
+   `seen.json` (on the `state` branch) is checked once, by name first and then by config,
+   and each org only for its own families (`org_families`). Eligible models go to
+   `export-xnnpack.yml` at the revision seen, at most 6 runs per watcher run. A dry run over
+   the 40 newest real repos (2026-09-12) skipped all of them correctly: Qwen3.8 multimodal
+   and FP8, Qwen3-ASR, Llama 4, Llama Guard, SmolLM3 (no XNNPACK recipe yet), and
+   HuggingFaceTB's GSM8K fine-tune of Qwen3 (not HuggingFaceTB's own family).
 3. **QNN.**
 4. **MediaTek.**
 

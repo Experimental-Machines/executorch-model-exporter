@@ -9,7 +9,18 @@ hub:
   tags: [executorch, android, on-device, openweights]
 
 watch:
-  orgs: [Qwen, google, meta-llama, HuggingFaceTB]
+  # Watched orgs, each for its own families only (the app template token in the repo name),
+  # so one lab's fine-tune of another lab's model is not picked up. Backfill and manual
+  # exports ignore this.
+  org_families:
+    Qwen: [qwen3, qwen25]
+    google: [gemma3]
+    meta-llama: [llama32]
+    HuggingFaceTB: [smollm2, smollm3]
+  # Newest repos listed per org and watcher run (the listing is sorted by creation date).
+  limit_per_org: 200
+  # Export workflow runs one watcher run may start; the rest wait for the next run.
+  max_dispatch_per_run: 6
   pipeline_tag: text-generation
   # Size limit, read from the size in the repo name ("4B", "360M"): at most this many
   # billions. Publishers name by nominal size; Qwen3-4B's real total is 4,022,468,096, so

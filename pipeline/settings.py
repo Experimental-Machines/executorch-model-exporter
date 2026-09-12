@@ -25,6 +25,9 @@ class Settings:
     repo_suffix: str
     hub_tags: tuple[str, ...]
     watch_orgs: tuple[str, ...]
+    org_families: dict[str, tuple[str, ...]]
+    limit_per_org: int
+    max_dispatch_per_run: int
     pipeline_tag: str
     max_nominal_billions: float
     max_params: int
@@ -58,7 +61,10 @@ def load() -> Settings:
         hub_org=hub["org"],
         repo_suffix=hub["repo_suffix"],
         hub_tags=tuple(hub["tags"]),
-        watch_orgs=tuple(watch["orgs"]),
+        watch_orgs=tuple(watch["org_families"]),
+        org_families={org: tuple(tokens) for org, tokens in watch["org_families"].items()},
+        limit_per_org=int(watch["limit_per_org"]),
+        max_dispatch_per_run=int(watch["max_dispatch_per_run"]),
         pipeline_tag=watch["pipeline_tag"],
         max_nominal_billions=float(watch["max_nominal_billions"]),
         max_params=int(watch["max_params"]),

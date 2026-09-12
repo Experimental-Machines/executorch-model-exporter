@@ -17,6 +17,16 @@ FAMILY_APP_TOKENS = {
     "gemma3": {"gemma3"},
     "smollm3": {"smollm3"},
 }
+# What a release of each family is called. The architecture class alone is not enough: a
+# later generation can keep the class (a text-only "Qwen3.8" on Qwen3ForCausalLM would pass
+# every other check, and the app's template matcher would read it as Qwen3 too).
+FAMILY_NAME_PATTERNS = {
+    "qwen3": re.compile(r"qwen3(?![.\d])", re.IGNORECASE),
+    "qwen2_5": re.compile(r"qwen2\.5(?![.\d])", re.IGNORECASE),
+    "llama": re.compile(r"llama-?3\.2(?![.\d])|smollm2(?!\d)", re.IGNORECASE),
+    "gemma3": re.compile(r"gemma-?3(?![.\dn])", re.IGNORECASE),
+    "smollm3": re.compile(r"smollm3(?!\d)", re.IGNORECASE),
+}
 _INSTRUCT_TOKENS = {"instruct", "it", "chat"}
 
 
@@ -61,6 +71,23 @@ def variant(model_id: str, family: str | None) -> str:
     return "base"
 
 
+def name_reasons(model_id: str, settings: Settings) -> list[str]:
+    """Reasons that need nothing but the repo name, so the watcher can skip a model before
+    fetching anything about it."""
+    name = naming.source_name(model_id)
+    reasons = []
+    hits = [token for token in settings.name_exclude if token in naming.normalise(name)]
+    if hits:
+        reasons.append(f"name matches excluded marker(s) {hits}")
+    nominal = naming.nominal_billions(name)
+    if nominal is not None and nominal > settings.max_nominal_billions:
+        reasons.append(f"named size {nominal:g}B is above {settings.max_nominal_billions:g}B")
+    output_repo = naming.output_repo(model_id, settings.hub_org, settings.repo_suffix)
+    if naming.app_family(naming.app_model_name(output_repo, "x.pte")) is None:
+        reasons.append(f"the app has no chat template for {name!r} (or refuses it by name)")
+    return reasons
+
+
 def evaluate(source: SourceModel, settings: Settings) -> Verdict:
     name = naming.source_name(source.id)
     family = families.family_for(source.config) if source.config else None
@@ -70,10 +97,7 @@ def evaluate(source: SourceModel, settings: Settings) -> Verdict:
 
     if source.pipeline_tag not in (None, settings.pipeline_tag):
         reasons.append(f"pipeline tag {source.pipeline_tag!r} is not {settings.pipeline_tag!r}")
-    normalised = naming.normalise(name)
-    hits = [token for token in settings.name_exclude if token in normalised]
-    if hits:
-        reasons.append(f"name matches excluded marker(s) {hits}")
+    reasons.extend(name_reasons(source.id, settings))
     if source.access_error:
         reasons.append(source.access_error)
     elif not source.config:
@@ -82,9 +106,6 @@ def evaluate(source: SourceModel, settings: Settings) -> Verdict:
         reasons.append("mixture-of-experts checkpoint")
     elif family is None:
         reasons.append(f"architecture {source.config.get('architectures')} has no recipe")
-    nominal = naming.nominal_billions(name)
-    if nominal is not None and nominal > settings.max_nominal_billions:
-        reasons.append(f"named size {nominal:g}B is above {settings.max_nominal_billions:g}B")
     if source.total_params is None:
         reasons.append("no safetensors parameter count on the Hub")
     elif source.total_params >= settings.max_params:
@@ -92,10 +113,11 @@ def evaluate(source: SourceModel, settings: Settings) -> Verdict:
 
     output_repo = naming.output_repo(source.id, settings.hub_org, settings.repo_suffix)
     app_token = naming.app_family(naming.app_model_name(output_repo, "x.pte"))
-    if app_token is None:
-        reasons.append(f"the app has no chat template for {name!r} (or refuses it by name)")
-    elif family is not None and app_token not in FAMILY_APP_TOKENS.get(family.key, set()):
-        reasons.append(f"name reads as app family {app_token!r}, architecture is {family.key!r}")
+    if family is not None and app_token is not None:
+        if app_token not in FAMILY_APP_TOKENS.get(family.key, set()):
+            reasons.append(f"name reads as app family {app_token!r}, architecture is {family.key!r}")
+        elif not FAMILY_NAME_PATTERNS[family.key].search(name):
+            reasons.append(f"{name!r} is not named like a {family.key} release (a later version?)")
 
     for backend in families.BACKENDS:
         if family is None:

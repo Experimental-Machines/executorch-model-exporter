@@ -9,7 +9,7 @@ GitHub-hosted runners. Design and decisions: [docs/PLAN.md](docs/PLAN.md).
 | XNNPACK (CPU) | Qwen3, Qwen2.5, Llama 3.2, SmolLM2 |
 | Qualcomm QNN (SM8650, SM8750) | planned (phase 3) |
 | MediaTek NeuroPilot (MT6989, MT6991) | planned (phase 4) |
-| HF watcher (auto-dispatch) | planned (phase 2) |
+| HF watcher (auto-dispatch) | every 6 hours; state on the `state` branch |
 
 ## Running an export
 
@@ -23,6 +23,11 @@ Repository secrets:
 - `HF_TOKEN`: a Hugging Face token with write access to the output org
   (`hub.org` in [config/pipeline.yaml](config/pipeline.yaml)). Its account must have
   accepted the licenses of gated source models (Llama, Gemma).
+
+**Watch Hugging Face** runs every 6 hours. Its first run records the models that already
+exist without exporting them; to export existing ones, run it with `backfill` set to a
+comma-separated list of model ids (or run **Export XNNPACK** directly). `dry_run` reports
+what it would do without dispatching or saving state.
 
 **Probe runner** exports one small model at 2k and 32k windows without publishing, to
 measure what the runner really has and calibrate the sizing estimates.

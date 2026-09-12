@@ -67,6 +67,30 @@ def _summary(args) -> int:
     return 0
 
 
+def _watch(args) -> int:
+    from pipeline import settings, watch
+
+    cfg = settings.load()
+    state_path = Path(args.state)
+    backfill = tuple(m.strip() for m in args.backfill.split(",") if m.strip())
+    summary = watch.run(
+        state_path,
+        cfg,
+        dispatch=not args.dry_run,
+        backfill=backfill,
+        limit_per_org=cfg.limit_per_org,
+        max_dispatch=cfg.max_dispatch_per_run,
+    )
+    if not args.dry_run:
+        watch.save_state(state_path, summary["state"])
+    text = watch.markdown(summary)
+    if args.summary:
+        with open(args.summary, "a", encoding="utf-8") as f:
+            f.write(text)
+    print(text)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m pipeline")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -85,6 +109,13 @@ def main(argv: list[str] | None = None) -> int:
     export.add_argument("--keep-work", action="store_true")
     export.add_argument("--skip-smoke", action="store_true")
     export.set_defaults(func=_export_xnnpack)
+
+    watch = commands.add_parser("watch", help="check the watched orgs, dispatch exports, update state")
+    watch.add_argument("--state", required=True, help="state JSON (on the state branch)")
+    watch.add_argument("--backfill", default="", help="comma-separated model ids to evaluate and export now")
+    watch.add_argument("--dry-run", action="store_true", help="dispatch nothing and leave the state file alone")
+    watch.add_argument("--summary", default=None, help="append the markdown summary to this file")
+    watch.set_defaults(func=_watch)
 
     for name, func, text in (
         ("publish-hf", _publish_hf, "commit one backend folder to the output HF repo"),
