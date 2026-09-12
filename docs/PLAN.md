@@ -104,9 +104,18 @@ MediaTek code: read the license bundled in the SDK archive and write
 
 ## Phases
 
-0. **Probe** (`probe-runner.yml`, written, not yet run on GitHub): measure the runner's
-   real RAM/disk/swap; export Qwen3-0.6B at 2k and 32k to calibrate the export-memory
-   estimate and the `.pte` size estimate.
+0. **Probe** (`probe-runner.yml`, done 2026-09-12): `ubuntu-latest` on this public repo is
+   4 vCPU (AMD EPYC 9V74), 16,766,414,848 B RAM, one 160 GB NVMe (~103 GB free after
+   cleanup, no `/mnt`), plus the 24 GiB swap file. Qwen3-0.6B exports:
+
+   | Window | `.pte` | Peak RSS | Export | Smoke |
+   |---|---|---|---|---|
+   | 2k | 496,570,368 B | 5,836,587,008 B | 600 s | "Paris", 83 tok/s decode |
+   | 16k | 525,932,032 B | 15,781,117,952 B | 721 s | "Paris", 83 tok/s decode |
+   | 32k | — | runner killed (causal masks) | — | — |
+
+   `pipeline/sizing.py` is calibrated on these: estimates within 1% of every measured
+   `.pte` and 4-7% above the measured export peaks.
 1. **XNNPACK end to end** (`export-xnnpack.yml`, validated locally in Docker; publishing
    not yet exercised): manual dispatch → export → smoke test → HF + release + artifact.
 2. **Watcher**: cron, state on a `state` branch, seeding, auto-dispatch.

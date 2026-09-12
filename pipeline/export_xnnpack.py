@@ -303,7 +303,7 @@ def run(
             {"path": pte_path_in_repo, "bytes": pte.stat().st_size, "sha256": sha256(pte)},
         ],
         "estimates": {
-            "pte_bytes_estimate": sizing.pte_bytes_estimate(arch),
+            "pte_bytes_estimate": sizing.pte_bytes_estimate(arch, window),
             "pte_bytes_actual": pte.stat().st_size,
             "export_peak_bytes_estimate": sizing.export_peak_bytes(arch, window),
         },

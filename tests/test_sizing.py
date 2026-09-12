@@ -1,4 +1,4 @@
-from conftest import TOTAL_PARAMS, hf_config
+from conftest import TOTAL_PARAMS, hf_config, load_json
 
 from pipeline import families, sizing
 
@@ -24,33 +24,54 @@ def test_kv_cache_qwen3_4b():
     assert sizing.kv_cache_bytes(arch("Qwen/Qwen3-4B"), 32768) == 9_663_676_416
 
 
-def test_pte_estimate_counts_tied_output_separately():
-    # embeddings 151,936 x 2,048 = 311,164,928 at 1 B; the tied output projection adds a
-    # 4-bit copy, so all 2,031,739,904 parameters count as linear at 0.625 B.
-    assert sizing.pte_bytes_estimate(arch("Qwen/Qwen3-1.7B")) == 311_164_928 + 1_269_837_440
-    assert sizing.pte_bytes_estimate(arch("Qwen/Qwen3-1.7B")) == 1_581_002_368
+def test_linear_params_are_counted_from_the_architecture():
+    # Qwen3-0.6B per layer: q 1,024x2,048 + k,v 2 x 1,024x1,024 + o 2,048x1,024
+    # + mlp 3 x 1,024x3,072 = 15,728,640; x 28 = 440,401,920; + output 151,936 x 1,024.
+    qwen = arch("Qwen/Qwen3-0.6B")
+    assert qwen.linear_params == 440_401_920 + 155_582_464
+    assert qwen.embedding_params == 155_582_464
+    # Its checkpoint stores lm_head despite tying, so the HF total counts the table twice.
+    # Norm weights: 28 x (2 x 1,024 + 2 x 128 q/k norms) + 1,024 final = 65,536.
+    assert qwen.total_params == 440_401_920 + 2 * 155_582_464 + 65_536
 
 
-def test_pte_estimate_untied():
-    a = sizing.Architecture(
-        n_layers=1, n_kv_heads=1, head_dim=1, vocab_size=1000, dim=100, total_params=1_100_000, tied_embeddings=False
-    )
-    # 100,000 embedding params at 1 B + 1,000,000 linear at 0.625 B.
-    assert sizing.pte_bytes_estimate(a) == 725_000
+def test_pte_estimate_matches_the_measured_exports():
+    qwen = arch("Qwen/Qwen3-0.6B")
+    # 155,582,464 + 595,984,384 x 0.5625 + 2,048 x 128 x 16 = 495,017,984; x 1.01
+    # Measured 496,570,368 B (probe run 34696579580).
+    assert sizing.pte_bytes_estimate(qwen, 2048) == 499_968_163
+    # + 16,384 x 128 x 16 instead: 524,378,112; x 1.01. Measured 525,932,032 B (run 34697093999).
+    assert sizing.pte_bytes_estimate(qwen, 16384) == 529_621_893
+    smol = families.architecture(load_json("smollm2-135m.config.json"), 134_515_008)
+    # 28,311,552 + 134,479,872 x 0.5625 + 2,048 x 64 x 16 = 106,053,632; x 1.01.
+    # Measured 106,018,048 B (local Docker run).
+    assert sizing.pte_bytes_estimate(smol, 2048) == 107_114_168
 
 
 def test_resident_bytes_around_the_qwen3_1_7b_boundary():
+    # .pte at 8k: (311,164,928 + 1,720,451,072 x 0.5625 + 8,192 x 128 x 16) x 1.01
     qwen = arch("Qwen/Qwen3-1.7B")
-    assert sizing.device_resident_bytes(qwen, 8192, OVERHEAD) == 3_960_050_560
-    assert sizing.device_resident_bytes(qwen, 16384, OVERHEAD) == 5_839_098_752
+    assert sizing.pte_bytes_estimate(qwen, 8192) == 1_308_652_830
+    assert sizing.device_resident_bytes(qwen, 8192, OVERHEAD) == 3_687_701_022
+    assert sizing.device_resident_bytes(qwen, 16384, OVERHEAD) == 5_583_694_202
+
+
+def test_export_peak_matches_the_probe():
+    # fp32 weights (155,582,464 + 595,984,384) x 4 = 3,006,267,392, + KV cache + masks + fixed.
+    qwen = arch("Qwen/Qwen3-0.6B")
+    # Measured peak RSS 5,836,587,008 B (probe run 34696579580): estimate 4.4% over.
+    assert sizing.export_peak_bytes(qwen, 2048) == 3_006_267_392 + 469_762_048 + 117_440_512 + 2_500_000_000
+    assert sizing.export_peak_bytes(qwen, 2048) == 6_093_469_952
+    # Measured peak RSS 15,781,117,952 B at 16k (run 34697093999), with part of it in swap.
+    assert sizing.export_peak_bytes(qwen, 16384) == 3_006_267_392 + 3_758_096_384 + 7_516_192_768 + 2_500_000_000
 
 
 def test_window_choice_per_model():
     expected = {
-        "Qwen/Qwen3-0.6B": 16384,  # 625,352,704 + 3,758,096,384 + 500,000,000 = 4,883,449,088
+        "Qwen/Qwen3-0.6B": 16384,  # 529,621,893 + 3,758,096,384 + 500,000,000 = 4,787,718,277
         "Qwen/Qwen3-1.7B": 8192,
-        "Qwen/Qwen3-4B": 4096,  # 2,902,998,720 + 1,207,959,552 + 500,000,000 = 4,610,958,272
-        "meta-llama/Llama-3.2-1B-Instruct": 32768,  # 65,536 B/token: 1,035,052,288 + 2,147,483,648 + 500,000,000
+        "Qwen/Qwen3-4B": 4096,  # 2,686,471,495 + 1,207,959,552 + 500,000,000 = 4,394,431,047
+        "meta-llama/Llama-3.2-1B-Instruct": 32768,  # 1,001,243,607 + 2,147,483,648 + 500,000,000
     }
     for model_id, context in expected.items():
         choice = sizing.choose_context(arch(model_id), TIERS, BUDGET, OVERHEAD, None)

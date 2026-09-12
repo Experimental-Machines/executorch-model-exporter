@@ -115,10 +115,12 @@ def architecture(config: dict, total_params: int) -> Architecture:
     dim = int(c["hidden_size"])
     return Architecture(
         n_layers=int(c["num_hidden_layers"]),
+        n_heads=n_heads,
         n_kv_heads=int(c.get("num_key_value_heads") or n_heads),
         head_dim=int(c.get("head_dim") or dim // n_heads),
         vocab_size=int(c["vocab_size"]),
         dim=dim,
+        intermediate=int(c["intermediate_size"]),
         total_params=int(total_params),
         tied_embeddings=bool(c.get("tie_word_embeddings", False)),
     )

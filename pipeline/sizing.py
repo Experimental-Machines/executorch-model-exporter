@@ -9,29 +9,53 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 FP32_BYTES = 4
-# 8da4w with group size 32: a 4-bit weight is half a byte, plus one fp32 scale per group
-# of 32 weights (4 / 32 = 0.125 bytes per weight).
-LINEAR_BYTES_PER_PARAM_8DA4W_G32 = 0.5 + FP32_BYTES / 32
+# 8da4w with group size 32: half a byte per 4-bit weight plus 2 bytes of scale per group
+# of 32 (2 / 32 = 0.0625 bytes per weight).
+LINEAR_BYTES_PER_PARAM_8DA4W_G32 = 0.5 + 2 / 32
 # int8 per-channel embedding table: one byte per weight (one scale per row is negligible).
 EMBEDDING_BYTES_PER_PARAM_INT8 = 1.0
-# Export holds fp32 weights plus transient copies while quantizing, on top of a fixed cost
-# for torch.export and lowering. To be calibrated by the probe workflow. Measured so far:
-# LFM2.5-1.2B 6.7 GB and LFM2.5-2.6B 12.2 GB peak (openweights export notes); SmolLM2-135M
-# 2,748,440,576 B peak for 538 MB of fp32 weights (local Docker run, 2026-09-12), so the
-# fixed part is at least ~2.2 GB.
-EXPORT_PEAK_WEIGHT_MULTIPLE = 1.5
+# RoPE cos/sin tables grow the file with the window: Qwen3-0.6B measured 496,570,368 B at
+# 2k and 525,932,032 B at 16k, 2,048 B per extra token = 4 x head_dim (128) x 4 bytes.
+ROPE_TABLE_BYTES_PER_TOKEN_PER_HEAD_DIM = 4 * FP32_BYTES
+# Norms, graph and delegate headers. With the terms above the estimate before this margin
+# was within 0.3% of all three measured files (SmolLM2-135M 2k, Qwen3-0.6B 2k and 16k).
+PTE_OVERHEAD_FACTOR = 1.01
+# Export peak RSS = fp32 weights + KV cache + causal masks + a fixed cost for torch.export
+# and lowering. Calibrated on the probe runs (ubuntu-latest, 16.8 GB RAM): Qwen3-0.6B peaked
+# at 5,836,587,008 B at 2k and 15,781,117,952 B at 16k; the fixed part is ~2.24 GB, and the
+# weights count once (LFM2.5-2.6B: 12.2 GB peak for 10.4 GB of fp32 weights).
+EXPORT_PEAK_WEIGHT_MULTIPLE = 1.0
 EXPORT_FIXED_OVERHEAD_BYTES = 2_500_000_000
 
 
 @dataclass(frozen=True)
 class Architecture:
     n_layers: int
+    n_heads: int
     n_kv_heads: int
     head_dim: int
     vocab_size: int
     dim: int
-    total_params: int
+    intermediate: int
+    total_params: int  # HF safetensors total: whatever the checkpoint stores
     tied_embeddings: bool
+
+    @property
+    def embedding_params(self) -> int:
+        return self.vocab_size * self.dim
+
+    @property
+    def linear_params(self) -> int:
+        """Every linear the exported model has, counted from the architecture.
+
+        Not derived from total_params: some tied checkpoints store lm_head anyway (Qwen3-0.6B)
+        and some do not (SmolLM2), while the export always gives the output projection its
+        own quantized copy."""
+        q_out = self.n_heads * self.head_dim
+        kv_out = self.n_kv_heads * self.head_dim
+        attention = self.dim * q_out + 2 * self.dim * kv_out + q_out * self.dim
+        mlp = 3 * self.dim * self.intermediate
+        return self.n_layers * (attention + mlp) + self.vocab_size * self.dim
 
 
 def kv_cache_bytes(arch: Architecture, context: int) -> int:
@@ -39,17 +63,17 @@ def kv_cache_bytes(arch: Architecture, context: int) -> int:
     return arch.n_layers * 2 * arch.n_kv_heads * arch.head_dim * context * FP32_BYTES
 
 
-def pte_bytes_estimate(arch: Architecture) -> int:
-    embedding = arch.vocab_size * arch.dim
-    linear = arch.total_params - embedding
-    if arch.tied_embeddings:
-        # The export gives the output projection its own quantized copy of the table.
-        linear += embedding
-    return int(embedding * EMBEDDING_BYTES_PER_PARAM_INT8 + linear * LINEAR_BYTES_PER_PARAM_8DA4W_G32)
+def pte_bytes_estimate(arch: Architecture, context: int) -> int:
+    raw = (
+        arch.embedding_params * EMBEDDING_BYTES_PER_PARAM_INT8
+        + arch.linear_params * LINEAR_BYTES_PER_PARAM_8DA4W_G32
+        + context * arch.head_dim * ROPE_TABLE_BYTES_PER_TOKEN_PER_HEAD_DIM
+    )
+    return int(raw * PTE_OVERHEAD_FACTOR)
 
 
 def device_resident_bytes(arch: Architecture, context: int, overhead: int) -> int:
-    return pte_bytes_estimate(arch) + kv_cache_bytes(arch, context) + overhead
+    return pte_bytes_estimate(arch, context) + kv_cache_bytes(arch, context) + overhead
 
 
 def causal_mask_bytes(arch: Architecture, context: int) -> int:
@@ -60,7 +84,7 @@ def causal_mask_bytes(arch: Architecture, context: int) -> int:
 
 
 def export_peak_bytes(arch: Architecture, context: int) -> int:
-    weights = arch.total_params * FP32_BYTES
+    weights = (arch.embedding_params + arch.linear_params) * FP32_BYTES
     return int(
         weights * EXPORT_PEAK_WEIGHT_MULTIPLE
         + kv_cache_bytes(arch, context)
