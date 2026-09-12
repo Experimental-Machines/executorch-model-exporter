@@ -47,23 +47,40 @@ _NOT_IN_EXPORT_LLM = (
     "not in ExecuTorch 1.4.0 export_llm's model list; needs a validated export path "
     "(optimum-executorch or params support) before it is published"
 )
-_NPU_PENDING = "backend pipeline not built yet (docs/PLAN.md phases 3-4)"
+_NPU_PENDING = "backend pipeline not built yet (docs/PLAN.md phase 4)"
 
 FAMILIES: tuple[Family, ...] = (
-    Family("qwen3", ("Qwen3ForCausalLM",), {"qnn": _NPU_PENDING, "mtk": _NPU_PENDING}),
-    Family("qwen2_5", ("Qwen2ForCausalLM",), {"qnn": _NPU_PENDING, "mtk": _NPU_PENDING}),
-    Family("llama", ("LlamaForCausalLM",), {"qnn": _NPU_PENDING, "mtk": _NPU_PENDING}),
-    Family(
-        "gemma3",
-        ("Gemma3ForCausalLM",),
-        {"xnnpack": _NOT_IN_EXPORT_LLM, "qnn": _NPU_PENDING, "mtk": _NPU_PENDING},
-    ),
-    Family(
-        "smollm3",
-        ("SmolLM3ForCausalLM",),
-        {"xnnpack": _NOT_IN_EXPORT_LLM, "qnn": _NPU_PENDING, "mtk": _NPU_PENDING},
-    ),
+    Family("qwen3", ("Qwen3ForCausalLM",), {"mtk": _NPU_PENDING}),
+    Family("qwen2_5", ("Qwen2ForCausalLM",), {"mtk": _NPU_PENDING}),
+    Family("llama", ("LlamaForCausalLM",), {"mtk": _NPU_PENDING}),
+    Family("gemma3", ("Gemma3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _NPU_PENDING}),
+    Family("smollm3", ("SmolLM3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _NPU_PENDING}),
 )
+
+# ExecuTorch 1.4.0's Qualcomm LLM scripts (examples/qualcomm/oss_scripts/llama, the
+# SUPPORTED_LLM_MODELS registry) export a fixed list of checkpoints, each with its own
+# quantization recipe. These are the ones in the watched orgs: source repo -> --decoder_model.
+QNN_DECODERS = {
+    "Qwen/Qwen3-0.6B": "qwen3-0_6b",
+    "Qwen/Qwen3-1.7B": "qwen3-1_7b",
+    "Qwen/Qwen2.5-0.5B": "qwen2_5-0_5b",
+    "Qwen/Qwen2.5-1.5B": "qwen2_5-1_5b",
+    "google/gemma-3-1b-it": "gemma3-1b",
+    "HuggingFaceTB/SmolLM2-135M-Instruct": "smollm2_135m",
+    "HuggingFaceTB/SmolLM3-3B": "smollm3-3b",
+    "meta-llama/Llama-3.2-1B-Instruct": "llama3_2-1b_instruct",
+    "meta-llama/Llama-3.2-3B-Instruct": "llama3_2-3b_instruct",
+}
+# Registry entries with no repo_id: the script needs Meta's original checkpoint, params and
+# tokenizer passed in, which meta-llama's HF repos carry under original/.
+QNN_META_CHECKPOINT = {"llama3_2-1b_instruct", "llama3_2-3b_instruct"}
+QNN_UNLISTED = "no entry for this checkpoint in ExecuTorch 1.4.0's Qualcomm LLM scripts"
+
+
+def qnn_decoder(model_id: str) -> str | None:
+    return QNN_DECODERS.get(model_id)
+
+
 BACKENDS = ("xnnpack", "qnn", "mtk")
 
 

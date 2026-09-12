@@ -98,11 +98,18 @@ def fetch(repo_id: str, revision: str = "main", token: str | None = None) -> Sou
     return source
 
 
-def download(source: SourceModel, local_dir: Path, token: str | None = None) -> Path:
-    """Weights, tokenizer and license files for ``source.sha`` into ``local_dir``."""
+def download(
+    source: SourceModel,
+    local_dir: Path,
+    token: str | None = None,
+    weights: bool = True,
+    extra: tuple[str, ...] = (),
+) -> Path:
+    """Tokenizer and license files (plus the weights, and any ``extra`` paths) for
+    ``source.sha`` into ``local_dir``."""
     from huggingface_hub import snapshot_download
 
-    patterns = WEIGHT_PATTERNS + SIDE_FILES + source.license_files
+    patterns = (WEIGHT_PATTERNS if weights else []) + SIDE_FILES + source.license_files + list(extra)
     snapshot_download(
         source.id,
         revision=source.sha,

@@ -1,0 +1,119 @@
+name: Export QNN
+run-name: "QNN: ${{ inputs.model_id }}@${{ inputs.revision }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_id:
+        description: Hugging Face model id listed in ExecuTorch 1.4.0's Qualcomm LLM scripts, e.g. Qwen/Qwen3-1.7B
+        required: true
+        type: string
+      revision:
+        description: Branch, tag or commit of the source repo (recorded; the Qualcomm script downloads main)
+        default: main
+        type: string
+      socs:
+        description: JSON list of chips, or empty for qnn.socs in config/pipeline.yaml
+        default: ""
+        type: string
+      publish_hf:
+        description: Publish to the Hugging Face org in config/pipeline.yaml
+        default: true
+        type: boolean
+      publish_release:
+        description: Attach the files to a GitHub release
+        default: true
+        type: boolean
+
+permissions:
+  contents: write # GitHub releases
+
+concurrency:
+  group: export-qnn-${{ inputs.model_id }}
+  cancel-in-progress: false
+
+jobs:
+  targets:
+    runs-on: ubuntu-latest
+    outputs:
+      socs: ${{ steps.socs.outputs.socs }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: socs
+        env:
+          SOCS: ${{ inputs.socs }}
+        run: |
+          if [ -z "$SOCS" ]; then
+            python3 -m pip install --quiet pyyaml
+            SOCS=$(python3 -c 'import json, yaml; print(json.dumps(yaml.safe_load(open("config/pipeline.yaml"))["export"]["qnn"]["socs"]))')
+          fi
+          echo "socs=$SOCS" >>"$GITHUB_OUTPUT"
+
+  export:
+    needs: targets
+    strategy:
+      fail-fast: false
+      matrix:
+        soc: ${{ fromJSON(needs.targets.outputs.socs) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      MODEL_ID: ${{ inputs.model_id }}
+      REVISION: ${{ inputs.revision }}
+      SOC: ${{ matrix.soc }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-export
+        with:
+          swap-gib: "24"
+          requirements: requirements/export-qnn.txt
+
+      - name: Name things
+        run: |
+          grep -E '^QAIRT_VERSION=' config/versions.env >>"$GITHUB_ENV"
+          soc_lower=$(echo "$SOC" | tr '[:upper:]' '[:lower:]')
+          echo "TARGET=$soc_lower" >>"$GITHUB_ENV"
+          echo "ARTIFACT=qnn-${soc_lower}-${MODEL_ID//\//--}" >>"$GITHUB_ENV"
+
+      # The executorch wheel downloads the QAIRT SDK and a libc++ into ~/.cache/executorch/qnn
+      # on first import. Cached per version in this repository only; never re-hosted.
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/executorch/qnn
+          key: qairt-${{ env.QAIRT_VERSION }}-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Export
+        run: python -m pipeline export-qnn "$MODEL_ID" --soc "$SOC" --revision "$REVISION" --out "$WORK_DIR/out" --work "$WORK_DIR/work"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f "$WORK_DIR/out/qnn/$TARGET/export-report.json" ]; then
+            python -m pipeline summary "$WORK_DIR/out" --backend qnn --target "$TARGET" >>"$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ env.WORK_DIR }}/out
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Publish to Hugging Face
+        if: inputs.publish_hf
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::Set the HF_TOKEN repository secret (write access to the output org)"
+            exit 1
+          fi
+          python -m pipeline publish-hf "$WORK_DIR/out" --backend qnn --target "$TARGET"
+
+      - name: Publish GitHub release
+        if: inputs.publish_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m pipeline publish-release "$WORK_DIR/out" --backend qnn --target "$TARGET"

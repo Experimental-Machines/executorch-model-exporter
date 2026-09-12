@@ -110,6 +110,14 @@ def xnnpack_file(model_id: str, qmode: str, context: int) -> str:
     return f"{source_name(model_id)}-{qmode}-{window_label(context)}.pte"
 
 
+def qnn_folder(soc: str) -> str:
+    return f"qnn/{soc.lower()}"
+
+
+def qnn_file(model_id: str, model_mode: str, context: int) -> str:
+    return f"{source_name(model_id)}-qnn-{model_mode}-{window_label(context)}.pte"
+
+
 def check_app_rules(repo_id: str, weights_path: str, backend: str) -> list[str]:
     """Problems that would stop the app from using this file, empty when there are none."""
     problems: list[str] = []

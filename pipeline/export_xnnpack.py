@@ -11,69 +11,30 @@ Produces, under ``out_dir`` (the layout of the published HF repo):
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import shutil
 import subprocess
 import sys
 import time
-from importlib import metadata as pkg_metadata
 from pathlib import Path
 
 import yaml
 
 from pipeline import convert, eligibility, families, hub, manifest, naming, settings, sizing, smoke
+from pipeline.exporting import (
+    ExportError,
+    children_peak_rss,
+    copy_side_files,
+    host_budget,
+    host_info,
+    self_peak_rss,
+    sha256,
+    source_report,
+    toolchain,
+)
 
 BACKEND = "xnnpack"
-
-
-class ExportError(Exception):
-    pass
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as f:
-        for block in iter(lambda: f.read(1 << 20), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def host_info() -> dict:
-    info = {"nproc": os.cpu_count()}
-    meminfo = Path("/proc/meminfo")
-    if meminfo.exists():
-        fields = {}
-        for line in meminfo.read_text().splitlines():
-            key, _, rest = line.partition(":")
-            fields[key] = int(rest.split()[0]) * 1024
-        info["mem_total_bytes"] = fields.get("MemTotal")
-        info["swap_total_bytes"] = fields.get("SwapTotal")
-    return info
-
-
-def host_budget(info: dict, reserve: int = 1_000_000_000) -> int | None:
-    if info.get("mem_total_bytes") is None:
-        return None
-    return info["mem_total_bytes"] + (info.get("swap_total_bytes") or 0) - reserve
-
-
-def _children_peak_rss() -> int | None:
-    try:
-        import resource
-    except ImportError:  # Windows
-        return None
-    # ru_maxrss is in kilobytes on Linux.
-    return resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * 1024
-
-
-def _self_peak_rss() -> int | None:
-    try:
-        import resource
-    except ImportError:
-        return None
-    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
 
 
 def export_llm_config(
@@ -117,35 +78,6 @@ def export_llm_config(
         },
         "backend": {"xnnpack": {"enabled": True, "extended_ops": True}},
     }
-
-
-def _toolchain() -> dict:
-    versions = {}
-    for package in ("executorch", "torch", "torchao"):
-        try:
-            versions[package] = pkg_metadata.version(package)
-        except pkg_metadata.PackageNotFoundError:
-            versions[package] = None
-    return versions
-
-
-def _copy_side_files(source: hub.SourceModel, src_dir: Path, out_dir: Path) -> tuple[str, list[str]]:
-    for name in ("tokenizer.json", "tokenizer.model"):
-        if (src_dir / name).exists():
-            shutil.copy2(src_dir / name, out_dir / name)
-            tokenizer = name
-            break
-    else:
-        raise ExportError("source repo has neither tokenizer.json nor tokenizer.model")
-    licenses = []
-    for name in source.license_files:
-        if (src_dir / name).exists():
-            shutil.copy2(src_dir / name, out_dir / name)
-            licenses.append(name)
-    token = naming.app_family(naming.source_name(source.id))
-    if token in manifest.NOTICES:
-        (out_dir / "NOTICE").write_text(manifest.NOTICES[token], encoding="utf-8")
-    return tokenizer, licenses
 
 
 def run(
@@ -205,13 +137,13 @@ def run(
 
     started = time.time()
     hub.download(source, src_dir)
-    tokenizer, licenses = _copy_side_files(source, src_dir, out_dir)
+    tokenizer, licenses = copy_side_files(source, src_dir, out_dir)
 
     print("==> converting checkpoint")
     conversion = convert.convert(src_dir, checkpoint, plan.converter, families.text_config(source.config))
     for weights in src_dir.glob("*.safetensors"):
         weights.unlink()  # free the disk before export writes the .pte
-    convert_peak = _self_peak_rss()
+    convert_peak = self_peak_rss()
 
     params_path = work_dir / "params.json"
     params_path.write_text(json.dumps(plan.params, indent=2), encoding="utf-8")
@@ -265,17 +197,8 @@ def run(
         "target": None,
         "tokenizer": tokenizer,
         "output_repo": output_repo,
-        "source": {
-            "id": source.id,
-            "sha": source.sha,
-            "created_at": source.created_at.isoformat() if source.created_at else None,
-            "total_params": source.total_params,
-            "family": family.key,
-            "variant": verdict.variant,
-            "license": source.card_license,
-            "license_files": licenses,
-        },
-        "toolchain": _toolchain(),
+        "source": source_report(source, family.key, verdict.variant, licenses),
+        "toolchain": toolchain(),
         "recipe": {
             "model_class": plan.model_class,
             "converter": plan.converter,
@@ -287,7 +210,7 @@ def run(
             "kv_cache_dtype": "fp32",
             "label": f"{recipe.qmode}-g{recipe.group_size}, int8 embeddings",
             "description": (
-                f"ExecuTorch {_toolchain()['executorch']} `export_llm`: 8-bit dynamic activations "
+                f"ExecuTorch {toolchain()['executorch']} `export_llm`: 8-bit dynamic activations "
                 f"and 4-bit weights in groups of {recipe.group_size}, int8 per-channel embeddings, "
                 f"XNNPACK with extended ops, prefill chunk {min(cfg.prefill_chunk, window)}, "
                 "fp32 KV cache."
@@ -310,7 +233,7 @@ def run(
         "host": {
             **host,
             "peak_rss_convert_bytes": convert_peak,
-            "peak_rss_export_bytes": _children_peak_rss(),
+            "peak_rss_export_bytes": children_peak_rss(),
             "export_seconds": round(export_seconds, 1),
             "total_seconds": round(time.time() - started, 1),
         },

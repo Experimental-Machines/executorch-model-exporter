@@ -46,6 +46,26 @@ def _export_xnnpack(args) -> int:
     return 0
 
 
+def _export_qnn(args) -> int:
+    from pipeline import export_qnn
+    from pipeline.exporting import ExportError
+
+    try:
+        report = export_qnn.run(
+            args.model,
+            args.revision,
+            args.soc,
+            Path(args.out),
+            Path(args.work),
+            keep_work=args.keep_work,
+        )
+    except ExportError as error:
+        print(f"export failed: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps({"file": report["files"], "target": report["target"]}, indent=2))
+    return 0
+
+
 def _publish_hf(args) -> int:
     from pipeline import publish
 
@@ -109,6 +129,15 @@ def main(argv: list[str] | None = None) -> int:
     export.add_argument("--keep-work", action="store_true")
     export.add_argument("--skip-smoke", action="store_true")
     export.set_defaults(func=_export_xnnpack)
+
+    qnn = commands.add_parser("export-qnn", help="compile a Qualcomm HTP .pte for one chip")
+    qnn.add_argument("model")
+    qnn.add_argument("--soc", required=True, help="e.g. SM8650")
+    qnn.add_argument("--revision", default="main")
+    qnn.add_argument("--out", default="out")
+    qnn.add_argument("--work", default="work")
+    qnn.add_argument("--keep-work", action="store_true")
+    qnn.set_defaults(func=_export_qnn)
 
     watch = commands.add_parser("watch", help="check the watched orgs, dispatch exports, update state")
     watch.add_argument("--state", required=True, help="state JSON (on the state branch)")

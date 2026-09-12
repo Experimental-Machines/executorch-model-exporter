@@ -65,3 +65,16 @@ export:
     qmode: 8da4w
     group_size: 32
     embedding_quantize: "8,0"
+  qnn:
+    # Snapdragon 8 Gen 3 and 8 Elite. Each chip is its own compile and its own folder.
+    socs: [SM8650, SM8750]
+    # Hybrid mode: a prefill graph consuming prefill_ar_len tokens per step plus a
+    # one-token decode graph, both compiled into the .pte.
+    model_mode: hybrid
+    prefill_ar_len: 128
+    # NPU graphs have static shapes; the window is fixed at compile time. 2048 is a
+    # conservative first setting (Qualcomm's examples use 1024-2048).
+    max_context_len: 2048
+    # Qualcomm's documented PTQ calibration for these scripts.
+    calib_tasks: [wikitext]
+    calib_limit: 1

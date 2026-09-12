@@ -7,14 +7,14 @@ import subprocess
 import time
 from pathlib import Path
 
-from pipeline import hub, manifest, settings
+from pipeline import exporting, hub, manifest, settings
 
 # GitHub rejects release assets of 2 GiB or more.
 RELEASE_ASSET_LIMIT = 2 * 1024**3
 
 
 def _folder(backend: str, target: str | None) -> str:
-    return backend if target is None else f"{backend}/{target}"
+    return backend if target is None else f"{backend}/{target.lower()}"
 
 
 def load_report(out_dir: Path, backend: str, target: str | None = None) -> dict:
@@ -34,12 +34,17 @@ def publish_hf(out_dir: Path, backend: str, target: str | None = None, attempts:
     report = load_report(out_dir, backend, target)
     repo_id = report["output_repo"]
     folder = _folder(backend, target)
-    hf = hub.api()
-    hf.create_repo(repo_id, repo_type="model", exist_ok=True)
-
     local_folder = out_dir / folder
     new_paths = {f"{folder}/{p.name}": p for p in local_folder.iterdir() if p.is_file()}
     root_files = {p.name: p for p in out_dir.iterdir() if p.is_file()}
+    scoped = [path for path in new_paths if path.rsplit("/", 1)[-1] in exporting.TOKENIZER_FILES]
+    if scoped:
+        # A tokenizer inside any backend folder makes the app stop lending the root one to
+        # every other folder (HuggingFaceClient.tokenizerFor), breaking the other backends.
+        raise ValueError(f"tokenizer files must stay at the repo root, found {scoped}")
+
+    hf = hub.api()
+    hf.create_repo(repo_id, repo_type="model", exist_ok=True)
 
     for attempt in range(attempts):
         info = hf.model_info(repo_id, expand=["sha", "siblings"])
@@ -126,27 +131,30 @@ def summary(out_dir: Path, backend: str, target: str | None = None) -> str:
     report = load_report(out_dir, backend, target)
     smoke = report.get("smoke") or {}
     host = report["host"]
+    estimates = report.get("estimates") or {}
     rows = [
         ("Source", f"{report['source']['id']} @ `{report['source']['sha'][:12]}`"),
         ("Family / variant", f"{report['source']['family']} / {report['source']['variant']}"),
         ("Parameters", f"{report['source']['total_params']:,}"),
         ("Window", f"{report['window']['context']:,} ({report['window']['reason']})"),
         ("Files", ", ".join(f"`{f['path']}` {f['bytes']:,} B" for f in report["files"])),
-        (
-            ".pte estimate vs actual",
-            f"{report['estimates']['pte_bytes_estimate']:,} / {report['estimates']['pte_bytes_actual']:,} B",
-        ),
-        (
-            "Peak RSS convert / export",
-            f"{host.get('peak_rss_convert_bytes') or 0:,} / {host.get('peak_rss_export_bytes') or 0:,} B",
-        ),
-        ("Export estimate", f"{report['estimates']['export_peak_bytes_estimate']:,} B"),
+        ("Peak RSS export", f"{host.get('peak_rss_export_bytes') or 0:,} B"),
         ("Export time", f"{host.get('export_seconds')} s of {host.get('total_seconds')} s"),
-        (
-            "Smoke test",
-            f"{'passed' if smoke.get('passed') else 'failed'}: {smoke.get('reply', '')!r}" if smoke else "not run",
-        ),
     ]
-    lines = [f"### {manifest.BACKEND_TITLES[backend]}: {report['output_repo']}", "", "| | |", "|---|---|"]
+    if estimates:
+        rows += [
+            (".pte estimate vs actual", f"{estimates['pte_bytes_estimate']:,} / {estimates['pte_bytes_actual']:,} B"),
+            ("Export peak estimate", f"{estimates['export_peak_bytes_estimate']:,} B"),
+        ]
+    if not smoke:
+        rows.append(("Check", "not run"))
+    elif smoke.get("kind") == "structural":
+        rows.append(
+            ("Check", "structure " + ("passed" if smoke["passed"] else "failed: " + "; ".join(smoke["problems"])))
+        )
+    else:
+        rows.append(("Smoke test", f"{'passed' if smoke.get('passed') else 'failed'}: {smoke.get('reply', '')!r}"))
+    title = manifest.BACKEND_TITLES[backend] + (f" {manifest.target(report)}" if report.get("target") else "")
+    lines = [f"### {title}: {report['output_repo']}", "", "| | |", "|---|---|"]
     lines += [f"| {k} | {v} |" for k, v in rows]
     return "\n".join(lines) + "\n"

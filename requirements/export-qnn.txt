@@ -1,0 +1,23 @@
+# Qualcomm QNN export. Same core pins as export-xnnpack.txt; install torch from the CPU
+# index first. The executorch Linux x86_64 wheel ships the Qualcomm backend and downloads
+# the QAIRT SDK version it was built against on first import (config/versions.env).
+torch==2.13.0
+torchao==0.18.0
+executorch==1.4.0
+pytorch-tokenizers==1.4.1
+huggingface_hub==1.31.0
+safetensors==0.8.0
+jinja2==3.1.6
+pyyaml==6.0.3
+# ExecuTorch 1.4.0's pins for its examples (requirements-examples.txt,
+# examples/models/llama/install_requirements.sh): the Qualcomm LLM scripts load configs and
+# tokenizers through transformers and calibrate on an lm_eval task.
+transformers==5.0.0rc1
+datasets==3.6.0
+lm_eval==0.4.5
+# backends/qualcomm/requirements.txt
+py-cpuinfo
+requests
+tabulate
+graphviz
+pydot

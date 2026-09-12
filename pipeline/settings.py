@@ -20,6 +20,16 @@ class XnnpackRecipe:
 
 
 @dataclass(frozen=True)
+class QnnRecipe:
+    socs: tuple[str, ...]
+    model_mode: str
+    prefill_ar_len: int
+    max_context_len: int
+    calib_tasks: tuple[str, ...]
+    calib_limit: int
+
+
+@dataclass(frozen=True)
 class Settings:
     hub_org: str
     repo_suffix: str
@@ -37,6 +47,7 @@ class Settings:
     runtime_overhead_bytes: int
     prefill_chunk: int
     xnnpack: XnnpackRecipe
+    qnn: QnnRecipe
     executorch_version: str
 
 
@@ -77,6 +88,14 @@ def load() -> Settings:
             qmode=export["xnnpack"]["qmode"],
             group_size=int(export["xnnpack"]["group_size"]),
             embedding_quantize=str(export["xnnpack"]["embedding_quantize"]),
+        ),
+        qnn=QnnRecipe(
+            socs=tuple(export["qnn"]["socs"]),
+            model_mode=export["qnn"]["model_mode"],
+            prefill_ar_len=int(export["qnn"]["prefill_ar_len"]),
+            max_context_len=int(export["qnn"]["max_context_len"]),
+            calib_tasks=tuple(export["qnn"]["calib_tasks"]),
+            calib_limit=int(export["qnn"]["calib_limit"]),
         ),
         executorch_version=versions["EXECUTORCH_VERSION"],
     )

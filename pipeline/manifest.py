@@ -52,7 +52,7 @@ def backend_config(report: dict) -> dict:
                 "methods": methods,
             }
         )
-    return {
+    config = {
         "runtime": "executorch",
         "runtime_version": report["toolchain"]["executorch"],
         "backend": report["backend"],
@@ -62,6 +62,10 @@ def backend_config(report: dict) -> dict:
         "source_revision": report["source"]["sha"],
         "variants": variants,
     }
+    if report["toolchain"].get("qairt"):
+        # HTP context binaries only load on the QNN runtime they were compiled with.
+        config["qnn_sdk_version"] = report["toolchain"]["qairt"]
+    return config
 
 
 def _gb(n: int) -> str:
@@ -115,12 +119,14 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
     for r in reports:
         smoke = r.get("smoke") or {}
         verdict = "passed" if smoke.get("passed") else ("not run" if not smoke else "failed")
+        if smoke.get("kind") == "structural":
+            verdict = "structure checked (no host HTP runtime)" if smoke.get("passed") else "structure check failed"
         if smoke.get("answered"):
             verdict += ' ("Paris")'
         for f in r["files"]:
             if f["path"].endswith(".pte"):
                 out.append(
-                    f"| {BACKEND_TITLES[r['backend']]} | {r.get('target') or 'any arm64'} | "
+                    f"| {BACKEND_TITLES[r['backend']]} | {target(r)} | "
                     f"[`{f['path']}`]({f['path']}) | {r['window']['context']:,} tokens | "
                     f"{_gb(f['bytes'])} | {verdict} |"
                 )
@@ -165,7 +171,24 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
         )
     if token in NOTICES:
         out.append("See [`NOTICE`](NOTICE) for the attribution the license requires.")
+    qnn = [r for r in reports if r["backend"] == "qnn"]
+    if qnn:
+        version = qnn[0]["toolchain"].get("qairt")
+        out += [
+            "",
+            f"The `qnn/` folders hold QNN HTP context binaries compiled with the Qualcomm AI Runtime "
+            f"SDK (QAIRT) {version} from Qualcomm Technologies, Inc., used under its AI Stack License. "
+            "No Qualcomm SDK or runtime library is included; running them needs the matching QNN "
+            "runtime (for example `executorch-android-qnn` 1.4.0, which depends on `qnn-runtime` 2.37.0).",
+        ]
     return "\n".join(out) + "\n"
+
+
+def target(report: dict) -> str:
+    if not report.get("target"):
+        return "any arm64"
+    name = report.get("target_name")
+    return f"{report['target'].upper()} ({name})" if name else report["target"].upper()
 
 
 def run_info() -> dict:

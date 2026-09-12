@@ -130,6 +130,8 @@ def evaluate(source: SourceModel, settings: Settings) -> Verdict:
                 verdict.backends[backend] = None
             except families.UnsupportedModel as error:
                 verdict.backends[backend] = str(error)
+        elif backend == "qnn":
+            verdict.backends[backend] = None if families.qnn_decoder(source.id) else families.QNN_UNLISTED
         else:
             verdict.backends[backend] = None
     return verdict

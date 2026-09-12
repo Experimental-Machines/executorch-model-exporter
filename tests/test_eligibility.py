@@ -9,13 +9,20 @@ def evaluate(model_id, **overrides):
     return eligibility.evaluate(make_source(model_id, **overrides), CFG)
 
 
-def test_qwen3_is_exported_to_xnnpack_only_for_now():
+def test_qwen3_goes_to_xnnpack_and_qnn():
     verdict = evaluate("Qwen/Qwen3-1.7B")
     assert verdict.eligible
     assert verdict.reasons == []
-    assert verdict.export_backends == ["xnnpack"]
-    assert "not built yet" in verdict.backends["qnn"]
+    assert verdict.export_backends == ["xnnpack", "qnn"]
+    assert "not built yet" in verdict.backends["mtk"]
     assert verdict.variant == "instruct"
+
+
+def test_qnn_needs_an_entry_in_executorchs_qualcomm_registry():
+    # Same architecture, but ExecuTorch 1.4.0's Qualcomm scripts only list Qwen/Qwen3-1.7B.
+    verdict = evaluate("Qwen/Qwen3-1.7B-Base", config=hf_config("Qwen/Qwen3-1.7B"))
+    assert verdict.export_backends == ["xnnpack"]
+    assert "no entry" in verdict.backends["qnn"]
 
 
 def test_the_4b_class_is_in_by_name_even_though_it_has_4_02b_parameters():
@@ -65,11 +72,11 @@ def test_llama_family_covers_llama32_and_smollm2():
     assert evaluate("HuggingFaceTB/SmolLM2-360M-Instruct").eligible
 
 
-def test_gemma3_is_recognised_but_has_no_backend_yet():
+def test_gemma3_goes_to_qnn_only():
     verdict = evaluate("google/gemma-3-1b-it")
     assert verdict.reasons == []
-    assert not verdict.eligible
-    assert verdict.backends["xnnpack"] is not None
+    assert verdict.export_backends == ["qnn"]
+    assert "export_llm" in verdict.backends["xnnpack"]
 
 
 def test_gated_repo_without_access_says_what_to_do():

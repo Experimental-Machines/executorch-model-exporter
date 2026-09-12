@@ -7,13 +7,13 @@ GitHub-hosted runners. Design and decisions: [docs/PLAN.md](docs/PLAN.md).
 | Backend | Status |
 |---|---|
 | XNNPACK (CPU) | Qwen3, Qwen2.5, Llama 3.2, SmolLM2 |
-| Qualcomm QNN (SM8650, SM8750) | planned (phase 3) |
+| Qualcomm QNN (SM8650, SM8750) | checkpoints in ExecuTorch 1.4.0's Qualcomm registry (Qwen3, Qwen2.5 base, Gemma 3 1B, SmolLM2 135M, SmolLM3 3B, Llama 3.2) |
 | MediaTek NeuroPilot (MT6989, MT6991) | planned (phase 4) |
 | HF watcher (auto-dispatch) | every 6 hours; state on the `state` branch |
 
 ## Running an export
 
-Actions → **Export XNNPACK** → Run workflow, with a model id such as `Qwen/Qwen3-1.7B`.
+Actions → **Export XNNPACK** (or **Export QNN**) → Run workflow, with a model id such as `Qwen/Qwen3-1.7B`.
 The run exports, smoke-tests the `.pte` with ExecuTorch's `TextLLMRunner` (the runner the
 app uses), uploads an artifact, and publishes to
 `experimentalmachines/<model>-ExecuTorch` on Hugging Face and to a GitHub release.

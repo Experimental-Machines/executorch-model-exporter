@@ -95,9 +95,29 @@ cannot read are reported as a skip reason, not a crash.
 
 ### QNN (phase 3)
 
-QAIRT 2.37.0 + ExecuTorch v1.4.0 built from source with QNN host bindings, cached per
-version. `examples/qualcomm/oss_scripts/llama/llama.py --compile_only --model_mode hybrid`
-per chip. Only models with a `--decoder_model` entry in ExecuTorch 1.4.0 are exportable.
+No source build: the executorch 1.4.0 Linux x86_64 wheel ships the Qualcomm backend
+(`PyQnnManagerAdaptor`, `libqnn_executorch_backend.so`) and downloads QAIRT 2.37.0.250724
+plus a libc++ into `~/.cache/executorch/qnn` on first import; the workflow caches that
+directory per QAIRT version. `export-qnn.yml` runs one job per chip in `qnn.socs`, each
+calling ExecuTorch's own script in compile-only mode:
+
+`python -m executorch.examples.qualcomm.oss_scripts.llama.llama --decoder_model <key>
+--soc_model <SoC> --compile_only --model_mode hybrid --max_seq_len 2048 --max_context_len
+2048 --prefill_ar_len 128 --calib_tasks wikitext --calib_limit 1`
+
+- Only checkpoints in the script's registry (`SUPPORTED_LLM_MODELS`) can be exported; from
+  the watched orgs that is Qwen3-0.6B/1.7B, Qwen2.5-0.5B/1.5B (base), gemma-3-1b-it,
+  SmolLM2-135M-Instruct, SmolLM3-3B and Llama-3.2-1B/3B-Instruct (`families.QNN_DECODERS`).
+  Gemma 3 and SmolLM3 are QNN-only for now (no XNNPACK path yet).
+- Each registry entry carries its own quantization recipe; the script downloads the weights
+  from the entry's repo at `main`. Llama 3.2 entries have no repo, so Meta's original
+  checkpoint, params and tokenizer (`original/` in meta-llama's repos) are passed in.
+- Calibration dependencies are ExecuTorch's example pins: `transformers==5.0.0rc1`,
+  `datasets==3.6.0`, `lm_eval==0.4.5` (`requirements/export-qnn.txt`).
+- No host runtime for HTP binaries, so the check is structural: the program loads, has
+  `prefill_forward` and `kv_forward`, and delegates to `QnnBackend`.
+- The window is fixed at compile time: `qnn.max_context_len` (2048 to start).
+- QAIRT's license: `THIRD_PARTY_NOTICES.md`.
 
 ### MediaTek (phase 4)
 
@@ -131,7 +151,7 @@ MediaTek code: read the license bundled in the SDK archive and write
    the 40 newest real repos (2026-09-12) skipped all of them correctly: Qwen3.8 multimodal
    and FP8, Qwen3-ASR, Llama 4, Llama Guard, SmolLM3 (no XNNPACK recipe yet), and
    HuggingFaceTB's GSM8K fine-tune of Qwen3 (not HuggingFaceTB's own family).
-3. **QNN.**
+3. **QNN** (`export-qnn.yml`; the watcher dispatches it for registry checkpoints).
 4. **MediaTek.**
 
 ## Known limits

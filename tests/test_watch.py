@@ -129,14 +129,18 @@ def test_backfill_exports_a_seeded_model(tmp_path):
     run(tmp_path, hub)
     summary = run(tmp_path, hub, backfill=("Qwen/Qwen3-1.7B",))
     assert summary["backfilled"] == ["Qwen/Qwen3-1.7B"]
-    assert hub.dispatched == [("export-xnnpack.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B")]
+    # Qwen3-1.7B is also in ExecuTorch's Qualcomm registry: one run per backend workflow.
+    assert hub.dispatched == [
+        ("export-xnnpack.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B"),
+        ("export-qnn.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B"),
+    ]
 
 
 def test_backfill_on_the_first_run_still_seeds_everything_else(tmp_path):
     hub = FakeHub({"Qwen": ["Qwen/Qwen3-0.6B", "Qwen/Qwen3-4B"]})
     summary = run(tmp_path, hub, backfill=("Qwen/Qwen3-1.7B",))
     assert summary["seeded"] == 2
-    assert [d[1] for d in hub.dispatched] == ["Qwen/Qwen3-1.7B"]
+    assert {d[1] for d in hub.dispatched} == {"Qwen/Qwen3-1.7B"}
     assert summary["state"]["models"]["Qwen/Qwen3-0.6B"]["status"] == "seeded"
 
 
