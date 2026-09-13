@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import os
 import subprocess
@@ -30,6 +31,18 @@ def test_compile_only_command_for_a_registered_checkpoint(tmp_path):
     # The wheel lacks the registry's params .json, so it is always handed over.
     params = Path(flag(command, "--params"))
     assert params == settings.ROOT / "third_party/executorch/examples/models/qwen3/config/0_6b_config.json"
+
+
+def test_a_forced_window_reaches_the_command_and_the_file_name(tmp_path):
+    recipe = dataclasses.replace(CFG.qnn, max_context_len=4096)
+    command = export_qnn.llama_command("qwen3-0_6b", "SM8750", recipe, tmp_path / "art", None)
+    assert flag(command, "--max_context_len") == flag(command, "--max_seq_len") == "4096"
+    assert naming.qnn_file("Qwen/Qwen3-0.6B", recipe.model_mode, 4096) == "Qwen3-0.6B-qnn-hybrid-4k.pte"
+
+
+def test_a_window_below_the_prefill_length_is_refused_before_any_download(tmp_path):
+    with pytest.raises(export_qnn.ExportError, match="below the prefill length"):
+        export_qnn.run("Qwen/Qwen3-0.6B", "main", "SM8750", tmp_path / "out", tmp_path / "work", context=64)
 
 
 def test_llama_gets_metas_original_checkpoint(tmp_path):

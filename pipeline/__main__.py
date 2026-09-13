@@ -58,6 +58,7 @@ def _export_qnn(args) -> int:
             Path(args.out),
             Path(args.work),
             keep_work=args.keep_work,
+            context=args.context,
         )
     except ExportError as error:
         print(f"export failed: {error}", file=sys.stderr)
@@ -136,6 +137,7 @@ def main(argv: list[str] | None = None) -> int:
     qnn.add_argument("--revision", default="main")
     qnn.add_argument("--out", default="out")
     qnn.add_argument("--work", default="work")
+    qnn.add_argument("--context", type=int, default=None, help="window instead of qnn.max_context_len")
     qnn.add_argument("--keep-work", action="store_true")
     qnn.set_defaults(func=_export_qnn)
 

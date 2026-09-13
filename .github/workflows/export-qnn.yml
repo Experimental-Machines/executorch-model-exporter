@@ -1,5 +1,5 @@
 name: Export QNN
-run-name: "QNN: ${{ inputs.model_id }}@${{ inputs.revision }}"
+run-name: "QNN: ${{ inputs.model_id }}@${{ inputs.revision }}${{ inputs.context && format(' ctx {0}', inputs.context) || '' }}"
 
 on:
   workflow_dispatch:
@@ -14,6 +14,10 @@ on:
         type: string
       socs:
         description: JSON list of chips, or empty for qnn.socs in config/pipeline.yaml
+        default: ""
+        type: string
+      context:
+        description: Context window in tokens, or empty for qnn.max_context_len in config/pipeline.yaml
         default: ""
         type: string
       publish_hf:
@@ -104,7 +108,11 @@ jobs:
           key: qairt-${{ env.QAIRT_VERSION }}-${{ runner.os }}-${{ runner.arch }}
 
       - name: Export
-        run: python -m pipeline export-qnn "$MODEL_ID" --soc "$SOC" --revision "$REVISION" --out "$WORK_DIR/out" --work "$WORK_DIR/work"
+        env:
+          CONTEXT: ${{ inputs.context }}
+        run: |
+          python -m pipeline export-qnn "$MODEL_ID" --soc "$SOC" --revision "$REVISION" \
+            --out "$WORK_DIR/out" --work "$WORK_DIR/work" ${CONTEXT:+--context "$CONTEXT"}
 
       - name: Summary
         if: always()

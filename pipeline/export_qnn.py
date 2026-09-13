@@ -16,6 +16,7 @@ the program loads, carries the decoder graphs, and delegates to QnnBackend.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import shutil
@@ -209,9 +210,14 @@ def run(
     out_dir: Path,
     work_dir: Path,
     keep_work: bool = False,
+    context: int | None = None,
 ) -> dict:
     cfg = settings.load()
     recipe = cfg.qnn
+    if context is not None:
+        if context < recipe.prefill_ar_len:
+            raise ExportError(f"--context {context} is below the prefill length {recipe.prefill_ar_len}")
+        recipe = dataclasses.replace(recipe, max_context_len=context)
     source = hub.fetch(model_id, revision)
     verdict = eligibility.evaluate(source, cfg)
     if verdict.reasons:
@@ -288,7 +294,11 @@ def run(
         },
         "window": {
             "context": window,
-            "reason": "fixed by qnn.max_context_len (static NPU graphs)",
+            "reason": (
+                "forced with --context (static NPU graphs)"
+                if context is not None
+                else "fixed by qnn.max_context_len (static NPU graphs)"
+            ),
             "kv_cache_bytes_per_token": None,
         },
         "files": [{"path": path_in_repo, "bytes": pte.stat().st_size, "sha256": sha256(pte)}],
