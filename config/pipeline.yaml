@@ -78,3 +78,17 @@ export:
     # Qualcomm's documented PTQ calibration for these scripts.
     calib_tasks: [wikitext]
     calib_limit: 1
+  mtk:
+    # Dimensity 9300 (DX3) and 9400 (DX4), ExecuTorch examples/mediatek's two platforms.
+    socs: [MT6989, MT6991]
+    # MediaTek's LLM recipe (examples/mediatek/shell_scripts/export_*.sh): 16-bit
+    # activations, 4-bit weights, the model cut into chunks of equal layer counts.
+    precision: A16W4
+    max_chunks: 4
+    # Static shapes: a prompt graph taking prompt_tokens per step and a one-token
+    # generation graph, both over a cache of cache_size tokens (the window).
+    prompt_tokens: 128
+    cache_size: 2048
+    # Calibration prompts shipped with examples/mediatek, wrapped in the family's chat
+    # template (MediaTek's scripts fall back to random inputs without them).
+    calibration: aot_utils/llm_utils/prompts/alpaca.txt

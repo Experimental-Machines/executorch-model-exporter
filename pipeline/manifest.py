@@ -39,7 +39,19 @@ BACKEND_TITLES = {"xnnpack": "XNNPACK (CPU)", "qnn": "Qualcomm QNN (HTP)", "mtk"
 def backend_config(report: dict) -> dict:
     """config.json for one backend folder, in the variants form the app reads."""
     variants = []
-    for f in report["files"]:
+    if report["backend"] == "mtk":
+        # One model in several files: the chunks run in order, plus the embedding table.
+        variants.append(
+            {
+                "files": [f["path"].rsplit("/", 1)[-1] for f in report["files"] if f["path"].endswith(".pte")],
+                "embedding": report["runner"]["token_embedding_path"],
+                "size_bytes": sum(f["bytes"] for f in report["files"]),
+                "sha256": {f["path"].rsplit("/", 1)[-1]: f["sha256"] for f in report["files"]},
+                "quantization": report["recipe"]["label"],
+                "methods": {},
+            }
+        )
+    for f in report["files"] if report["backend"] != "mtk" else []:
         if not f["path"].endswith(".pte"):
             continue
         methods = {k: report["metadata"][k] for k in CONFIG_METHODS if k in report["metadata"]}
@@ -65,6 +77,10 @@ def backend_config(report: dict) -> dict:
     if report["toolchain"].get("qairt"):
         # HTP context binaries only load on the QNN runtime they were compiled with.
         config["qnn_sdk_version"] = report["toolchain"]["qairt"]
+    if report["backend"] == "mtk":
+        # MediaTek's LLM runner (examples/mediatek/executor_runner) takes these as flags.
+        config["runner"] = report["runner"]
+        config["neuropilot_sdk"] = report["neuropilot"]
     return config
 
 
@@ -120,11 +136,11 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
         smoke = r.get("smoke") or {}
         verdict = "passed" if smoke.get("passed") else ("not run" if not smoke else "failed")
         if smoke.get("kind") == "structural":
-            verdict = "structure checked (no host HTP runtime)" if smoke.get("passed") else "structure check failed"
+            verdict = "structure checked (no host NPU runtime)" if smoke.get("passed") else "structure check failed"
         if smoke.get("answered"):
             verdict += ' ("Paris")'
         for f in r["files"]:
-            if f["path"].endswith(".pte"):
+            if f["path"].endswith((".pte", ".bin")):
                 out.append(
                     f"| {BACKEND_TITLES[r['backend']]} | {target(r)} | "
                     f"[`{f['path']}`]({f['path']}) | {r['window']['context']:,} tokens | "
@@ -180,6 +196,18 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
             f"SDK (QAIRT) {version} from Qualcomm Technologies, Inc., used under its AI Stack License. "
             "No Qualcomm SDK or runtime library is included; running them needs the matching QNN "
             "runtime (for example `executorch-android-qnn` 1.4.0, which depends on `qnn-runtime` 2.37.0).",
+        ]
+    mtk = [r for r in reports if r["backend"] == "mtk"]
+    if mtk:
+        sdk = mtk[0]["neuropilot"]
+        out += [
+            "",
+            f"The `mtk/` folders hold model binaries compiled with the MediaTek NeuroPilot Express SDK "
+            f"(build {sdk['build']}: mtk_converter {sdk['mtk_converter']}, mtk_neuron {sdk['mtk_neuron']}) "
+            "from MediaTek Inc., used under MediaTek's license terms for that SDK. No MediaTek SDK or "
+            "runtime library is included. They run on MediaTek's LLM runner from ExecuTorch "
+            "(`examples/mediatek/executor_runner`) with the device's NeuroPilot runtime; the settings it "
+            "needs are in each folder's `config.json` under `runner`.",
         ]
     return "\n".join(out) + "\n"
 

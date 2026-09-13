@@ -132,6 +132,12 @@ def evaluate(source: SourceModel, settings: Settings) -> Verdict:
                 verdict.backends[backend] = str(error)
         elif backend == "qnn":
             verdict.backends[backend] = None if families.qnn_decoder(source.id) else families.QNN_UNLISTED
+        elif backend == "mtk":
+            try:
+                families.mtk_plan(family, source.config, settings.mtk.max_chunks)
+                verdict.backends[backend] = None
+            except families.UnsupportedModel as error:
+                verdict.backends[backend] = str(error)
         else:
-            verdict.backends[backend] = None
+            raise ValueError(f"unknown backend {backend!r}")
     return verdict

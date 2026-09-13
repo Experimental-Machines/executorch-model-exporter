@@ -29,6 +29,7 @@ from pipeline import eligibility, families, hub, manifest, naming, settings, smo
 from pipeline.exporting import (
     ExportError,
     children_peak_rss,
+    contains,
     copy_side_files,
     host_info,
     sha256,
@@ -116,18 +117,6 @@ def decoder_pte(artifact: Path, model_mode: str) -> Path:
         found = sorted(p.name for p in artifact.glob("*.pte"))
         raise ExportError(f"expected one {model_mode} decoder .pte in {artifact}, found {found}")
     return matches[0]
-
-
-def contains(path: Path, needle: bytes, block: int = 1 << 24) -> bool:
-    """Whether ``needle`` occurs in the file, scanning in blocks (a .pte can be gigabytes)."""
-    tail = b""
-    with path.open("rb") as f:
-        while chunk := f.read(block):
-            window = tail + chunk
-            if needle in window:
-                return True
-            tail = window[-(len(needle) - 1) :]
-    return False
 
 
 def structural_check(pte: Path, model_mode: str) -> dict:

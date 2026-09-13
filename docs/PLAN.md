@@ -129,10 +129,34 @@ calling ExecuTorch's own script in compile-only mode:
 
 ### MediaTek (phase 4)
 
-Python 3.10 (the `mtk_converter` wheel is cp310), NeuroPilot SDK from MediaTek's URL (the
-one ExecuTorch's own CI uses), `examples/mediatek` export scripts per chip. Before any
-MediaTek code: read the license bundled in the SDK archive and write
-`THIRD_PARTY_NOTICES.md` and the model-card attribution from its exact text.
+`export-mtk.yml` runs one job per chip in `mtk.socs` (MT6989 = DX3, MT6991 = DX4):
+
+- **SDK:** NeuroPilot Express build 20250327, the archive ExecuTorch 1.4.0's CI installs,
+  downloaded from MediaTek on every run, checked against `NEUROPILOT_SDK_SHA256`, and
+  deleted once `mtk_converter` 8.13.0 and `mtk_neuron` 8.2.19 are installed. Its license
+  (read 2026-09-13, accepted for ExperimentalMachines) is summarised in
+  `THIRD_PARTY_NOTICES.md`; the agreement is marked MediaTek Confidential, so it is
+  paraphrased, not copied.
+- **Two Python environments:** `mtk_converter` is cp310-only and `examples/mediatek`
+  imports transformers 4.x internals, which cap `huggingface_hub` below the 1.x the pipeline
+  uses. The pipeline keeps its own environment (`requirements/export-mtk.txt`) and drives a
+  Python 3.10 virtualenv (`requirements/mtk-tools.txt` + MediaTek's wheels) as `MTK_PYTHON`.
+- **Scripts:** the LLM export scripts are in ExecuTorch's source, not the wheel; the
+  workflow sparse-checks-out `examples/mediatek` at `EXECUTORCH_COMMIT`.
+- **Recipe** (MediaTek's own, `shell_scripts/export_qwen.sh`): A16W4, the model cut into up
+  to 4 chunks of equal layer counts, a 128-token prompt graph and a one-token generation
+  graph over a 2048-token cache, calibrated on MediaTek's `alpaca.txt` prompts in the
+  family's chat template.
+- **Families:** the scripts build the model from `config.json`'s `model_type`, so any Qwen3
+  or Qwen2.5 size works, not a fixed list. Llama 3.2 (the scripts read
+  `rope_scaling['type']`, its config has `rope_type: llama3`), SmolLM2 (tokenizer class) and
+  Gemma 3 (`gemma3_text` vs `gemma3`) wait for validation.
+- **Output** per chip: the chunk `.pte` files, the fp32 token embedding table the runner
+  reads from disk, and `config.json` with the flags MediaTek's LLM runner
+  (`examples/mediatek/executor_runner`) needs. They do not run on `TextLLMRunner`.
+- **Check:** structural; every chunk loads, has its two methods, and delegates to
+  `NeuropilotBackend`.
+- The watcher does not dispatch `export-mtk.yml` until its first export passes.
 
 ## Phases
 
@@ -170,7 +194,7 @@ MediaTek code: read the license bundled in the SDK archive and write
 
    A 4k probe (`context` input, SM8750, not published) decides whether 4k becomes the
    default window.
-4. **MediaTek.**
+4. **MediaTek** (`export-mtk.yml`, built 2026-09-13; first export pending).
 
 ## Known limits
 

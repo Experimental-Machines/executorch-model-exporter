@@ -25,6 +25,18 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def contains(path: Path, needle: bytes, block: int = 1 << 24) -> bool:
+    """Whether ``needle`` occurs in the file, scanning in blocks (a .pte can be gigabytes)."""
+    tail = b""
+    with path.open("rb") as f:
+        while chunk := f.read(block):
+            window = tail + chunk
+            if needle in window:
+                return True
+            tail = window[-(len(needle) - 1) :]
+    return False
+
+
 def host_info() -> dict:
     info = {"nproc": os.cpu_count()}
     meminfo = Path("/proc/meminfo")

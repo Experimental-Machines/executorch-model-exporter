@@ -30,6 +30,7 @@ from pipeline.settings import Settings
 STATE_VERSION = 1
 # Backend → the workflow that exports it (one run covers every target chip). MediaTek
 # joins in phase 4.
+# export-mtk.yml joins once its first export has passed (docs/PLAN.md phase 4).
 WORKFLOWS = {"xnnpack": "export-xnnpack.yml", "qnn": "export-qnn.yml"}
 # A model whose metadata could not be read is retried this many runs before it is skipped.
 MAX_ATTEMPTS = 5

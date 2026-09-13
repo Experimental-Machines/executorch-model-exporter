@@ -9,20 +9,26 @@ def evaluate(model_id, **overrides):
     return eligibility.evaluate(make_source(model_id, **overrides), CFG)
 
 
-def test_qwen3_goes_to_xnnpack_and_qnn():
+def test_qwen3_goes_to_every_backend():
     verdict = evaluate("Qwen/Qwen3-1.7B")
     assert verdict.eligible
     assert verdict.reasons == []
-    assert verdict.export_backends == ["xnnpack", "qnn"]
-    assert "not built yet" in verdict.backends["mtk"]
+    assert verdict.export_backends == ["xnnpack", "qnn", "mtk"]
     assert verdict.variant == "instruct"
 
 
 def test_qnn_needs_an_entry_in_executorchs_qualcomm_registry():
     # Same architecture, but ExecuTorch 1.4.0's Qualcomm scripts only list Qwen/Qwen3-1.7B.
+    # The MediaTek scripts build any Qwen3 from its config.json.
     verdict = evaluate("Qwen/Qwen3-1.7B-Base", config=hf_config("Qwen/Qwen3-1.7B"))
-    assert verdict.export_backends == ["xnnpack"]
+    assert verdict.export_backends == ["xnnpack", "mtk"]
     assert "no entry" in verdict.backends["qnn"]
+
+
+def test_mediatek_waits_on_validation_for_llama():
+    verdict = evaluate("meta-llama/Llama-3.2-1B-Instruct")
+    assert "mtk" not in verdict.export_backends
+    assert "rope_type llama3" in verdict.backends["mtk"]
 
 
 def test_the_4b_class_is_in_by_name_even_though_it_has_4_02b_parameters():

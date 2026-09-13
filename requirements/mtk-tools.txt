@@ -1,0 +1,18 @@
+# MediaTek NeuroPilot export tools: a separate Python 3.10 virtualenv, because MediaTek's
+# mtk_converter wheel is cp310-only and ExecuTorch's examples/mediatek code needs
+# transformers 4.x (it imports transformers.tokenization_utils), which caps
+# huggingface_hub below the 1.x the pipeline itself uses. Install torch and torchvision from
+# the CPU index first. mtk_converter and mtk_neuron come from the NeuroPilot Express SDK
+# archive at run time (config/versions.env), never from this repository.
+torch==2.13.0
+torchao==0.18.0
+executorch==1.4.0
+transformers==4.57.6
+tokenizers==0.22.2
+huggingface_hub==0.36.2
+safetensors==0.8.0
+datasets==3.6.0
+sentencepiece
+# backends/mediatek/requirements.txt
+piq
+pillow

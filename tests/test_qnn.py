@@ -173,7 +173,7 @@ def test_readme_and_config_for_qnn():
     assert config["target"] == "sm8650"
     text = manifest.readme("experimentalmachines/Qwen3-0.6B-ExecuTorch", [qnn_report(), qnn_report("sm8750")], [], [])
     assert "SM8650 (Snapdragon 8 Gen 3)" in text and "SM8750 (Snapdragon 8 Elite)" in text
-    assert "structure checked (no host HTP runtime)" in text
+    assert "structure checked (no host NPU runtime)" in text
     assert "QAIRT) 2.37.0.250724" in text and "AI Stack License" in text
     assert "- qnn" in text
 

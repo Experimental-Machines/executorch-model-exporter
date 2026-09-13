@@ -34,8 +34,10 @@ runs:
       run: |
         # torch (and torchvision, where pinned) from the CPU index: the PyPI Linux wheels pull
         # gigabytes of CUDA libraries.
-        cpu_pins=$(grep -E '^(torch|torchvision)==' "$REQUIREMENTS")
+        cpu_pins=$(grep -E '^(torch|torchvision)==' "$REQUIREMENTS" || true)
         python -m pip install --upgrade pip
-        python -m pip install $cpu_pins --index-url https://download.pytorch.org/whl/cpu
+        if [ -n "$cpu_pins" ]; then
+          python -m pip install $cpu_pins --index-url https://download.pytorch.org/whl/cpu
+        fi
         python -m pip install -r "$REQUIREMENTS"
-        python -m pip list | grep -iE '^(torch|torchao|executorch|transformers|huggingface.hub) '
+        python -m pip list | grep -iE '^(torch|torchao|executorch|transformers|huggingface.hub) ' || true

@@ -23,5 +23,24 @@ def test_torch_pin_matches_executorch_1_4_0():
     assert export["torchao"] == "0.18.0"
 
 
+def test_every_export_environment_pins_the_same_runtime():
+    xnnpack = pins("requirements/export-xnnpack.txt")
+    for path in ("requirements/export-qnn.txt", "requirements/mtk-tools.txt"):
+        other = pins(path)
+        for package in ("executorch", "torch", "torchao"):
+            assert other[package] == xnnpack[package], (path, package)
+
+
+def test_mediatek_tools_keep_transformers_4():
+    # examples/mediatek imports transformers.tokenization_utils (4.x), which caps
+    # huggingface_hub below 1.0: hence a separate environment from the pipeline's.
+    tools = pins("requirements/mtk-tools.txt")
+    assert tools["transformers"].startswith("4.")
+    assert tools["huggingface_hub"].startswith("0.")
+    versions = settings.read_env_file(settings.CONFIG_DIR / "versions.env")
+    assert versions["MTK_PYTHON_VERSION"] == "3.10"  # mtk_converter is cp310-only
+    assert re.fullmatch(r"[0-9a-f]{64}", versions["NEUROPILOT_SDK_SHA256"])
+
+
 def test_huggingface_hub_pin_is_shared():
     assert pins("requirements/dev.txt")["huggingface_hub"] == pins("requirements/export-xnnpack.txt")["huggingface_hub"]

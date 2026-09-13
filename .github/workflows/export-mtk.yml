@@ -1,0 +1,166 @@
+name: Export MediaTek
+run-name: "MediaTek: ${{ inputs.model_id }}@${{ inputs.revision }}${{ inputs.context && format(' ctx {0}', inputs.context) || '' }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_id:
+        description: Hugging Face model id of a family with a MediaTek recipe (families.mtk_plan), e.g. Qwen/Qwen3-0.6B
+        required: true
+        type: string
+      revision:
+        description: Branch, tag or commit of the source repo
+        default: main
+        type: string
+      socs:
+        description: JSON list of chips, or empty for mtk.socs in config/pipeline.yaml
+        default: ""
+        type: string
+      context:
+        description: Context window (cache size) in tokens, or empty for mtk.cache_size in config/pipeline.yaml
+        default: ""
+        type: string
+      publish_hf:
+        description: Publish to the Hugging Face org in config/pipeline.yaml
+        default: true
+        type: boolean
+      publish_release:
+        description: Attach the files to a GitHub release
+        default: true
+        type: boolean
+
+permissions:
+  contents: write # GitHub releases
+
+concurrency:
+  group: export-mtk-${{ inputs.model_id }}
+  cancel-in-progress: false
+
+jobs:
+  targets:
+    runs-on: ubuntu-latest
+    outputs:
+      socs: ${{ steps.socs.outputs.socs }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: socs
+        env:
+          SOCS: ${{ inputs.socs }}
+        run: |
+          if [ -z "$SOCS" ]; then
+            python3 -m pip install --quiet pyyaml
+            SOCS=$(python3 -c 'import json, yaml; print(json.dumps(yaml.safe_load(open("config/pipeline.yaml"))["export"]["mtk"]["socs"]))')
+          fi
+          echo "socs=$SOCS" >>"$GITHUB_OUTPUT"
+
+  export:
+    needs: targets
+    strategy:
+      fail-fast: false
+      matrix:
+        soc: ${{ fromJSON(needs.targets.outputs.socs) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      MODEL_ID: ${{ inputs.model_id }}
+      REVISION: ${{ inputs.revision }}
+      SOC: ${{ matrix.soc }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # The pipeline itself (fetch, reports, publishing) on the repo's usual Python.
+      - uses: ./.github/actions/setup-export
+        with:
+          swap-gib: "24"
+          requirements: requirements/export-mtk.txt
+
+      - name: Name things
+        run: |
+          grep -E '^(NEUROPILOT_SDK_[A-Z0-9_]+|MTK_[A-Z_]+_VERSION|EXECUTORCH_COMMIT)=' config/versions.env >>"$GITHUB_ENV"
+          soc_lower=$(echo "$SOC" | tr '[:upper:]' '[:lower:]')
+          echo "TARGET=$soc_lower" >>"$GITHUB_ENV"
+          echo "ARTIFACT=mtk-${soc_lower}-${MODEL_ID//\//--}" >>"$GITHUB_ENV"
+
+      - uses: actions/setup-python@v7
+        id: mtk-python
+        with:
+          python-version: ${{ env.MTK_PYTHON_VERSION }}
+          update-environment: false
+
+      # MediaTek's tools in their own Python 3.10 virtualenv (requirements/mtk-tools.txt says
+      # why). The NeuroPilot Express SDK is downloaded from MediaTek on every run, checked
+      # against the pinned digest, and deleted after its two wheels are installed: it is
+      # licensed by MediaTek Inc. under its own terms (THIRD_PARTY_NOTICES.md), which every
+      # run accepts, and nothing from it is cached, uploaded or published.
+      - name: MediaTek tools
+        run: |
+          python_bin="${{ steps.mtk-python.outputs.python-path }}"
+          "$python_bin" -m venv "$WORK_DIR/mtk-venv"
+          tool_python="$WORK_DIR/mtk-venv/bin/python"
+          "$tool_python" -m pip install --quiet --upgrade pip
+          "$tool_python" -m pip install --quiet "$(grep -E '^torch==' requirements/mtk-tools.txt)" \
+            --index-url https://download.pytorch.org/whl/cpu
+
+          sdk="$RUNNER_TEMP/neuropilot"
+          mkdir -p "$sdk"
+          curl -fsSL --retry 3 --retry-all-errors -o "$sdk.tar.gz" "$NEUROPILOT_SDK_URL"
+          echo "$NEUROPILOT_SDK_SHA256  $sdk.tar.gz" | sha256sum -c -
+          tar xzf "$sdk.tar.gz" -C "$sdk" --strip-components=1 --wildcards \
+            "*/mtk_neuron-${MTK_NEURON_VERSION}-*.whl" "*/mtk_converter-${MTK_CONVERTER_VERSION}+public-cp310-*.whl"
+          "$tool_python" -m pip install --quiet -r requirements/mtk-tools.txt \
+            "$sdk"/mtk_neuron-"${MTK_NEURON_VERSION}"-*.whl \
+            "$sdk"/mtk_converter-"${MTK_CONVERTER_VERSION}"+public-cp310-*.whl
+          rm -rf "$sdk" "$sdk.tar.gz"
+          "$tool_python" -m pip list | grep -iE '^(torch|torchao|executorch|transformers|mtk.converter|mtk.neuron) '
+          echo "MTK_PYTHON=$tool_python" >>"$GITHUB_ENV"
+
+      # The LLM export scripts are in the ExecuTorch source, not the wheel (BSD, fetched at
+      # the pinned commit).
+      - name: ExecuTorch examples/mediatek
+        run: |
+          src="$WORK_DIR/executorch"
+          git init -q "$src"
+          git -C "$src" remote add origin https://github.com/pytorch/executorch.git
+          git -C "$src" sparse-checkout set examples/mediatek
+          git -C "$src" fetch -q --depth 1 origin "$EXECUTORCH_COMMIT"
+          git -C "$src" checkout -q FETCH_HEAD
+          echo "MTK_EXAMPLES=$src/examples/mediatek" >>"$GITHUB_ENV"
+
+      - name: Export
+        env:
+          CONTEXT: ${{ inputs.context }}
+        run: |
+          python -m pipeline export-mtk "$MODEL_ID" --soc "$SOC" --revision "$REVISION" \
+            --out "$WORK_DIR/out" --work "$WORK_DIR/work" ${CONTEXT:+--context "$CONTEXT"}
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f "$WORK_DIR/out/mtk/$TARGET/export-report.json" ]; then
+            python -m pipeline summary "$WORK_DIR/out" --backend mtk --target "$TARGET" >>"$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ env.WORK_DIR }}/out
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Publish to Hugging Face
+        if: inputs.publish_hf
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::Set the HF_TOKEN repository secret (write access to the output org)"
+            exit 1
+          fi
+          python -m pipeline publish-hf "$WORK_DIR/out" --backend mtk --target "$TARGET"
+
+      - name: Publish GitHub release
+        if: inputs.publish_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m pipeline publish-release "$WORK_DIR/out" --backend mtk --target "$TARGET"

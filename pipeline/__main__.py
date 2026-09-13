@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -43,6 +44,32 @@ def _export_xnnpack(args) -> int:
         print(f"export failed: {error}", file=sys.stderr)
         return 2
     print(json.dumps({"file": report["files"], "window": report["window"]["context"]}, indent=2))
+    return 0
+
+
+def _export_mtk(args) -> int:
+    from pipeline import export_mtk
+    from pipeline.exporting import ExportError
+
+    if not args.tool_python or not args.examples:
+        print("export failed: set --tool-python and --examples (or MTK_PYTHON and MTK_EXAMPLES)", file=sys.stderr)
+        return 2
+    try:
+        report = export_mtk.run(
+            args.model,
+            args.revision,
+            args.soc,
+            Path(args.out),
+            Path(args.work),
+            tool_python=args.tool_python,
+            examples_dir=Path(args.examples),
+            keep_work=args.keep_work,
+            context=args.context,
+        )
+    except ExportError as error:
+        print(f"export failed: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps({"file": report["files"], "target": report["target"]}, indent=2))
     return 0
 
 
@@ -140,6 +167,26 @@ def main(argv: list[str] | None = None) -> int:
     qnn.add_argument("--context", type=int, default=None, help="window instead of qnn.max_context_len")
     qnn.add_argument("--keep-work", action="store_true")
     qnn.set_defaults(func=_export_qnn)
+
+    mtk = commands.add_parser("export-mtk", help="compile MediaTek NeuroPilot .pte chunks for one chip")
+    mtk.add_argument("model")
+    mtk.add_argument("--soc", required=True, help="MT6989 or MT6991")
+    mtk.add_argument("--revision", default="main")
+    mtk.add_argument("--out", default="out")
+    mtk.add_argument("--work", default="work")
+    mtk.add_argument("--context", type=int, default=None, help="window instead of mtk.cache_size")
+    mtk.add_argument(
+        "--tool-python",
+        default=os.environ.get("MTK_PYTHON"),
+        help="Python 3.10 with requirements/mtk-tools.txt and MediaTek's wheels (env MTK_PYTHON)",
+    )
+    mtk.add_argument(
+        "--examples",
+        default=os.environ.get("MTK_EXAMPLES"),
+        help="ExecuTorch's examples/mediatek at EXECUTORCH_COMMIT (env MTK_EXAMPLES)",
+    )
+    mtk.add_argument("--keep-work", action="store_true")
+    mtk.set_defaults(func=_export_mtk)
 
     watch = commands.add_parser("watch", help="check the watched orgs, dispatch exports, update state")
     watch.add_argument("--state", required=True, help="state JSON (on the state branch)")

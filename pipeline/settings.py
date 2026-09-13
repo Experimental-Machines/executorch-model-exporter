@@ -30,6 +30,16 @@ class QnnRecipe:
 
 
 @dataclass(frozen=True)
+class MtkRecipe:
+    socs: tuple[str, ...]
+    precision: str
+    max_chunks: int
+    prompt_tokens: int
+    cache_size: int
+    calibration: str
+
+
+@dataclass(frozen=True)
 class Settings:
     hub_org: str
     repo_suffix: str
@@ -48,6 +58,7 @@ class Settings:
     prefill_chunk: int
     xnnpack: XnnpackRecipe
     qnn: QnnRecipe
+    mtk: MtkRecipe
     executorch_version: str
 
 
@@ -96,6 +107,14 @@ def load() -> Settings:
             max_context_len=int(export["qnn"]["max_context_len"]),
             calib_tasks=tuple(export["qnn"]["calib_tasks"]),
             calib_limit=int(export["qnn"]["calib_limit"]),
+        ),
+        mtk=MtkRecipe(
+            socs=tuple(export["mtk"]["socs"]),
+            precision=export["mtk"]["precision"],
+            max_chunks=int(export["mtk"]["max_chunks"]),
+            prompt_tokens=int(export["mtk"]["prompt_tokens"]),
+            cache_size=int(export["mtk"]["cache_size"]),
+            calibration=export["mtk"]["calibration"],
         ),
         executorch_version=versions["EXECUTORCH_VERSION"],
     )

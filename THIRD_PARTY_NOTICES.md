@@ -38,7 +38,40 @@ agreement (read `LICENSE.pdf` for the binding text):
 Model cards of repos with `qnn/` folders state that the context binaries were compiled with
 QAIRT 2.37.0.250724 and that no Qualcomm SDK or runtime library is included.
 
-## MediaTek NeuroPilot SDK
+## MediaTek NeuroPilot Express SDK (build 20250327)
 
-Not used yet (docs/PLAN.md, phase 4). Its license will be reviewed and recorded here from
-the text bundled in the SDK before any MediaTek export runs.
+Used by `export-mtk.yml` to compile MediaTek NeuroPilot model binaries for MT6989
+(Dimensity 9300) and MT6991 (Dimensity 9400). Each run downloads the archive ExecuTorch
+1.4.0's own CI uses from MediaTek's URL (`NEUROPILOT_SDK_URL` in `config/versions.env`),
+checks it against `NEUROPILOT_SDK_SHA256`, installs its `mtk_converter` 8.13.0 and
+`mtk_neuron` 8.2.19 wheels into a throwaway environment, and deletes the archive. Nothing
+from the SDK is committed to this repository, cached, uploaded as an artifact, or published.
+
+The SDK is © MediaTek Inc. and licensed under MediaTek's "Terms and Conditions of Use for
+NeuroPilot Express SDK License" (`LICENSE AGREEMENT.pdf` in the archive; the document is
+marked MediaTek Confidential, so it is not reproduced here). Accessing or using the SDK is
+acceptance of that agreement, which every run of `export-mtk.yml` does on behalf of whoever
+operates this repository; ExperimentalMachines accepted it on 2026-09-13. Points that bear on
+this pipeline, paraphrased (read the agreement for the binding text):
+
+- The license is non-exclusive, non-transferable and revocable, to use the SDK for developing
+  applications used with MediaTek chipsets, and to distribute it only in object code as part
+  of such an application, never standalone. This pipeline does not redistribute the SDK.
+- No reverse engineering, and MediaTek's copyright and proprietary notices must be kept.
+- No action may subject any part of the SDK to open-source license terms (the agreement
+  names, among others, the GPL, BSD and Apache licenses). This repository's code only
+  downloads and runs the SDK; it contains no part of it.
+- The user is responsible for inputs and outputs, and must not use the SDK for the
+  applications the agreement lists (such as social scoring or biometric categorisation) where
+  applicable law prohibits them.
+- The user indemnifies MediaTek, MediaTek's liability is capped, MediaTek may terminate the
+  agreement at any time, U.S. and other export-control laws apply, and Singapore law governs.
+
+Model cards of repos with `mtk/` folders state that the binaries were compiled with this SDK
+from MediaTek Inc. and that no MediaTek SDK or runtime library is included.
+
+## ExecuTorch examples/mediatek
+
+`export-mtk.yml` also fetches `examples/mediatek` from the ExecuTorch source at
+`EXECUTORCH_COMMIT` (v1.4.0) at run time; those scripts are © MediaTek Inc., under the
+BSD-style license in ExecuTorch's repository root.

@@ -47,14 +47,19 @@ _NOT_IN_EXPORT_LLM = (
     "not in ExecuTorch 1.4.0 export_llm's model list; needs a validated export path "
     "(optimum-executorch or params support) before it is published"
 )
-_NPU_PENDING = "backend pipeline not built yet (docs/PLAN.md phase 4)"
+_MTK_LLAMA = (
+    "not validated on ExecuTorch 1.4.0's MediaTek scripts: they read rope_scaling['type'], "
+    "Llama 3.2 configs carry rope_type llama3, and SmolLM2 needs its tokenizer class chosen"
+)
+_MTK_GEMMA3 = "not validated on the MediaTek scripts (they expect model_type gemma3, HF has gemma3_text)"
+_MTK_NO_MODEL = "no model definition for this architecture in ExecuTorch 1.4.0's examples/mediatek"
 
 FAMILIES: tuple[Family, ...] = (
-    Family("qwen3", ("Qwen3ForCausalLM",), {"mtk": _NPU_PENDING}),
-    Family("qwen2_5", ("Qwen2ForCausalLM",), {"mtk": _NPU_PENDING}),
-    Family("llama", ("LlamaForCausalLM",), {"mtk": _NPU_PENDING}),
-    Family("gemma3", ("Gemma3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _NPU_PENDING}),
-    Family("smollm3", ("SmolLM3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _NPU_PENDING}),
+    Family("qwen3", ("Qwen3ForCausalLM",)),
+    Family("qwen2_5", ("Qwen2ForCausalLM",)),
+    Family("llama", ("LlamaForCausalLM",), {"mtk": _MTK_LLAMA}),
+    Family("gemma3", ("Gemma3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _MTK_GEMMA3}),
+    Family("smollm3", ("SmolLM3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _MTK_NO_MODEL}),
 )
 
 # ExecuTorch 1.4.0's Qualcomm LLM scripts (examples/qualcomm/oss_scripts/llama, the
@@ -90,6 +95,39 @@ QNN_UNLISTED = "no entry for this checkpoint in ExecuTorch 1.4.0's Qualcomm LLM 
 
 def qnn_decoder(model_id: str) -> str | None:
     return QNN_DECODERS.get(model_id)
+
+
+@dataclass(frozen=True)
+class MtkPlan:
+    script: str  # examples/mediatek/model_export_scripts/<script>
+    preformatter: str  # examples/mediatek/aot_utils/llm_utils/preformatter_templates/<name>
+    num_chunks: int
+
+
+# ExecuTorch 1.4.0 examples/mediatek: export script and chat template per family, the pair
+# its shell_scripts/export_*.sh use. The model definition comes from config.json's
+# model_type (aot_utils/llm_utils/utils.py resolve_model_classes).
+_MTK_SCRIPTS = {
+    "qwen3": ("qwen.py", "qwen3.json", "qwen3"),
+    "qwen2_5": ("qwen.py", "qwen.json", "qwen2"),
+}
+
+
+def mtk_chunks(n_layers: int, max_chunks: int) -> int:
+    """Most chunks up to ``max_chunks`` that split the layers evenly (the scripts require it)."""
+    return next(n for n in range(min(max_chunks, n_layers), 0, -1) if n_layers % n == 0)
+
+
+def mtk_plan(family: Family, config: dict, max_chunks: int) -> MtkPlan:
+    if family.key not in _MTK_SCRIPTS:
+        raise UnsupportedModel(f"no MediaTek export script mapped for {family.key}")
+    script, preformatter, model_type = _MTK_SCRIPTS[family.key]
+    c = text_config(config)
+    if c.get("model_type") != model_type:
+        raise UnsupportedModel(f"model_type {c.get('model_type')!r}, the MediaTek {script} path expects {model_type!r}")
+    if rope_scaling(c) is not None:
+        raise UnsupportedModel("RoPE scaling is not validated on the MediaTek scripts")
+    return MtkPlan(script, preformatter, mtk_chunks(int(c["num_hidden_layers"]), max_chunks))
 
 
 BACKENDS = ("xnnpack", "qnn", "mtk")

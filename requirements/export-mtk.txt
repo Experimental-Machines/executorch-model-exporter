@@ -1,0 +1,6 @@
+# MediaTek export, pipeline side: fetching, reports and publishing. The export itself runs
+# in a separate Python 3.10 environment (requirements/mtk-tools.txt plus MediaTek's wheels),
+# which export-mtk.yml builds and passes to the pipeline as MTK_PYTHON.
+huggingface_hub==1.31.0
+jinja2==3.1.6
+pyyaml==6.0.3

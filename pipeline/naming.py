@@ -118,6 +118,22 @@ def qnn_file(model_id: str, model_mode: str, context: int) -> str:
     return f"{source_name(model_id)}-qnn-{model_mode}-{window_label(context)}.pte"
 
 
+def mtk_folder(soc: str) -> str:
+    return f"mtk/{soc.lower()}"
+
+
+def mtk_chunk_file(model_id: str, precision: str, context: int, chunk: int, chunks: int) -> str:
+    """One chunk of a MediaTek export; "neuropilot" is what the app reads as the backend."""
+    return (
+        f"{source_name(model_id)}-neuropilot-{precision.lower()}-{window_label(context)}-chunk{chunk + 1}of{chunks}.pte"
+    )
+
+
+def mtk_embedding_file(model_id: str) -> str:
+    """The token embedding table MediaTek's runner reads from disk (fp32, not in the chunks)."""
+    return f"{source_name(model_id)}-neuropilot-embedding-fp32.bin"
+
+
 def check_app_rules(repo_id: str, weights_path: str, backend: str) -> list[str]:
     """Problems that would stop the app from using this file, empty when there are none."""
     problems: list[str] = []

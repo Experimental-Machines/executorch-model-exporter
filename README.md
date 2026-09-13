@@ -8,15 +8,19 @@ GitHub-hosted runners. Design and decisions: [docs/PLAN.md](docs/PLAN.md).
 |---|---|
 | XNNPACK (CPU) | Qwen3, Qwen2.5, Llama 3.2, SmolLM2 |
 | Qualcomm QNN (SM8650, SM8750) | checkpoints in ExecuTorch 1.4.0's Qualcomm registry (Qwen3, Qwen2.5 base, Gemma 3 1B, SmolLM2 135M, SmolLM3 3B, Llama 3.2) |
-| MediaTek NeuroPilot (MT6989, MT6991) | planned (phase 4) |
+| MediaTek NeuroPilot (MT6989, MT6991) | Qwen3, Qwen2.5 (phase 4, first export pending); Llama 3.2 and Gemma 3 not validated yet |
 | HF watcher (auto-dispatch) | every 6 hours; state on the `state` branch |
 
 ## Running an export
 
-Actions → **Export XNNPACK** (or **Export QNN**) → Run workflow, with a model id such as `Qwen/Qwen3-1.7B`.
-The run exports, smoke-tests the `.pte` with ExecuTorch's `TextLLMRunner` (the runner the
-app uses), uploads an artifact, and publishes to
+Actions → **Export XNNPACK** (or **Export QNN**, **Export MediaTek**) → Run workflow, with a
+model id such as `Qwen/Qwen3-1.7B`. The run exports, checks the result (XNNPACK: a smoke
+test with ExecuTorch's `TextLLMRunner`, the runner the app uses; NPU backends: a structural
+check, as there is no host NPU runtime), uploads an artifact, and publishes to
 `experimentalmachines/<model>-ExecuTorch` on Hugging Face and to a GitHub release.
+
+The QNN and MediaTek workflows download Qualcomm's and MediaTek's SDKs from their publishers
+on each run, which accepts their license terms: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Repository secrets:
 
