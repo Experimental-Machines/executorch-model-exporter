@@ -17,7 +17,7 @@ on:
         default: ""
         type: string
       contexts:
-        description: JSON list of context windows in tokens, one job per chip and window; empty for every tier in config/pipeline.yaml
+        description: JSON list of context windows in tokens, one job per chip and window; empty for every tier in config/pipeline.yaml plus mtk.cache_size
         default: ""
         type: string
       publish_hf:
@@ -56,14 +56,17 @@ jobs:
       - id: contexts
         env:
           CONTEXTS: ${{ inputs.contexts }}
-        # Accepts a JSON list, one number, or a comma-separated list; empty means every tier.
+        # Accepts a JSON list, one number, or a comma-separated list. Empty means every tier plus
+        # mtk.cache_size, MediaTek's own window: calibration memory grows with the window, and 512
+        # is the one built so far (docs/research, findings 22-24).
         run: |
           python3 -m pip install --quiet pyyaml
           CONTEXTS=$(python3 - "$CONTEXTS" <<'PY'
           import json, sys, yaml
           raw = sys.argv[1].strip()
           if not raw:
-              values = yaml.safe_load(open("config/pipeline.yaml"))["export"]["context_tiers"]
+              export = yaml.safe_load(open("config/pipeline.yaml"))["export"]
+              values = export["context_tiers"] + [export["mtk"]["cache_size"]]
           else:
               try:
                   values = json.loads(raw)

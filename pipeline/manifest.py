@@ -161,7 +161,9 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
         "",
         "## Files",
         "",
-        "Every backend is exported at every context window the runner could build (2k to 32k). "
+        "Every backend is exported at every context window the runner could build (2k to 32k"
+        + (", plus MediaTek's default 512" if any(r["backend"] == "mtk" for r in reports) else "")
+        + "). "
         "The window is fixed inside the file: the runtime allocates the whole KV cache at load, "
         "so pick the largest window the device can hold (`fits_phone_budget` in each folder's "
         "`config.json` is the estimate against a 5 GB budget).",
