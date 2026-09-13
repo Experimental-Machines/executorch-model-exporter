@@ -43,7 +43,7 @@ def test_readme_has_card_metadata_and_kv_arithmetic():
     assert "base_model_relation: quantized" in text
     assert "- xnnpack" in text and "- executorch" in text
     # 229,376 x 8,192 = 1,879,048,192
-    assert "1,879,048,192 bytes at the exported window of 8,192 tokens" in text
+    assert "at 8,192 tokens: the KV cache costs 229,376 bytes per token (fp32), 1,879,048,192 bytes" in text
     assert "[`LICENSE`](LICENSE)" in text
     assert "NOTICE" not in text
 

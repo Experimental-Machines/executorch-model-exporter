@@ -49,7 +49,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          if [ -f "$WORK_DIR/out/xnnpack/export-report.json" ]; then
+          if compgen -G "$WORK_DIR/out/xnnpack/export-report*.json" >/dev/null; then
             python -m pipeline summary "$WORK_DIR/out" --backend xnnpack >>"$GITHUB_STEP_SUMMARY"
           fi
 
@@ -57,5 +57,5 @@ jobs:
         if: always()
         with:
           name: probe-${{ matrix.context }}
-          path: ${{ env.WORK_DIR }}/out/xnnpack/export-report.json
+          path: ${{ env.WORK_DIR }}/out/xnnpack/export-report-*.json
           if-no-files-found: warn

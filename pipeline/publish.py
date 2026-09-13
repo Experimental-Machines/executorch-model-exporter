@@ -7,7 +7,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from pipeline import exporting, hub, manifest, settings
+from pipeline import exporting, hub, manifest, naming, settings
 
 # GitHub rejects release assets of 2 GiB or more.
 RELEASE_ASSET_LIMIT = 2 * 1024**3
@@ -18,14 +18,38 @@ def _folder(backend: str, target: str | None) -> str:
 
 
 def load_report(out_dir: Path, backend: str, target: str | None = None) -> dict:
-    return json.loads((out_dir / _folder(backend, target) / "export-report.json").read_text(encoding="utf-8"))
+    """The one export report in the local backend folder (one run exports one window)."""
+    found = sorted((out_dir / _folder(backend, target)).glob("export-report*.json"))
+    if len(found) != 1:
+        raise ValueError(f"expected one export report in {out_dir / _folder(backend, target)}, found {found}")
+    return json.loads(found[0].read_text(encoding="utf-8"))
+
+
+def is_report(path: str) -> bool:
+    name = path.rsplit("/", 1)[-1]
+    return name.startswith("export-report") and name.endswith(".json")
+
+
+def superseded(path: str, folder: str, label: str) -> bool:
+    """Whether a file already in the repo is replaced by this run: the same window in the
+    same backend folder, or the folder's pre-matrix files that carried no window in their
+    name. Other windows' files stay: the folder holds every window side by side."""
+    if not path.startswith(f"{folder}/") or "/" in path[len(folder) + 1 :]:
+        return False
+    name = path[len(folder) + 1 :]
+    if name in ("config.json", "export-report.json"):
+        return True
+    return f"-{label}." in name or f"-{label}-" in name
 
 
 def publish_hf(out_dir: Path, backend: str, target: str | None = None, attempts: int = 6) -> str:
-    """Commit this backend's folder plus the shared root files; regenerate README.md.
+    """Commit this run's window into its backend folder beside the other windows, plus the
+    shared root files; regenerate the folder's config.json and the repo README.md from
+    every report in the repo.
 
-    Each backend's run publishes on its own, possibly at the same moment as another, so the
-    commit is pinned to the revision the README was rendered from and retried on conflict.
+    Runs publish on their own, possibly at the same moment as another (other windows, other
+    backends), so the commit is pinned to the revision the README was rendered from and
+    retried on conflict.
     """
     from huggingface_hub import CommitOperationAdd, CommitOperationDelete, hf_hub_download
     from huggingface_hub.errors import HfHubHTTPError
@@ -34,6 +58,7 @@ def publish_hf(out_dir: Path, backend: str, target: str | None = None, attempts:
     report = load_report(out_dir, backend, target)
     repo_id = report["output_repo"]
     folder = _folder(backend, target)
+    label = naming.window_label(report["window"]["context"])
     local_folder = out_dir / folder
     new_paths = {f"{folder}/{p.name}": p for p in local_folder.iterdir() if p.is_file()}
     root_files = {p.name: p for p in out_dir.iterdir() if p.is_file()}
@@ -49,27 +74,43 @@ def publish_hf(out_dir: Path, backend: str, target: str | None = None, attempts:
     for attempt in range(attempts):
         info = hf.model_info(repo_id, expand=["sha", "siblings"])
         existing = [s.rfilename for s in info.siblings or []]
+        stale = [path for path in existing if superseded(path, folder, label)]
         reports = [report]
+        migrated: dict[str, bytes] = {}
         for path in existing:
-            if path.endswith("/export-report.json") and not path.startswith(f"{folder}/"):
-                local = hf_hub_download(repo_id, path, revision=info.sha, token=hf.token)
-                reports.append(json.loads(Path(local).read_text(encoding="utf-8")))
+            if not is_report(path) or (path in stale and not path.endswith("/export-report.json")):
+                continue
+            local = hf_hub_download(repo_id, path, revision=info.sha, token=hf.token)
+            other = json.loads(Path(local).read_text(encoding="utf-8"))
+            if path in stale:
+                # A pre-matrix report carries no window in its name. Its window's file stays
+                # unless it is the one this run replaces, so the report moves to the labelled name.
+                if naming.window_label(other["window"]["context"]) == label:
+                    continue
+                migrated[f"{folder}/{exporting.report_file(other['window']['context'])}"] = (
+                    json.dumps(other, indent=2).encode() + b"\n"
+                )
+            reports.append(other)
+        folder_reports = [r for r in reports if _folder(r["backend"], r.get("target")) == folder]
+        config = json.dumps(manifest.backend_config(folder_reports), indent=2) + "\n"
         license_files = sorted({f for r in reports for f in r["source"].get("license_files", [])})
         readme = manifest.readme(repo_id, reports, list(cfg.hub_tags), license_files)
 
-        operations = [
-            CommitOperationDelete(path_in_repo=path)
-            for path in existing
-            if path.startswith(f"{folder}/") and path not in new_paths
+        operations = [CommitOperationDelete(path_in_repo=path) for path in stale if path not in new_paths]
+        operations += [
+            CommitOperationAdd(path_in_repo=k, path_or_fileobj=str(v))
+            for k, v in new_paths.items()
+            if k != f"{folder}/config.json"
         ]
-        operations += [CommitOperationAdd(path_in_repo=k, path_or_fileobj=str(v)) for k, v in new_paths.items()]
+        operations.append(CommitOperationAdd(path_in_repo=f"{folder}/config.json", path_or_fileobj=config.encode()))
+        operations += [CommitOperationAdd(path_in_repo=k, path_or_fileobj=v) for k, v in migrated.items()]
         operations += [CommitOperationAdd(path_in_repo=k, path_or_fileobj=str(v)) for k, v in root_files.items()]
         operations.append(CommitOperationAdd(path_in_repo="README.md", path_or_fileobj=readme.encode("utf-8")))
         try:
             commit = hf.create_commit(
                 repo_id,
                 operations,
-                commit_message=f"{folder}: {report['source']['id']}@{report['source']['sha'][:12]}",
+                commit_message=f"{folder} {label}: {report['source']['id']}@{report['source']['sha'][:12]}",
                 parent_commit=info.sha,
             )
             return commit.commit_url

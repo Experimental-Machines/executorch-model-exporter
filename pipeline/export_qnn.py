@@ -8,7 +8,7 @@ binaries for the chip. Produces, under ``out_dir``:
     tokenizer.json | tokenizer.model, LICENSE…, NOTICE   (repo root, shared with other backends)
     qnn/<soc>/<name>-qnn-hybrid-<window>.pte
     qnn/<soc>/config.json
-    qnn/<soc>/export-report.json
+    qnn/<soc>/export-report-<window>.json
 
 There is no host runtime for HTP binaries here, so the check after export is structural:
 the program loads, carries the decoder graphs, and delegates to QnnBackend.
@@ -30,9 +30,9 @@ from pipeline.exporting import (
     ExportError,
     MemorySampler,
     children_peak_rss,
-    contains,
     copy_side_files,
     host_info,
+    report_file,
     run_tool,
     sha256,
     source_report,
@@ -353,7 +353,7 @@ def run(
     (backend_dir / "config.json").write_text(
         json.dumps(manifest.backend_config(report), indent=2) + "\n", encoding="utf-8"
     )
-    (backend_dir / "export-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    (backend_dir / report_file(window)).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     if not keep_work:
         shutil.rmtree(work_dir, ignore_errors=True)
     if not check["passed"]:

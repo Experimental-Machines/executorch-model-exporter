@@ -16,7 +16,7 @@ the [openweights](https://github.com/alpharomercoma/openweights) Android app: XN
 | Chips | QNN: SM8650 (8 Gen 3), SM8750 (8 Elite). MediaTek: MT6989 (D9300), MT6991 (D9400) |
 | Outputs | Hugging Face Hub, GitHub Releases (files ≤ 2 GiB), Actions artifacts |
 | HF layout | One repo per model, backend folders; NPU exports published even though the app can't load them yet |
-| Context window | Auto-fit per model: largest of 32k/16k/8k/4k/2k that fits both the phone budget and the runner |
+| Context window | Every window of 2k/4k/8k/16k/32k, per model and backend, one workflow job each; the app and the benchmarker decide what fits a device. A window the runner cannot build is skipped and reported, not failed |
 | Runtime pin | ExecuTorch **1.4.0** everywhere; QAIRT **2.37.0** (what `executorch-android-qnn:1.4.0` depends on) |
 | Vendor SDKs | Downloaded from the vendor at run time, cached only in this repo's Actions cache, never re-hosted |
 
@@ -24,13 +24,22 @@ the [openweights](https://github.com/alpharomercoma/openweights) Android app: XN
 
 ```
 experimentalmachines/Qwen3-1.7B-ExecuTorch
-├── README.md                 # generated from every backend's export-report.json
+├── README.md                 # generated from every export-report-*.json in the repo
 ├── LICENSE…                  # upstream license files, copied verbatim
 ├── tokenizer.json            # root only: nested weights borrow it (HuggingFaceClient.kt)
-├── xnnpack/Qwen3-1.7B-8da4w-8k.pte, config.json, export-report.json
-├── qnn/sm8650/…, qnn/sm8750/…
-└── mtk/mt6989/…, mtk/mt6991/…
+├── xnnpack/Qwen3-1.7B-8da4w-{2k,4k,8k,16k}.pte   # one file per window the runner could build
+├── xnnpack/config.json                             # variants[]: every window, smallest first
+├── xnnpack/export-report-{2k,4k,8k,16k}.json       # the full record of each export
+├── qnn/sm8650/…, qnn/sm8750/…                      # same shape per chip
+└── mtk/mt6989/…, mtk/mt6991/…                      # chunks per window, one shared embedding table
 ```
+
+Each window is its own workflow job and publishes on its own: `publish.publish_hf` replaces
+only the files of its own window in its folder (`superseded`), regenerates the folder's
+`config.json` from every `export-report-*.json` there, and the README from every report in
+the repo, pinned to the parent commit and retried on conflict. Every variant carries
+`context` and `fits_phone_budget` (the sizing estimate against the 5 GB budget, `None` for
+the NPU backends) so a consumer can pick without downloading.
 
 Constraints taken from the app source:
 
@@ -44,12 +53,13 @@ Constraints taken from the app source:
   these rules and checks every generated name.
 - `config.json` next to each `.pte`, in the `variants[].methods` form Discover reads.
 
-## Context auto-fit
+## Context windows and the sizing model
 
 ExecuTorch fixes the window at export and allocates the full fp32 KV cache at load. The
 openweights window matrix found Qwen3-1.7B at 32k resident at 6.1-8.5 GB and killed by
-Samsung's and MIUI's 6 GB memory guards, so the window is fitted to a phone budget, not
-just to what the runner can export:
+Samsung's and MIUI's 6 GB memory guards. Every window is exported anyway (the benchmark
+matrix needs them, and the app filters), and the sizing model below tells consumers what
+fits and tells the exporter what the runner can build:
 
 - KV cache bytes = `n_layers × 2 × n_kv_heads × head_dim × window × 4`.
   Qwen3-1.7B at 32k: 28 × 2 × 8 × 128 × 32,768 × 4 = 7,516,192,768 bytes.
@@ -60,10 +70,9 @@ just to what the runner can export:
   copy). Within 1% of every measured file.
 - Export peak ≈ fp32 weights + KV cache + `n_layers × window²` bytes of causal masks +
   2.5 GB.
-- Pick the largest tier with resident ≤ `device_budget_bytes` (default 5.0 GB) and
-  estimated export peak ≤ runner RAM + swap. A forced window (`--context`, the workflow's
-  `context` input) gets both checks too: it can pick a smaller tier or one between tiers,
-  not one the phone cannot hold.
+- `fits_phone_budget` = resident ≤ `device_budget_bytes` (default 5.0 GB), recorded per
+  file. Estimated export peak > runner RAM + swap is the one gate: the job exits 4 and the
+  workflow records the window as skipped (Qwen3 at 32k on hosted runners, see Known limits).
 
 ## Backends
 
@@ -224,12 +233,7 @@ G5, Dimensity 9300+, Exynos 2500; GSM8K, RetrievalQA, IFEval, PopQA, BFCL, Fresh
 | Samsung Exynos | absent | 1.4.0 ships `backends/samsung` (`EnnBackend`) but no LLM example for it (L, upstream-bound) |
 | Tensor G5 | n/a | no ExecuTorch delegate for the Tensor TPU: it runs XNNPACK (or Vulkan) files |
 | Benchmarker, device farm, benchmarks | absent | another component; what it needs from here is already published per file: `config.json` `variants[].methods` (window, prefill chunk, BOS/EOS), `qnn_sdk_version`, the tokenizer at the root |
-| Several context lengths per model | **absent** | today exactly one window per model per backend: auto-fit picks the largest tier that fits (or `--context` forces one), `publish_hf` deletes any other file in the backend folder, `config.json` `variants[]` is rewritten with one entry, the watcher dispatches one run |
-
-Making the window matrix real touches `publish.publish_hf` (keep sibling windows, merge
-`variants[]`), the workflows (a `contexts` matrix like `probe-runner.yml`), the watcher (one
-dispatch per tier) and the sizing guard (each tier still has to fit the phone and the runner:
-32k is out for anything above ~0.6B, see Known limits). The file names already carry the window.
+| Several context lengths per model | done | one job per window in every export workflow (`contexts` input, default every tier); `publish_hf` keeps sibling windows and merges `variants[]`; the watcher's one dispatch per backend covers the matrix. 32k XNNPACK is out of reach for Qwen3-class models on hosted runners (Known limits) and is recorded as skipped |
 
 ## Known limits
 

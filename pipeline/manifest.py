@@ -36,22 +36,31 @@ BUILT_WITH = {"llama32": "Built with Llama"}
 BACKEND_TITLES = {"xnnpack": "XNNPACK (CPU)", "qnn": "Qualcomm QNN (HTP)", "mtk": "MediaTek NeuroPilot"}
 
 
-def backend_config(report: dict) -> dict:
-    """config.json for one backend folder, in the variants form the app reads."""
-    variants = []
+def _variants(report: dict) -> list[dict]:
+    window = report["window"]
+    common = {
+        "context": window["context"],
+        "quantization": report["recipe"]["label"],
+        # The sizing estimate against the phone budget (None for the NPU backends, whose
+        # runtime memory is not modelled here); the app and the benchmarker decide.
+        "fits_phone_budget": window.get("fits_phone_budget"),
+    }
     if report["backend"] == "mtk":
         # One model in several files: the chunks run in order, plus the embedding table.
-        variants.append(
+        # MediaTek's LLM runner (examples/mediatek/executor_runner) takes ``runner`` as flags.
+        return [
             {
                 "files": [f["path"].rsplit("/", 1)[-1] for f in report["files"] if f["path"].endswith(".pte")],
                 "embedding": report["runner"]["token_embedding_path"],
                 "size_bytes": sum(f["bytes"] for f in report["files"]),
                 "sha256": {f["path"].rsplit("/", 1)[-1]: f["sha256"] for f in report["files"]},
-                "quantization": report["recipe"]["label"],
+                **common,
                 "methods": {},
+                "runner": report["runner"],
             }
-        )
-    for f in report["files"] if report["backend"] != "mtk" else []:
+        ]
+    variants = []
+    for f in report["files"]:
         if not f["path"].endswith(".pte"):
             continue
         methods = {k: report["metadata"][k] for k in CONFIG_METHODS if k in report["metadata"]}
@@ -60,10 +69,20 @@ def backend_config(report: dict) -> dict:
                 "file": f["path"].rsplit("/", 1)[-1],
                 "size_bytes": f["bytes"],
                 "sha256": f["sha256"],
-                "quantization": report["recipe"]["label"],
+                **common,
                 "methods": methods,
             }
         )
+    return variants
+
+
+def backend_config(reports: dict | list[dict]) -> dict:
+    """config.json for one backend folder, in the variants form the app reads: one variant
+    per exported window, smallest first, from that folder's reports."""
+    reports = [reports] if isinstance(reports, dict) else list(reports)
+    reports.sort(key=lambda r: r["window"]["context"])
+    report = reports[-1]  # the newest layout wins for the shared fields
+    variants = [variant for r in reports for variant in _variants(r)]
     config = {
         "runtime": "executorch",
         "runtime_version": report["toolchain"]["executorch"],
@@ -78,8 +97,6 @@ def backend_config(report: dict) -> dict:
         # HTP context binaries only load on the QNN runtime they were compiled with.
         config["qnn_sdk_version"] = report["toolchain"]["qairt"]
     if report["backend"] == "mtk":
-        # MediaTek's LLM runner (examples/mediatek/executor_runner) takes these as flags.
-        config["runner"] = report["runner"]
         config["neuropilot_sdk"] = report["neuropilot"]
     return config
 
@@ -111,7 +128,10 @@ def _card_metadata(source: dict, tags: list[str]) -> str:
 
 def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files: list[str]) -> str:
     """Model card covering every backend present in the repo."""
-    reports = sorted(reports, key=lambda r: (list(BACKEND_TITLES).index(r["backend"]), r.get("target") or ""))
+    reports = sorted(
+        reports,
+        key=lambda r: (list(BACKEND_TITLES).index(r["backend"]), r.get("target") or "", r["window"]["context"]),
+    )
     source = reports[0]["source"]
     token = naming.app_family(naming.source_name(source["id"]))
     tags = sorted(set(hub_tags) | {r["backend"] for r in reports})
@@ -128,6 +148,11 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
         f"ExecuTorch {reports[0]['toolchain']['executorch']} runtime.",
         "",
         "## Files",
+        "",
+        "Every backend is exported at every context window the runner could build (2k to 32k). "
+        "The window is fixed inside the file: the runtime allocates the whole KV cache at load, "
+        "so pick the largest window the device can hold (`fits_phone_budget` in each folder's "
+        "`config.json` is the estimate against a 5 GB budget).",
         "",
         "| Backend | Target | File | Window | Size | Smoke test |",
         "|---|---|---|---|---|---|",
@@ -151,8 +176,9 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
     out += [
         "",
         f"Tokenizer: [`{reports[0]['tokenizer']}`]({reports[0]['tokenizer']}), copied unchanged "
-        "from the source repo. Each backend folder has a `config.json` with the metadata the "
-        "`.pte` reports and an `export-report.json` with the full export record.",
+        "from the source repo. Each backend folder has a `config.json` listing every window as a "
+        "variant with the metadata the `.pte` reports, and an `export-report-<window>.json` per "
+        "file with the full export record.",
         "",
         "## Memory",
         "",
@@ -162,16 +188,23 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
         if kv:
             ctx = r["window"]["context"]
             out.append(
-                f"- {BACKEND_TITLES[r['backend']]}: the KV cache costs {kv:,} bytes per token "
-                f"(fp32), {kv * ctx:,} bytes at the exported window of {ctx:,} tokens, allocated "
-                "in full when the model loads."
+                f"- {BACKEND_TITLES[r['backend']]} at {ctx:,} tokens: the KV cache costs {kv:,} bytes per "
+                f"token (fp32), {kv * ctx:,} bytes for the whole window, allocated in full when the "
+                "model loads."
             )
     out += ["", "## How it was made", ""]
+    described = set()
     for r in reports:
         recipe = r["recipe"]
-        line = f"- {BACKEND_TITLES[r['backend']]}: {recipe['description']}"
-        if r.get("run", {}).get("url"):
-            line += f" Built by [this workflow run]({r['run']['url']})."
+        key = (r["backend"], r.get("target"))
+        if key in described:
+            continue
+        described.add(key)
+        line = f"- {BACKEND_TITLES[r['backend']]} {target(r)}: {recipe['description']}"
+        same = [x for x in reports if (x["backend"], x.get("target")) == key]
+        runs = sorted({x["run"]["url"] for x in same if x.get("run", {}).get("url")})
+        if runs:
+            line += " Built by " + ", ".join(f"[run {i + 1}]({url})" for i, url in enumerate(runs)) + "."
         out.append(line)
     lic = source.get("license") or {}
     name = lic.get("license_name") or lic.get("license") or "the upstream license"
