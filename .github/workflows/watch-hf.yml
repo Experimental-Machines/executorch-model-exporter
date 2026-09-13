@@ -68,8 +68,10 @@ jobs:
           if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
           python -m pipeline watch "${args[@]}"
 
+      # Saved even when a dispatch failed (the watch step exits 1): what was dispatched must
+      # be recorded, or the next pass starts it again.
       - name: Save state
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ !cancelled() && inputs.dry_run != true }}
         working-directory: .state
         run: |
           git add seen.json
