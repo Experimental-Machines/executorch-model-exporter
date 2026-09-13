@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 import pytest
 from conftest import hf_config, make_source
@@ -38,7 +39,7 @@ def run(tmp_path, hub, **kwargs):
         CFG,
         lister=hub.lister,
         fetch=hub.fetch,
-        dispatcher=hub.dispatch,
+        dispatcher=kwargs.pop("dispatcher", hub.dispatch),
         **kwargs,
     )
     if kwargs.get("dispatch", True):
@@ -152,6 +153,47 @@ def test_dry_run_dispatches_nothing(tmp_path):
     assert hub.dispatched == []
     assert summary["dispatched"] == ["Qwen/Qwen3-0.6B-A -> xnnpack"]
     assert "Checked 1 model(s)" in watch.markdown(summary)
+
+
+def test_a_failed_dispatch_stays_pending_and_the_pass_goes_on(tmp_path):
+    hub = FakeHub({"Qwen": []})
+    run(tmp_path, hub)
+    hub.listings["Qwen"] = ["Qwen/Qwen3-0.6B-A", "Qwen/Qwen3-0.6B-B"]
+    real = hub.dispatch
+
+    def flaky(workflow, model_id, revision):
+        if model_id.endswith("-A"):
+            raise RuntimeError("HTTP 502")
+        real(workflow, model_id, revision)
+
+    summary = run(tmp_path, hub, dispatcher=flaky)
+    assert [d[1] for d in hub.dispatched] == ["Qwen/Qwen3-0.6B-B"]
+    assert summary["failed"] == ["Qwen/Qwen3-0.6B-A -> xnnpack: HTTP 502"]
+    a = summary["state"]["models"]["Qwen/Qwen3-0.6B-A"]
+    assert a["status"] == "pending" and a["backends"]["xnnpack"]["status"] == "pending"
+    assert "HTTP 502" in a["backends"]["xnnpack"]["last_error"]
+    assert "Could not dispatch" in watch.markdown(summary)
+    # The next pass retries it and clears the error.
+    hub.dispatched.clear()
+    summary = run(tmp_path, hub)
+    assert [d[1] for d in hub.dispatched] == ["Qwen/Qwen3-0.6B-A"]
+    assert "last_error" not in summary["state"]["models"]["Qwen/Qwen3-0.6B-A"]["backends"]["xnnpack"]
+
+
+def test_gh_dispatch_treats_a_run_in_flight_as_dispatched(monkeypatch):
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append(command[:3])
+        if command[:3] == ["gh", "run", "list"]:
+            runs = [{"displayTitle": "XNNPACK: Qwen/Qwen3-0.6B@abc", "status": "in_progress"}]
+            return subprocess.CompletedProcess(command, 0, stdout=json.dumps(runs), stderr="")
+        raise AssertionError("must not dispatch again")
+
+    monkeypatch.setattr(watch.subprocess, "run", fake_run)
+    watch.gh_dispatch("export-xnnpack.yml", "Qwen/Qwen3-0.6B", "abc")
+    assert calls == [["gh", "run", "list"]]
+    assert not watch.run_in_flight("export-xnnpack.yml", "Qwen/Qwen3-0.6B-Base", None)
 
 
 def test_state_version_is_checked(tmp_path):

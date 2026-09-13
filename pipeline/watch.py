@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -53,12 +54,42 @@ def list_org(org: str, limit: int) -> list[Listed]:
     return [Listed(m.id, m.sha, m.created_at.isoformat() if m.created_at else None) for m in models]
 
 
-def gh_dispatch(workflow: str, model_id: str, revision: str) -> None:
-    command = ["gh", "workflow", "run", workflow, "-f", f"model_id={model_id}", "-f", f"revision={revision}"]
-    repo = os.environ.get("GITHUB_REPOSITORY")
+_IN_FLIGHT = ("queued", "in_progress", "waiting", "pending", "requested")
+
+
+def run_in_flight(workflow: str, model_id: str, repo: str | None) -> bool:
+    """Whether ``workflow`` already has a queued or running run for ``model_id`` (run names
+    are "<backend>: <model id>@<revision>…")."""
+    command = ["gh", "run", "list", "--workflow", workflow, "--limit", "100", "--json", "displayTitle,status"]
     if repo:
         command += ["-R", repo]
-    subprocess.run(command, check=True)
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        return False
+    return any(r["status"] in _IN_FLIGHT and f" {model_id}@" in r["displayTitle"] for r in json.loads(result.stdout))
+
+
+def gh_dispatch(workflow: str, model_id: str, revision: str, attempts: int = 4) -> None:
+    """Start one export run, once: the dispatch API has answered 502 after creating the run,
+    so a run already in flight for this model counts as dispatched, and transient failures
+    are retried."""
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    if run_in_flight(workflow, model_id, repo):
+        print(f"    {workflow} already has a run in flight for {model_id}")
+        return
+    command = ["gh", "workflow", "run", workflow, "-f", f"model_id={model_id}", "-f", f"revision={revision}"]
+    if repo:
+        command += ["-R", repo]
+    for attempt in range(attempts):
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode == 0:
+            return
+        time.sleep(10)
+        if run_in_flight(workflow, model_id, repo):
+            return
+        if attempt < attempts - 1:
+            time.sleep(15 * (attempt + 1))
+    raise RuntimeError(f"gh workflow run {workflow} for {model_id} failed: {result.stderr.strip()[-300:]}")
 
 
 def load_state(path: Path) -> dict | None:
@@ -139,7 +170,7 @@ def run(
     """One watcher pass. Returns a summary; the caller saves ``summary["state"]``."""
     state = load_state(state_path)
     stamp = now()
-    summary = {"seeded": 0, "new": [], "backfilled": [], "dispatched": [], "state": None}
+    summary = {"seeded": 0, "new": [], "backfilled": [], "dispatched": [], "failed": [], "state": None}
 
     seeding = state is None
     if seeding:
@@ -181,8 +212,15 @@ def run(
             if info["status"] != "pending" or budget == 0:
                 continue
             if dispatch:
-                dispatcher(WORKFLOWS[backend], model_id, entry["sha"])
+                try:
+                    dispatcher(WORKFLOWS[backend], model_id, entry["sha"])
+                except Exception as error:  # GitHub API trouble: stays pending, the pass goes on
+                    info.update(last_error=f"{stamp}: {error}"[:400])
+                    summary["failed"].append(f"{model_id} -> {backend}: {error}")
+                    budget -= 1
+                    continue
                 info.update(status="dispatched", at=stamp)
+                info.pop("last_error", None)
             summary["dispatched"].append(f"{model_id} -> {backend}")
             budget -= 1
         if all(info["status"] != "pending" for info in entry["backends"].values()):
@@ -204,6 +242,8 @@ def markdown(summary: dict) -> str:
         ]
     checked = summary["new"] + summary["backfilled"]
     lines.append(f"Checked {len(checked)} model(s); dispatched {len(summary['dispatched'])} export run(s).")
+    if summary.get("failed"):
+        lines += ["", "Could not dispatch (still pending, retried next run):", *[f"- {f}" for f in summary["failed"]]]
     if checked:
         lines += ["", "| Model | Result | Why |", "|---|---|---|"]
         for model_id in checked:

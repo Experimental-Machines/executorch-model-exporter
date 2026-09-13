@@ -145,7 +145,7 @@ def _watch(args) -> int:
         with open(args.summary, "a", encoding="utf-8") as f:
             f.write(text)
     print(text)
-    return 0
+    return 1 if summary["failed"] else 0
 
 
 def main(argv: list[str] | None = None) -> int:
