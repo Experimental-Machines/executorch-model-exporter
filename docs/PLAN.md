@@ -197,7 +197,14 @@ calling ExecuTorch's own script in compile-only mode:
   (`examples/mediatek/executor_runner`) needs. They do not run on `TextLLMRunner`.
 - **Check:** structural; every chunk loads, has its two methods, and delegates to
   `NeuropilotBackend`.
-- The watcher does not dispatch `export-mtk.yml` until its first export passes.
+- **First export** (2026-09-13, not published): Qwen3-0.6B, MT6991, 512-token cache, all 9
+  prompts, structural check passed. 4 chunks (3 x 86 MB, 165 MB with the output layer) plus
+  a 622 MB fp32 embedding table, 1.05 GB in all. Export 1,695 s, calibration 43% of it.
+  Memory in use reached up to ~29.0 GB (16.5 GB of RAM + 12.4 GB of swap), above the 21.1 GB
+  `calibration_bytes` estimate (docs/research, findings 22-23).
+- **Windows, open:** the watcher dispatches `export-mtk.yml` (the last of `watch.STAGES`)
+  without `contexts`, so it runs the `context_tiers` (2,048-32,768), not the 512 that works;
+  2,048 passes the estimate gate but likely exceeds the runner (docs/research, finding 24).
 
 ## Phases
 

@@ -113,7 +113,7 @@ export:
     # generated tokens per prompt that calibrate the one-token graph (MediaTek's default 9).
     calibration: aot_utils/llm_utils/prompts/alpaca.txt
     response_cap: 9
-    # Larger windows keep fewer of the 8 prompts to fit the runner's memory (export_mtk):
+    # Larger windows keep fewer of the 9 prompts to fit the runner's memory (export_mtk):
     # never fewer than this, or the window is skipped. Each export report records
     # prompts_used, so the benchmarker can see what a window was calibrated on.
     min_calibration_prompts: 4

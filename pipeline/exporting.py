@@ -6,6 +6,7 @@ import hashlib
 import os
 import shutil
 import threading
+import time
 from importlib import metadata as pkg_metadata
 from pathlib import Path
 
@@ -85,7 +86,10 @@ class MemorySampler:
 
     Peak RSS stops at physical memory, so it cannot show how far an export went into swap:
     the Qwen3-0.6B QNN exports at 2k and 4k both peaked at ~15.7 GB RSS on a 16.8 GB runner
-    (docs/research/export-bottlenecks.md). This records the swap actually in use.
+    (docs/research/export-bottlenecks.md). This records the swap actually in use, and the
+    peak of RAM plus swap in use within one sample, with its time for matching against the
+    log: peak swap and lowest MemAvailable alone only bound it, since they need not coincide
+    (docs/research, finding 23).
     """
 
     def __init__(self, interval: float = 5.0, meminfo: Path = Path("/proc/meminfo")):
@@ -93,6 +97,8 @@ class MemorySampler:
         self.meminfo = meminfo
         self.peak_swap_used = None
         self.min_available = None
+        self.peak_in_use = None
+        self.peak_in_use_at = None
         self._stop = threading.Event()
         self._thread = None
 
@@ -109,6 +115,10 @@ class MemorySampler:
         self.peak_swap_used = max(swap_used, self.peak_swap_used or 0)
         if available is not None:
             self.min_available = available if self.min_available is None else min(available, self.min_available)
+            in_use = fields.get("MemTotal", 0) - available + swap_used
+            if self.peak_in_use is None or in_use > self.peak_in_use:
+                self.peak_in_use = in_use
+                self.peak_in_use_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
     def _run(self) -> None:
         while not self._stop.wait(self.interval):
@@ -127,7 +137,12 @@ class MemorySampler:
         self.sample()
 
     def result(self) -> dict:
-        return {"peak_swap_used_bytes": self.peak_swap_used, "min_mem_available_bytes": self.min_available}
+        return {
+            "peak_swap_used_bytes": self.peak_swap_used,
+            "min_mem_available_bytes": self.min_available,
+            "peak_in_use_bytes": self.peak_in_use,
+            "peak_in_use_at": self.peak_in_use_at,
+        }
 
 
 def host_budget(info: dict, reserve: int = 1_000_000_000) -> int | None:

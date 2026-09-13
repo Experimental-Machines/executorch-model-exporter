@@ -66,8 +66,10 @@ stages are 87-93% of it:
 - The HTP compile is Qualcomm's SDK building the prompt and decode graphs; CPU-bound.
 - Runners vary: identical 2k calibrations took 1,761 s and 936 s. The 2k to 4k growth on one
   chip (3.92x) is not yet explained; reports now record the CPU model and peak swap in use.
-- XNNPACK exports take about 10-12 minutes and are limited by memory, not time; the first
-  MediaTek run was limited by calibration memory.
+- XNNPACK exports take about 10-12 minutes and are limited by memory, not time.
+- The first MediaTek export (Qwen3-0.6B, MT6991, 512-token cache) took 1,695 s: calibration
+  736 s (43%), NeuroPilot lowering 472 s (28%), over 4 chunks. Its limit is calibration
+  memory: the window it can build is set by the runner's RAM plus swap, not by time.
 
 ## Locally
 

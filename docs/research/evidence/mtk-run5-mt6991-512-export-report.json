@@ -1,0 +1,151 @@
+{
+  "backend": "mtk",
+  "target": "mt6991",
+  "target_name": "Dimensity 9400",
+  "tokenizer": "tokenizer.json",
+  "output_repo": "experimentalmachines/Qwen3-0.6B-ExecuTorch",
+  "source": {
+    "id": "Qwen/Qwen3-0.6B",
+    "sha": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "created_at": "2025-04-27T03:40:08+00:00",
+    "total_params": 751632384,
+    "family": "qwen3",
+    "variant": "instruct",
+    "license": {
+      "license": "apache-2.0",
+      "license_link": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/LICENSE"
+    },
+    "license_files": [
+      "LICENSE"
+    ]
+  },
+  "toolchain": {
+    "executorch": "1.4.0",
+    "torch": "2.13.0+cpu",
+    "torchao": "0.18.0",
+    "transformers": "4.57.6"
+  },
+  "neuropilot": {
+    "name": "NeuroPilot Express SDK",
+    "build": "8.0.8-build20250925",
+    "mtk_converter": "8.13.0+public",
+    "mtk_neuron": "8.2.23"
+  },
+  "recipe": {
+    "script": "qwen.py",
+    "precision": "A16W4",
+    "num_chunks": 4,
+    "prompt_tokens": 128,
+    "cache_size": 512,
+    "calibration": {
+      "prompts": "aot_utils/llm_utils/prompts/alpaca.txt",
+      "prompts_used": 9,
+      "prompts_available": 9,
+      "preformatter": "qwen3.json"
+    },
+    "label": "NeuroPilot A16W4, 4 chunks",
+    "description": "ExecuTorch 1.4.0 MediaTek LLM export (`examples/mediatek`, `qwen.py`): A16W4 (16-bit activations, 4-bit weights) calibrated on MediaTek's `alpaca.txt` prompts (9 of 9) in the qwen3.json chat template, cut into 4 chunks, with a 128-token prompt graph and a one-token generation graph over a 512-token cache, compiled with MediaTek NeuroPilot Express SDK (mtk_converter 8.13.0+public, mtk_neuron 8.2.23) for MT6991 (Dimensity 9400)."
+  },
+  "window": {
+    "context": 512,
+    "reason": "forced with --context (static NPU graphs)",
+    "kv_cache_bytes_per_token": null
+  },
+  "runner": {
+    "prompt_token_batch_size": 128,
+    "cache_size": 512,
+    "hidden_size": 1024,
+    "num_head": 16,
+    "num_layer": 28,
+    "head_dim": 128,
+    "max_token_length": 40960,
+    "rot_emb_base": 1000000.0,
+    "input_type": "fp32",
+    "output_type": "fp32",
+    "cache_type": "fp32",
+    "mask_type": "fp32",
+    "rot_emb_type": "fp32",
+    "vocab_size": 151936,
+    "bos_token": 151643,
+    "eos_token": 151645,
+    "eos_tokens": [
+      151645,
+      151643
+    ],
+    "tokenizer_type": "hf",
+    "tokenizer_path": "tokenizer.json",
+    "token_embedding_path": "Qwen3-0.6B-neuropilot-embedding-fp32.bin",
+    "model_package_paths": [
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk1of4.pte",
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk2of4.pte",
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk3of4.pte",
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk4of4.pte"
+    ]
+  },
+  "files": [
+    {
+      "path": "mtk/mt6991/Qwen3-0.6B-neuropilot-a16w4-512-chunk1of4.pte",
+      "bytes": 86052736,
+      "sha256": "4246333b0865d70fe642737e3925015bc001b45e9fa93556d6fde2fbd2738a89"
+    },
+    {
+      "path": "mtk/mt6991/Qwen3-0.6B-neuropilot-a16w4-512-chunk2of4.pte",
+      "bytes": 86052736,
+      "sha256": "825630f3452d0cc6d6c0f169f60e6ef9e6e7eaffdc335ff9ff14fc632f22dfce"
+    },
+    {
+      "path": "mtk/mt6991/Qwen3-0.6B-neuropilot-a16w4-512-chunk3of4.pte",
+      "bytes": 86052992,
+      "sha256": "fb7621a509c9d8983448df6ef279ddfb249dcc9fcf6ed5e8936ce92adc01a026"
+    },
+    {
+      "path": "mtk/mt6991/Qwen3-0.6B-neuropilot-a16w4-512-chunk4of4.pte",
+      "bytes": 165214720,
+      "sha256": "053560c1da793db8842f9e74a9cc3ab49b0e6c5e29956c27d0825ea598e25543"
+    },
+    {
+      "path": "mtk/mt6991/Qwen3-0.6B-neuropilot-embedding-fp32.bin",
+      "bytes": 622329856,
+      "sha256": "66490b62288569e367e064ede4ad922015d5bfd923872b1bbb03cf2a92b4f520"
+    }
+  ],
+  "host": {
+    "nproc": 4,
+    "mem_total_bytes": 16766410752,
+    "swap_total_bytes": 25769799680,
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "peak_rss_export_bytes": 15728893952,
+    "peak_swap_used_bytes": 12444127232,
+    "min_mem_available_bytes": 228864000,
+    "export_seconds": 1694.7,
+    "total_seconds": 1725.0
+  },
+  "metadata": {},
+  "smoke": {
+    "kind": "structural",
+    "passed": true,
+    "problems": [],
+    "methods": {
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk1of4.pte": [
+        "Qwen3-0.6B_A16W4_4_chunks_128t512c_0",
+        "Qwen3-0.6B_A16W4_4_chunks_1t512c_0"
+      ],
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk2of4.pte": [
+        "Qwen3-0.6B_A16W4_4_chunks_128t512c_1",
+        "Qwen3-0.6B_A16W4_4_chunks_1t512c_1"
+      ],
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk3of4.pte": [
+        "Qwen3-0.6B_A16W4_4_chunks_128t512c_2",
+        "Qwen3-0.6B_A16W4_4_chunks_1t512c_2"
+      ],
+      "Qwen3-0.6B-neuropilot-a16w4-512-chunk4of4.pte": [
+        "Qwen3-0.6B_A16W4_4_chunks_128t512c_3",
+        "Qwen3-0.6B_A16W4_4_chunks_1t512c_3"
+      ]
+    }
+  },
+  "run": {
+    "url": "https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34756997605",
+    "id": "34756997605"
+  }
+}
