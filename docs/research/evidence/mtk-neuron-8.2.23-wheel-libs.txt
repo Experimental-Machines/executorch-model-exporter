@@ -1,0 +1,46 @@
+# Dynamic sections of the shared libraries in mtk_neuron-8.2.23-py3-none-linux_x86_64.whl
+# (from neuropilot-express-sdk-8.0.8-build20250925.tar.gz, sha256 42155c3b25e9f9af1bef55534d0700835f32564a289e8cb1e44f0b2433ddab48),
+# read with pyelftools. Only DT_NEEDED, DT_SONAME, DT_RPATH and DT_RUNPATH are listed; no library has an RPATH or RUNPATH.
+# mtk_neuron/extract_shared.py loads lib/libextract_shared.so by absolute path with ctypes.cdll.LoadLibrary, so the
+# loader resolves its DT_NEEDED libc++.so.1 only through LD_LIBRARY_PATH, the ld.so cache and the default directories.
+
+mtk_neuron/lib/libc++.so.1
+  DT_NEEDED   libpthread.so.0
+  DT_NEEDED   libc.so.6
+  DT_NEEDED   libm.so.6
+  DT_NEEDED   librt.so.1
+  DT_NEEDED   libgcc_s.so.1
+  DT_SONAME   libc++.so.1
+mtk_neuron/lib/libextract_shared.so
+  DT_NEEDED   librt.so.1
+  DT_NEEDED   libdl.so.2
+  DT_NEEDED   libm.so.6
+  DT_NEEDED   libpthread.so.0
+  DT_NEEDED   libc++.so.1
+  DT_NEEDED   libgcc_s.so.1
+  DT_NEEDED   libc.so.6
+  DT_NEEDED   ld-linux-x86-64.so.2
+  DT_SONAME   libextract_shared.so.8
+mtk_neuron/lib/libextract_shared.so.8
+  DT_NEEDED   librt.so.1
+  DT_NEEDED   libdl.so.2
+  DT_NEEDED   libm.so.6
+  DT_NEEDED   libpthread.so.0
+  DT_NEEDED   libc++.so.1
+  DT_NEEDED   libgcc_s.so.1
+  DT_NEEDED   libc.so.6
+  DT_NEEDED   ld-linux-x86-64.so.2
+  DT_SONAME   libextract_shared.so.8
+mtk_neuron/lib/libextract_shared.so.8.2.23
+  DT_NEEDED   librt.so.1
+  DT_NEEDED   libdl.so.2
+  DT_NEEDED   libm.so.6
+  DT_NEEDED   libpthread.so.0
+  DT_NEEDED   libc++.so.1
+  DT_NEEDED   libgcc_s.so.1
+  DT_NEEDED   libc.so.6
+  DT_NEEDED   ld-linux-x86-64.so.2
+  DT_SONAME   libextract_shared.so.8
+
+# For comparison, mtk_converter 8.13.0 (cp310) links libstdc++.so.6, not libc++, and carries RPATH $ORIGIN/../_lib:$ORIGIN/../../mtk_converter.libs on
+# mtk_converter/python/interpreter.cpython-310-x86_64-linux-gnu.so, so putting mtk_neuron/lib first on LD_LIBRARY_PATH changes nothing for it.

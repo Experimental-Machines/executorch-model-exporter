@@ -180,6 +180,26 @@ def structural_check(tool_python: str, chunks: list[Path], exp: str, recipe: set
     return {"kind": "structural", "passed": not problems, "problems": problems, "methods": methods}
 
 
+_NEURON_LIB = (
+    "import mtk_neuron, os; print(os.path.join(os.path.dirname(os.path.realpath(mtk_neuron.__file__)), 'lib'))"
+)
+
+
+def tool_env(tool_python: str, base: dict[str, str]) -> dict[str, str]:
+    """Environment for MediaTek's export script: mtk_neuron's own lib/ on the loader path.
+
+    mtk_neuron 8.2.23 ctypes-loads lib/libextract_shared.so, which needs libc++.so.1 by name
+    and has no RPATH; the wheel ships that libc++ in the same lib/ folder, where the loader
+    only looks if LD_LIBRARY_PATH says so when the process starts (docs/research, finding 21).
+    """
+    result = subprocess.run([tool_python, "-c", _NEURON_LIB], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise ExportError(f"cannot locate mtk_neuron in the MediaTek tool environment:\n{result.stderr[-2000:]}")
+    neuron_lib = result.stdout.strip().splitlines()[-1]
+    paths = [neuron_lib] + [p for p in base.get("LD_LIBRARY_PATH", "").split(":") if p]
+    return {**base, "LD_LIBRARY_PATH": ":".join(paths), "PYTHONUNBUFFERED": "1"}
+
+
 def tool_versions(tool_python: str) -> dict:
     result = subprocess.run([tool_python, "-c", _VERSIONS, *TOOL_PACKAGES], capture_output=True, text=True)
     if result.returncode != 0:
@@ -275,8 +295,9 @@ def run(
     command = export_command(tool_python, plan, recipe, soc, weight_dir / "config.json", dataset)
     print("==> " + " ".join(command))
     export_started = time.time()
+    env = tool_env(tool_python, dict(os.environ))
     with MemorySampler() as memory:
-        subprocess.run(command, check=True, cwd=examples_dir, env={**os.environ, "PYTHONUNBUFFERED": "1"})
+        subprocess.run(command, check=True, cwd=examples_dir, env=env)
     export_seconds = time.time() - export_started
 
     exp = exp_name(weight_dir, recipe.precision, plan.num_chunks)

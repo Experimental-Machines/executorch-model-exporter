@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import subprocess
 
 import pytest
 from conftest import hf_config, load_json
@@ -177,3 +178,17 @@ def test_the_calibration_patch_adds_what_the_export_checks_for():
     # One family script per patch target: every mapped script must be covered.
     targets = {line.split("/")[-1] for line in patch.read_text(encoding="utf-8").splitlines() if line.startswith("+++")}
     assert {plan().script} <= targets
+
+
+def test_the_export_script_starts_with_mtk_neurons_lib_on_the_loader_path(monkeypatch):
+    lib = "/w/mtk-venv/lib/python3.10/site-packages/mtk_neuron/lib"
+
+    def fake_run(command, **kwargs):
+        assert command[1] == "-c" and "mtk_neuron" in command[2]
+        return subprocess.CompletedProcess(command, 0, stdout=lib + "\n", stderr="")
+
+    monkeypatch.setattr(export_mtk.subprocess, "run", fake_run)
+    env = export_mtk.tool_env("/w/mtk-venv/bin/python", {"LD_LIBRARY_PATH": "/opt/x", "HOME": "/h"})
+    assert env["LD_LIBRARY_PATH"] == f"{lib}:/opt/x"
+    assert env["HOME"] == "/h" and env["PYTHONUNBUFFERED"] == "1"
+    assert export_mtk.tool_env("p", {})["LD_LIBRARY_PATH"] == lib

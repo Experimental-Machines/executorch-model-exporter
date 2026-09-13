@@ -158,6 +158,9 @@ calling ExecuTorch's own script in compile-only mode:
   imports transformers 4.x internals, which cap `huggingface_hub` below the 1.x the pipeline
   uses. The pipeline keeps its own environment (`requirements/export-mtk.txt`) and drives a
   Python 3.10 virtualenv (`requirements/mtk-tools.txt` + MediaTek's wheels) as `MTK_PYTHON`.
+  The export script starts with `mtk_neuron/lib` first on `LD_LIBRARY_PATH`
+  (`export_mtk.tool_env`): the wheel's `libextract_shared.so` needs the `libc++.so.1`
+  bundled beside it but has no RPATH (docs/research, finding 21).
 - **Scripts:** the LLM export scripts are in ExecuTorch's source, not the wheel; the
   workflow sparse-checks-out `examples/mediatek` at `EXECUTORCH_COMMIT`.
 - **Recipe** (MediaTek's own, `shell_scripts/export_qwen.sh`): A16W4, the model cut into up

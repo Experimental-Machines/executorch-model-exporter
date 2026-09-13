@@ -1,0 +1,26 @@
+# Fourth MediaTek export, Qwen3-0.6B, 512-token cache, MT6991, NeuroPilot Express 8.0.8 (mtk_neuron 8.2.23): chunk 0 calibrates in 2:31; lowering then fails because mtk_neuron's libextract_shared.so cannot find libc++.so.1.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34756096938 , job "export (MT6991, 512)" (available).
+# Lines kept: those matching /mtk_converter  |mtk-neuron  |Applied patch|Export shape|Preparing Model Calibration|Exporting Chunk|Calibrating Model: .*[0-9]+/9 \[|Getting ATen Dialect|Delegating Edge|Traceback|extract_shared|LoadLibrary|_dlopen|OSError|returned non-zero/, ANSI codes and progress-bar redraws removed (first and last calibration updates kept).
+
+2026-09-13T12:08:34Z mtk_converter             8.13.0+public
+2026-09-13T12:08:34Z mtk-neuron                8.2.23
+2026-09-13T12:08:38Z Applied patch examples/mediatek/model_export_scripts/qwen.py cleanly.
+2026-09-13T12:08:56Z Export shape(s):              ['128t512c', '1t512c']
+2026-09-13T12:09:00Z Preparing Model Calibration Inputs...
+2026-09-13T12:13:17Z Exporting Chunk 0 to PTE
+2026-09-13T12:13:39Z Calibrating Model:   0%|          | 0/9 [00:00<?, ?it/s]
+2026-09-13T12:13:56Z Calibrating Model:  11%|█         | 1/9 [00:15<02:03, 15.39s/it]
+2026-09-13T12:15:57Z Calibrating Model: 100%|██████████| 9/9 [02:31<00:00, 18.52s/it]
+2026-09-13T12:15:57Z Calibrating Model: 100%|██████████| 9/9 [02:31<00:00, 16.88s/it]
+2026-09-13T12:15:58Z Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 128t512c chunk 0
+2026-09-13T12:16:19Z Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 1t512c chunk 0
+2026-09-13T12:16:36Z Delegating Edge Program to Neuropilot Backend
+2026-09-13T12:17:31Z Traceback (most recent call last):
+2026-09-13T12:17:31Z     blob, new_models = mtk_neuron.extract_shared_data(
+2026-09-13T12:17:31Z   File "/exe-expo-work/mtk-venv/lib/python3.10/site-packages/mtk_neuron/extract_shared.py", line 79, in extract_shared_data
+2026-09-13T12:17:31Z   File "/exe-expo-work/mtk-venv/lib/python3.10/site-packages/mtk_neuron/extract_shared.py", line 13, in __init__
+2026-09-13T12:17:31Z     lib = ctypes.cdll.LoadLibrary(path)
+2026-09-13T12:17:31Z   File "/opt/hostedtoolcache/Python/3.10.21/x64/lib/python3.10/ctypes/__init__.py", line 452, in LoadLibrary
+2026-09-13T12:17:31Z     self._handle = _dlopen(self._name, mode)
+2026-09-13T12:17:31Z OSError: libc++.so.1: cannot open shared object file: No such file or directory
+2026-09-13T12:17:37Z subprocess.CalledProcessError: Command '['/exe-expo-work/mtk-venv/bin/python', 'model_export_scripts/qwen.py', '/exe-expo-work/work/weights/Qwen3-0.6B/config.json', '--precision', 'A16W4', '--num_chunks', '4', '--dataset', 'aot_utils/llm_utils/prompts/alpaca.txt', '--response_cap', '9', '--preformatter', 'aot_utils/llm_utils/preformatter_templates/qwen3.json', '-shapes', '128t
