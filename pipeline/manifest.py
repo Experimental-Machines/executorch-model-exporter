@@ -40,6 +40,7 @@ def _variants(report: dict) -> list[dict]:
     window = report["window"]
     common = {
         "context": window["context"],
+        "source_revision": report["source"]["sha"],
         "quantization": report["recipe"]["label"],
         # The sizing estimate against the phone budget (None for the NPU backends, whose
         # runtime memory is not modelled here); the app and the benchmarker decide.
@@ -136,13 +137,19 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
     token = naming.app_family(naming.source_name(source["id"]))
     tags = sorted(set(hub_tags) | {r["backend"] for r in reports})
     upstream = f"https://huggingface.co/{source['id']}"
+    revisions = sorted({r["source"]["sha"] for r in reports})
     out = [_card_metadata(source, tags), ""]
     if token in BUILT_WITH:
         out += [f"**{BUILT_WITH[token]}**", ""]
+    revision_text = (
+        f"revision `{revisions[0][:12]}`"
+        if len(revisions) == 1
+        else "revisions " + ", ".join(f"`{sha[:12]}`" for sha in revisions) + " (see each variant's `source_revision`)"
+    )
     out += [
         f"# {naming.source_name(source['id'])} for ExecuTorch",
         "",
-        f"ExecuTorch exports of [{source['id']}]({upstream}) (revision `{source['sha'][:12]}`) "
+        f"ExecuTorch exports of [{source['id']}]({upstream}) ({revision_text}) "
         "for on-device inference with the "
         "[openweights](https://github.com/alpharomercoma/openweights) Android app or any "
         f"ExecuTorch {reports[0]['toolchain']['executorch']} runtime.",
@@ -167,12 +174,19 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
         if smoke.get("template_error"):
             verdict += " with a completion prompt (the chat template did not render)"
         for f in r["files"]:
-            if f["path"].endswith((".pte", ".bin")):
+            if f["path"].endswith(".pte"):
                 out.append(
                     f"| {BACKEND_TITLES[r['backend']]} | {target(r)} | "
                     f"[`{f['path']}`]({f['path']}) | {r['window']['context']:,} tokens | "
                     f"{_gb(f['bytes'])} | {verdict} |"
                 )
+    embeddings = sorted({f["path"] for r in reports for f in r["files"] if f["path"].endswith(".bin")})
+    if embeddings:
+        out += [
+            "",
+            "MediaTek folders also hold the token embedding table the NeuroPilot runner reads from disk, "
+            "shared by every window: " + ", ".join(f"[`{p}`]({p})" for p in embeddings) + ".",
+        ]
     out += [
         "",
         f"Tokenizer: [`{reports[0]['tokenizer']}`]({reports[0]['tokenizer']}), copied unchanged "
@@ -196,12 +210,14 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
     described = set()
     for r in reports:
         recipe = r["recipe"]
-        key = (r["backend"], r.get("target"))
+        # One line per distinct recipe text: the same for every XNNPACK window, but
+        # MediaTek's names its window and calibration prompts, which differ per window.
+        key = (r["backend"], r.get("target"), recipe["description"])
         if key in described:
             continue
         described.add(key)
         line = f"- {BACKEND_TITLES[r['backend']]} {target(r)}: {recipe['description']}"
-        same = [x for x in reports if (x["backend"], x.get("target")) == key]
+        same = [x for x in reports if (x["backend"], x.get("target"), x["recipe"]["description"]) == key]
         runs = sorted({x["run"]["url"] for x in same if x.get("run", {}).get("url")})
         if runs:
             line += " Built by " + ", ".join(f"[run {i + 1}]({url})" for i, url in enumerate(runs)) + "."

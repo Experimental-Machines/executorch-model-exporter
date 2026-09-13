@@ -47,6 +47,45 @@ def test_superseded_only_touches_this_window_and_the_pre_matrix_files():
     assert not publish.superseded("qnn/sm8650/config.json", "qnn", "2k")
     assert publish.superseded("mtk/mt6991/Qwen3-1.7B-neuropilot-a16w4-2k-chunk1of4.pte", "mtk/mt6991", "2k")
     assert not publish.superseded("mtk/mt6991/Qwen3-1.7B-neuropilot-embedding-fp32.bin", "mtk/mt6991", "2k")
+    # A model whose own name carries a window-like token (a real HuggingFaceTB repo).
+    name = "xnnpack/SmolLM2-1.7B-Instruct-16k-8da4w-4k.pte"
+    assert publish.window_of(name.split("/")[1]) == "4k"
+    assert not publish.superseded(name, "xnnpack", "16k")
+    assert publish.superseded(name, "xnnpack", "4k")
+    assert publish.window_of("export-report-16k.json") == "16k"
+    assert publish.window_of("config.json") is None
+
+
+def test_release_tags_are_per_window_and_chip():
+    assert publish.release_tag(report(4096)) == "Qwen3-1.7B-xnnpack-4k-abcdef0"
+    assert publish.release_tag(report(2048, backend="qnn", target="sm8650")) == "Qwen3-1.7B-qnn-sm8650-2k-abcdef0"
+
+
+def test_publish_hf_retries_once_on_a_stale_parent_commit(tmp_path, monkeypatch):
+    from huggingface_hub.errors import HfHubHTTPError
+
+    out = tmp_path / "out"
+    (out / "xnnpack").mkdir(parents=True)
+    (out / "tokenizer.json").write_text("{}")
+    (out / "xnnpack" / "Qwen3-1.7B-8da4w-2k.pte").write_bytes(b"pte")
+    (out / "xnnpack" / "export-report-2k.json").write_text(json.dumps(report(2048)))
+    hub = FakeHub({"README.md": None})
+    calls = []
+
+    def create_commit(repo_id, operations, commit_message, parent_commit):
+        calls.append(parent_commit)
+        if len(calls) == 1:  # another window's job committed in between
+            import httpx
+
+            response = httpx.Response(412, request=httpx.Request("POST", "https://huggingface.co/api"))
+            raise HfHubHTTPError("412 Precondition Failed", response=response)
+        return SimpleNamespace(commit_url="https://hf/commit/2")
+
+    hub.create_commit = create_commit
+    monkeypatch.setattr(publish.hub, "api", lambda: hub)
+    monkeypatch.setattr(publish.time, "sleep", lambda s: None)
+    assert publish.publish_hf(out, "xnnpack") == "https://hf/commit/2"
+    assert calls == ["rev1", "rev1"]  # re-read the repo and rebuilt the commit before retrying
 
 
 def test_backend_config_merges_every_window_in_the_folder():
@@ -142,3 +181,8 @@ def test_load_report_wants_exactly_one_report(tmp_path):
         publish.load_report(tmp_path, "xnnpack")
     (folder / "export-report-2k.json").write_text(json.dumps(report(2048)))
     assert publish.load_report(tmp_path, "xnnpack")["window"]["context"] == 2048
+    # Several windows exported into one folder by hand: --context picks.
+    (folder / "export-report-8k.json").write_text(json.dumps(report(8192)))
+    with pytest.raises(ValueError, match="pass --context"):
+        publish.load_report(tmp_path, "xnnpack")
+    assert publish.load_report(tmp_path, "xnnpack", context=8192)["window"]["context"] == 8192

@@ -56,11 +56,24 @@ jobs:
       - id: contexts
         env:
           CONTEXTS: ${{ inputs.contexts }}
+        # Accepts a JSON list, one number, or a comma-separated list; empty means every tier.
         run: |
-          if [ -z "$CONTEXTS" ]; then
-            python3 -m pip install --quiet pyyaml
-            CONTEXTS=$(python3 -c 'import json, yaml; print(json.dumps(yaml.safe_load(open("config/pipeline.yaml"))["export"]["context_tiers"]))')
-          fi
+          python3 -m pip install --quiet pyyaml
+          CONTEXTS=$(python3 - "$CONTEXTS" <<'PY'
+          import json, sys, yaml
+          raw = sys.argv[1].strip()
+          if not raw:
+              values = yaml.safe_load(open("config/pipeline.yaml"))["export"]["context_tiers"]
+          else:
+              try:
+                  values = json.loads(raw)
+              except ValueError:
+                  values = [v for v in raw.strip("[]").split(",") if v.strip()]
+              if not isinstance(values, list):
+                  values = [values]
+          print(json.dumps(sorted({int(v) for v in values}, reverse=True)))
+          PY
+          )
           echo "contexts=$CONTEXTS" >>"$GITHUB_OUTPUT"
 
   export:

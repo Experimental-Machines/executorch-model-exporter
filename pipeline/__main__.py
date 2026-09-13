@@ -11,6 +11,7 @@ from pathlib import Path
 
 def _plan(args) -> int:
     from pipeline import eligibility, families, hub, settings, sizing
+    from pipeline.exporting import host_budget, host_info
 
     cfg = settings.load()
     source = hub.fetch(args.model, args.revision)
@@ -19,10 +20,16 @@ def _plan(args) -> int:
     family = families.family_for(source.config) if source.config else None
     if family and source.total_params:
         arch = families.architecture(source.config, source.total_params)
+        budget = host_budget(host_info())
         choice = sizing.choose_context(
-            arch, cfg.context_tiers, cfg.device_budget_bytes, cfg.runtime_overhead_bytes, None
+            arch, cfg.context_tiers, cfg.device_budget_bytes, cfg.runtime_overhead_bytes, budget
         )
-        result["window"] = {"context": choice.context, "reason": choice.reason, "table": list(choice.table)}
+        result["windows"] = {
+            "exportable_on_this_host": [row["context"] for row in choice.table if row["fits_host"]],
+            "within_phone_budget": [row["context"] for row in choice.table if row["fits_device"]],
+            "host_budget_bytes": budget,
+            "table": list(choice.table),
+        }
     print(json.dumps(result, indent=2, default=str))
     return 0 if verdict.eligible else 3
 
@@ -99,21 +106,21 @@ def _export_qnn(args) -> int:
 def _publish_hf(args) -> int:
     from pipeline import publish
 
-    print(publish.publish_hf(Path(args.out), args.backend, args.target))
+    print(publish.publish_hf(Path(args.out), args.backend, args.target, args.context))
     return 0
 
 
 def _publish_release(args) -> int:
     from pipeline import publish
 
-    print(publish.publish_release(Path(args.out), args.backend, args.target))
+    print(publish.publish_release(Path(args.out), args.backend, args.target, args.context))
     return 0
 
 
 def _summary(args) -> int:
     from pipeline import publish
 
-    sys.stdout.write(publish.summary(Path(args.out), args.backend, args.target))
+    sys.stdout.write(publish.summary(Path(args.out), args.backend, args.target, args.context))
     return 0
 
 
@@ -212,6 +219,7 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("out")
         command.add_argument("--backend", required=True, choices=["xnnpack", "qnn", "mtk"])
         command.add_argument("--target", default=None)
+        command.add_argument("--context", type=int, default=None, help="which window, when the folder holds several")
         command.set_defaults(func=func)
 
     args = parser.parse_args(argv)
