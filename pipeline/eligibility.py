@@ -79,8 +79,13 @@ def name_reasons(model_id: str, settings: Settings) -> list[str]:
     hits = [token for token in settings.name_exclude if token in naming.normalise(name)]
     if hits:
         reasons.append(f"name matches excluded marker(s) {hits}")
+    hints = naming.size_hints(name)
     nominal = naming.nominal_billions(name)
-    if nominal is not None and nominal > settings.max_nominal_billions:
+    if nominal is None:
+        reasons.append(f"the app reads the size from the name and {name!r} has none (like 1.7B)")
+    elif len(hints) > 1:
+        reasons.append(f"name carries several sizes {hints}; the app would show the first")
+    elif nominal > settings.max_nominal_billions:
         reasons.append(f"named size {nominal:g}B is above {settings.max_nominal_billions:g}B")
     output_repo = naming.output_repo(model_id, settings.hub_org, settings.repo_suffix)
     if naming.app_family(naming.app_model_name(output_repo, "x.pte")) is None:

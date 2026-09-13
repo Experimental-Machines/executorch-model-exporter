@@ -38,6 +38,7 @@ class MtkRecipe:
     cache_size: int
     calibration: str
     response_cap: int
+    min_calibration_prompts: int
 
 
 @dataclass(frozen=True)
@@ -117,6 +118,7 @@ def load() -> Settings:
             cache_size=int(export["mtk"]["cache_size"]),
             calibration=export["mtk"]["calibration"],
             response_cap=int(export["mtk"]["response_cap"]),
+            min_calibration_prompts=int(export["mtk"]["min_calibration_prompts"]),
         ),
         executorch_version=versions["EXECUTORCH_VERSION"],
     )

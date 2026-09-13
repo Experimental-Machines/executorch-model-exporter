@@ -1,5 +1,5 @@
 name: Export MediaTek
-run-name: "MediaTek: ${{ inputs.model_id }}@${{ inputs.revision }}${{ inputs.context && format(' ctx {0}', inputs.context) || '' }}"
+run-name: "MediaTek: ${{ inputs.model_id }}@${{ inputs.revision }}${{ inputs.contexts && format(' ctx {0}', inputs.contexts) || '' }}"
 
 on:
   workflow_dispatch:
@@ -16,8 +16,8 @@ on:
         description: JSON list of chips, or empty for mtk.socs in config/pipeline.yaml
         default: ""
         type: string
-      context:
-        description: Context window (cache size) in tokens, or empty for mtk.cache_size in config/pipeline.yaml
+      contexts:
+        description: JSON list of context windows in tokens, one job per chip and window; empty for every tier in config/pipeline.yaml
         default: ""
         type: string
       publish_hf:
@@ -41,8 +41,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       socs: ${{ steps.socs.outputs.socs }}
+      contexts: ${{ steps.contexts.outputs.contexts }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: socs
         env:
           SOCS: ${{ inputs.socs }}
@@ -52,6 +53,28 @@ jobs:
             SOCS=$(python3 -c 'import json, yaml; print(json.dumps(yaml.safe_load(open("config/pipeline.yaml"))["export"]["mtk"]["socs"]))')
           fi
           echo "socs=$SOCS" >>"$GITHUB_OUTPUT"
+      - id: contexts
+        env:
+          CONTEXTS: ${{ inputs.contexts }}
+        # Accepts a JSON list, one number, or a comma-separated list; empty means every tier.
+        run: |
+          python3 -m pip install --quiet pyyaml
+          CONTEXTS=$(python3 - "$CONTEXTS" <<'PY'
+          import json, sys, yaml
+          raw = sys.argv[1].strip()
+          if not raw:
+              values = yaml.safe_load(open("config/pipeline.yaml"))["export"]["context_tiers"]
+          else:
+              try:
+                  values = json.loads(raw)
+              except ValueError:
+                  values = [v for v in raw.strip("[]").split(",") if v.strip()]
+              if not isinstance(values, list):
+                  values = [values]
+          print(json.dumps(sorted({int(v) for v in values}, reverse=True)))
+          PY
+          )
+          echo "contexts=$CONTEXTS" >>"$GITHUB_OUTPUT"
 
   export:
     needs: targets
@@ -59,6 +82,7 @@ jobs:
       fail-fast: false
       matrix:
         soc: ${{ fromJSON(needs.targets.outputs.socs) }}
+        context: ${{ fromJSON(needs.targets.outputs.contexts) }}
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:
@@ -67,8 +91,9 @@ jobs:
       MODEL_ID: ${{ inputs.model_id }}
       REVISION: ${{ inputs.revision }}
       SOC: ${{ matrix.soc }}
+      CONTEXT: ${{ matrix.context }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # The pipeline itself (fetch, reports, publishing) on the repo's usual Python.
       - uses: ./.github/actions/setup-export
@@ -81,9 +106,9 @@ jobs:
           grep -E '^(NEUROPILOT_SDK_[A-Z0-9_]+|MTK_[A-Z_]+_VERSION|EXECUTORCH_COMMIT)=' config/versions.env >>"$GITHUB_ENV"
           soc_lower=$(echo "$SOC" | tr '[:upper:]' '[:lower:]')
           echo "TARGET=$soc_lower" >>"$GITHUB_ENV"
-          echo "ARTIFACT=mtk-${soc_lower}-${MODEL_ID//\//--}" >>"$GITHUB_ENV"
+          echo "ARTIFACT=mtk-${soc_lower}-${MODEL_ID//\//--}-${CONTEXT}" >>"$GITHUB_ENV"
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: mtk-python
         with:
           python-version: ${{ env.MTK_PYTHON_VERSION }}
@@ -128,22 +153,31 @@ jobs:
           git -C "$src" checkout -q FETCH_HEAD
           echo "MTK_EXAMPLES=$src/examples/mediatek" >>"$GITHUB_ENV"
 
+      # Exit 4 means this runner cannot build this window: recorded as a skip, so the other
+      # jobs of the matrix stand on their own.
       - name: Export
-        env:
-          CONTEXT: ${{ inputs.context }}
         run: |
+          set +e
           python -m pipeline export-mtk "$MODEL_ID" --soc "$SOC" --revision "$REVISION" \
-            --out "$WORK_DIR/out" --work "$WORK_DIR/work" ${CONTEXT:+--context "$CONTEXT"}
+            --out "$WORK_DIR/out" --work "$WORK_DIR/work" --context "$CONTEXT"
+          rc=$?
+          set -e
+          if [ "$rc" -eq 4 ]; then
+            echo "SKIPPED=1" >>"$GITHUB_ENV"
+            echo "::warning title=Window skipped::$MODEL_ID at $CONTEXT tokens on $SOC cannot be exported on this runner"
+            exit 0
+          fi
+          exit "$rc"
 
       - name: Summary
-        if: always()
+        if: always() && env.SKIPPED != '1'
         run: |
-          if [ -f "$WORK_DIR/out/mtk/$TARGET/export-report.json" ]; then
+          if compgen -G "$WORK_DIR/out/mtk/$TARGET/export-report*.json" >/dev/null; then
             python -m pipeline summary "$WORK_DIR/out" --backend mtk --target "$TARGET" >>"$GITHUB_STEP_SUMMARY"
           fi
 
-      - uses: actions/upload-artifact@v7
-        if: always()
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always() && env.SKIPPED != '1'
         with:
           name: ${{ env.ARTIFACT }}
           path: ${{ env.WORK_DIR }}/out
@@ -151,7 +185,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish to Hugging Face
-        if: inputs.publish_hf
+        if: inputs.publish_hf && env.SKIPPED != '1'
         run: |
           if [ -z "$HF_TOKEN" ]; then
             echo "::error::Set the HF_TOKEN repository secret (write access to the output org)"
@@ -160,7 +194,7 @@ jobs:
           python -m pipeline publish-hf "$WORK_DIR/out" --backend mtk --target "$TARGET"
 
       - name: Publish GitHub release
-        if: inputs.publish_release
+        if: inputs.publish_release && env.SKIPPED != '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python -m pipeline publish-release "$WORK_DIR/out" --backend mtk --target "$TARGET"

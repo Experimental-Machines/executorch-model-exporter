@@ -6,7 +6,7 @@ Produces, under ``out_dir`` (the layout of the published HF repo):
     LICENSE…, NOTICE
     xnnpack/<name>-8da4w-<window>.pte
     xnnpack/config.json
-    xnnpack/export-report.json
+    xnnpack/export-report-<window>.json
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 import os
 import shutil
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -25,10 +24,13 @@ from pipeline import convert, eligibility, families, hub, manifest, naming, sett
 from pipeline.exporting import (
     ExportError,
     MemorySampler,
+    SkipExport,
     children_peak_rss,
     copy_side_files,
     host_budget,
     host_info,
+    report_file,
+    run_tool,
     self_peak_rss,
     sha256,
     source_report,
@@ -102,25 +104,27 @@ def run(
     plan = families.xnnpack_plan(family, source.config)
     arch = families.architecture(source.config, source.total_params)
     host = host_info()
-    choice = sizing.choose_context(
-        arch, cfg.context_tiers, cfg.device_budget_bytes, cfg.runtime_overhead_bytes, host_budget(host)
-    )
+    budget = host_budget(host)
+    choice = sizing.choose_context(arch, cfg.context_tiers, cfg.device_budget_bytes, cfg.runtime_overhead_bytes, budget)
+    # Every tier is exported, one job per window; the app and the benchmarker decide what
+    # fits a phone (the estimate goes into the report as fits_phone_budget). Only the host
+    # limit is a gate: past it the runner VM is killed outright, with no Python error.
     if context is None:
-        if choice.context is None:
-            raise ExportError(choice.reason)
-        window = choice.context
-        window_reason = choice.reason
+        exportable = [row["context"] for row in choice.table if row["fits_host"]]
+        if not exportable:
+            raise SkipExport(f"no window in {list(cfg.context_tiers)} can be exported on this host ({budget:,} B)")
+        window = exportable[0]
+        window_reason = f"largest window this host can export: {window}"
     else:
         window = context
-        window_reason = f"forced to {context} by the caller"
-        budget = host_budget(host)
+        window_reason = f"requested window {context}"
         peak = sizing.export_peak_bytes(arch, context)
         if budget is not None and peak > budget:
-            # Past the budget the runner VM is killed outright, with no Python error.
-            raise ExportError(
+            raise SkipExport(
                 f"a {context}-token export needs about {peak:,} B (causal masks alone "
                 f"{sizing.causal_mask_bytes(arch, context):,} B); this host has {budget:,} B"
             )
+    resident = sizing.device_resident_bytes(arch, window, cfg.runtime_overhead_bytes)
 
     output_repo = naming.output_repo(model_id, cfg.hub_org, cfg.repo_suffix)
     pte_name = naming.xnnpack_file(model_id, cfg.xnnpack.qmode, window)
@@ -157,9 +161,9 @@ def run(
     print("==> export_llm")
     export_started = time.time()
     with MemorySampler() as memory:
-        subprocess.run(
+        run_tool(
             [sys.executable, "-m", "executorch.extension.llm.export.export_llm", "--config", str(config_path)],
-            check=True,
+            "export_llm",
             cwd=work_dir,
             env={**os.environ, "PYTHONUNBUFFERED": "1"},
         )
@@ -176,6 +180,10 @@ def run(
         mismatches.append(f"get_max_context_len {method_values.get('get_max_context_len')} != {window}")
     if method_values.get("get_max_seq_len") != min(cfg.prefill_chunk, window):
         mismatches.append(f"get_max_seq_len {method_values.get('get_max_seq_len')}")
+    if bos is not None and method_values.get("get_bos_id") != bos:
+        mismatches.append(f"get_bos_id {method_values.get('get_bos_id')} != {bos}")
+    if eos and method_values.get("get_eos_ids") != eos:
+        mismatches.append(f"get_eos_ids {method_values.get('get_eos_ids')} != {eos}")
     if mismatches:
         raise ExportError("exported metadata disagrees with the request: " + "; ".join(mismatches))
 
@@ -222,6 +230,9 @@ def run(
             "context": window,
             "reason": window_reason,
             "kv_cache_bytes_per_token": kv_per_token,
+            "device_resident_bytes": resident,
+            "phone_budget_bytes": cfg.device_budget_bytes,
+            "fits_phone_budget": resident <= cfg.device_budget_bytes,
             "table": list(choice.table),
         },
         "files": [
@@ -248,7 +259,7 @@ def run(
     (backend_dir / "config.json").write_text(
         json.dumps(manifest.backend_config(report), indent=2) + "\n", encoding="utf-8"
     )
-    (backend_dir / "export-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    (backend_dir / report_file(window)).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     if not keep_work:
         shutil.rmtree(work_dir, ignore_errors=True)
     if smoke_result is not None and not smoke_result["passed"]:

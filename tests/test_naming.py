@@ -90,6 +90,14 @@ def test_app_rule_violations_are_reported():
     assert naming.check_app_rules("someone/Qwen3.5-2B-ExecuTorch", "xnnpack/a.pte", "xnnpack")
 
 
+def test_names_with_several_or_no_sizes_are_refused_by_name():
+    cfg = settings.load()
+    assert naming.size_hints("Qwen2.5-1M-1.5B") == ["1.5B", "1M"]
+    assert any("several sizes" in r for r in eligibility.name_reasons("Qwen/Qwen2.5-1M-1.5B", cfg))
+    assert any("has none" in r for r in eligibility.name_reasons("Qwen/Qwen3-Next", cfg))
+    assert eligibility.name_reasons("Qwen/Qwen3-1.7B", cfg) == []
+
+
 def test_window_label():
     assert naming.window_label(32768) == "32k"
     assert naming.window_label(8192) == "8k"

@@ -11,6 +11,7 @@ from pathlib import Path
 
 def _plan(args) -> int:
     from pipeline import eligibility, families, hub, settings, sizing
+    from pipeline.exporting import host_budget, host_info
 
     cfg = settings.load()
     source = hub.fetch(args.model, args.revision)
@@ -19,19 +20,41 @@ def _plan(args) -> int:
     family = families.family_for(source.config) if source.config else None
     if family and source.total_params:
         arch = families.architecture(source.config, source.total_params)
+        budget = host_budget(host_info())
         choice = sizing.choose_context(
-            arch, cfg.context_tiers, cfg.device_budget_bytes, cfg.runtime_overhead_bytes, None
+            arch, cfg.context_tiers, cfg.device_budget_bytes, cfg.runtime_overhead_bytes, budget
         )
-        result["window"] = {"context": choice.context, "reason": choice.reason, "table": list(choice.table)}
+        result["windows"] = {
+            "exportable_on_this_host": [row["context"] for row in choice.table if row["fits_host"]],
+            "within_phone_budget": [row["context"] for row in choice.table if row["fits_device"]],
+            "host_budget_bytes": budget,
+            "table": list(choice.table),
+        }
     print(json.dumps(result, indent=2, default=str))
     return 0 if verdict.eligible else 3
+
+
+def _run_export(export) -> int:
+    """Exit codes: 0 exported, 2 failed, 4 skipped (this host cannot export this window)."""
+    from pipeline.exporting import ExportError, SkipExport
+
+    try:
+        report = export()
+    except SkipExport as error:
+        print(f"export skipped: {error}", file=sys.stderr)
+        return 4
+    except ExportError as error:
+        print(f"export failed: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps({"file": report["files"], "window": report["window"]["context"]}, indent=2))
+    return 0
 
 
 def _export_xnnpack(args) -> int:
     from pipeline import export_xnnpack
 
-    try:
-        report = export_xnnpack.run(
+    return _run_export(
+        lambda: export_xnnpack.run(
             args.model,
             args.revision,
             Path(args.out),
@@ -40,22 +63,17 @@ def _export_xnnpack(args) -> int:
             keep_work=args.keep_work,
             skip_smoke=args.skip_smoke,
         )
-    except export_xnnpack.ExportError as error:
-        print(f"export failed: {error}", file=sys.stderr)
-        return 2
-    print(json.dumps({"file": report["files"], "window": report["window"]["context"]}, indent=2))
-    return 0
+    )
 
 
 def _export_mtk(args) -> int:
     from pipeline import export_mtk
-    from pipeline.exporting import ExportError
 
     if not args.tool_python or not args.examples:
         print("export failed: set --tool-python and --examples (or MTK_PYTHON and MTK_EXAMPLES)", file=sys.stderr)
         return 2
-    try:
-        report = export_mtk.run(
+    return _run_export(
+        lambda: export_mtk.run(
             args.model,
             args.revision,
             args.soc,
@@ -66,19 +84,14 @@ def _export_mtk(args) -> int:
             keep_work=args.keep_work,
             context=args.context,
         )
-    except ExportError as error:
-        print(f"export failed: {error}", file=sys.stderr)
-        return 2
-    print(json.dumps({"file": report["files"], "target": report["target"]}, indent=2))
-    return 0
+    )
 
 
 def _export_qnn(args) -> int:
     from pipeline import export_qnn
-    from pipeline.exporting import ExportError
 
-    try:
-        report = export_qnn.run(
+    return _run_export(
+        lambda: export_qnn.run(
             args.model,
             args.revision,
             args.soc,
@@ -87,31 +100,27 @@ def _export_qnn(args) -> int:
             keep_work=args.keep_work,
             context=args.context,
         )
-    except ExportError as error:
-        print(f"export failed: {error}", file=sys.stderr)
-        return 2
-    print(json.dumps({"file": report["files"], "target": report["target"]}, indent=2))
-    return 0
+    )
 
 
 def _publish_hf(args) -> int:
     from pipeline import publish
 
-    print(publish.publish_hf(Path(args.out), args.backend, args.target))
+    print(publish.publish_hf(Path(args.out), args.backend, args.target, args.context))
     return 0
 
 
 def _publish_release(args) -> int:
     from pipeline import publish
 
-    print(publish.publish_release(Path(args.out), args.backend, args.target))
+    print(publish.publish_release(Path(args.out), args.backend, args.target, args.context))
     return 0
 
 
 def _summary(args) -> int:
     from pipeline import publish
 
-    sys.stdout.write(publish.summary(Path(args.out), args.backend, args.target))
+    sys.stdout.write(publish.summary(Path(args.out), args.backend, args.target, args.context))
     return 0
 
 
@@ -153,8 +162,12 @@ def main(argv: list[str] | None = None) -> int:
     export.add_argument("--revision", default="main")
     export.add_argument("--out", default="out")
     export.add_argument("--work", default="work")
-    export.add_argument("--context", type=int, default=None, help="force a window instead of auto-fit")
-    export.add_argument("--keep-work", action="store_true")
+    export.add_argument(
+        "--context", type=int, default=None, help="window in tokens (default: the largest this host can build)"
+    )
+    export.add_argument(
+        "--keep-work", action="store_true", help="keep the work dir after success (a failure always leaves it)"
+    )
     export.add_argument("--skip-smoke", action="store_true")
     export.set_defaults(func=_export_xnnpack)
 
@@ -165,7 +178,9 @@ def main(argv: list[str] | None = None) -> int:
     qnn.add_argument("--out", default="out")
     qnn.add_argument("--work", default="work")
     qnn.add_argument("--context", type=int, default=None, help="window instead of qnn.max_context_len")
-    qnn.add_argument("--keep-work", action="store_true")
+    qnn.add_argument(
+        "--keep-work", action="store_true", help="keep the work dir after success (a failure always leaves it)"
+    )
     qnn.set_defaults(func=_export_qnn)
 
     mtk = commands.add_parser("export-mtk", help="compile MediaTek NeuroPilot .pte chunks for one chip")
@@ -204,6 +219,7 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("out")
         command.add_argument("--backend", required=True, choices=["xnnpack", "qnn", "mtk"])
         command.add_argument("--target", default=None)
+        command.add_argument("--context", type=int, default=None, help="which window, when the folder holds several")
         command.set_defaults(func=func)
 
     args = parser.parse_args(argv)

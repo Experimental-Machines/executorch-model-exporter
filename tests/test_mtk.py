@@ -134,7 +134,9 @@ def test_config_describes_one_model_in_several_files():
     assert variant["files"] == [f"Qwen3-0.6B-neuropilot-a16w4-2k-chunk{i}of4.pte" for i in range(1, 5)]
     assert variant["embedding"] == "Qwen3-0.6B-neuropilot-embedding-fp32.bin"
     assert variant["size_bytes"] == 4 * 150_000_000 + 622_329_856
-    assert config["runner"]["cache_size"] == 2048
+    # MediaTek's runner flags differ per window (cache size, file names): they live on the variant.
+    assert variant["runner"]["cache_size"] == 2048 and variant["context"] == 2048
+    assert "runner" not in config
     assert config["neuropilot_sdk"]["build"] == "20250327"
 
 

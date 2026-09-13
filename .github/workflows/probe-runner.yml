@@ -31,7 +31,7 @@ jobs:
       MODEL_ID: ${{ inputs.model_id }}
       CONTEXT: ${{ matrix.context }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Runner hardware
         run: |
@@ -49,13 +49,13 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          if [ -f "$WORK_DIR/out/xnnpack/export-report.json" ]; then
+          if compgen -G "$WORK_DIR/out/xnnpack/export-report*.json" >/dev/null; then
             python -m pipeline summary "$WORK_DIR/out" --backend xnnpack >>"$GITHUB_STEP_SUMMARY"
           fi
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: probe-${{ matrix.context }}
-          path: ${{ env.WORK_DIR }}/out/xnnpack/export-report.json
+          path: ${{ env.WORK_DIR }}/out/xnnpack/export-report-*.json
           if-no-files-found: warn

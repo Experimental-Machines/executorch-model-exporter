@@ -18,9 +18,13 @@ watch:
     meta-llama: [llama32]
     HuggingFaceTB: [smollm2, smollm3]
   # Newest repos listed per org and watcher run (the listing is sorted by creation date).
-  limit_per_org: 200
-  # Export workflow runs one watcher run may start; the rest wait for the next run.
-  max_dispatch_per_run: 6
+  # Qwen alone has 465 repos and its 200 newest (2026-09-13) start after Qwen3-4B, so the
+  # window has to cover a whole org; google's 1,134 is the largest.
+  limit_per_org: 1500
+  # Export workflow runs one watcher run may start; the rest wait for the next run. Each
+  # run fans out into one job per window (and chip); GitHub runs 20 jobs at a time and
+  # queues the rest, so this bounds the queue, not the runner load.
+  max_dispatch_per_run: 40
   pipeline_tag: text-generation
   # Size limit, read from the size in the repo name ("4B", "360M"): at most this many
   # billions. Publishers name by nominal size; Qwen3-4B's real total is 4,022,468,096, so
@@ -52,11 +56,14 @@ watch:
     - reward
 
 export:
-  # Candidate windows, largest first. The largest one that fits both budgets is used.
+  # Every window is exported, one workflow job each, for every model and backend; the app
+  # and the benchmarker decide what fits a phone. A window the runner cannot export (memory
+  # grows with the square of the window, docs/PLAN.md) is skipped and reported.
   context_tiers: [32768, 16384, 8192, 4096, 2048]
   # Phone budget for resident memory (.pte + KV cache + runtime overhead). Samsung's and
   # MIUI's memory guards killed the app at 6 GB PSS in the openweights window matrix
-  # (docs/research/executorch-window-matrix.md), so stay under that with margin.
+  # (docs/research/executorch-window-matrix.md). Not a gate: recorded per file as
+  # fits_phone_budget in config.json and the export report.
   device_budget_bytes: 5000000000
   runtime_overhead_bytes: 500000000
   # Prefill chunk (get_max_seq_len). The app's measured recipe uses 2048.
@@ -97,3 +104,7 @@ export:
     # generated tokens per prompt that calibrate the one-token graph (MediaTek's default 9).
     calibration: aot_utils/llm_utils/prompts/alpaca.txt
     response_cap: 9
+    # Larger windows keep fewer of the 8 prompts to fit the runner's memory (export_mtk):
+    # never fewer than this, or the window is skipped. Each export report records
+    # prompts_used, so the benchmarker can see what a window was calibrated on.
+    min_calibration_prompts: 4

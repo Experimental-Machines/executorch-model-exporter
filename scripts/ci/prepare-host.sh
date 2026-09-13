@@ -55,7 +55,7 @@ elif [ "$other_base" = "/" ] && [ "$(free_bytes /)" -gt $((swap_bytes + margin))
   swap_base=/
 fi
 sudo swapoff -a || true
-sudo rm -f /mnt/swapfile /swapfile
+sudo rm -f /mnt/swapfile /swapfile /mnt/exe-expo.swap /exe-expo.swap
 swap_file="${swap_base%/}/exe-expo.swap"
 sudo fallocate -l "${SWAP_GIB}G" "$swap_file"
 sudo chmod 600 "$swap_file"

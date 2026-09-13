@@ -11,7 +11,7 @@ chip. Produces, under ``out_dir``:
     mtk/<soc>/<name>-neuropilot-a16w4-<window>-chunk<i>of<n>.pte
     mtk/<soc>/<name>-neuropilot-embedding-fp32.bin       (token embedding table the runner reads)
     mtk/<soc>/config.json                                (includes MediaTek runner settings)
-    mtk/<soc>/export-report.json
+    mtk/<soc>/export-report-<window>.json
 
 These run on MediaTek's LLM runner (examples/mediatek/executor_runner), not on ExecuTorch's
 generic TextLLMRunner. There is no host runtime for NeuroPilot binaries, so the check after
@@ -32,11 +32,13 @@ from pipeline import eligibility, families, hub, manifest, naming, settings
 from pipeline.exporting import (
     ExportError,
     MemorySampler,
+    SkipExport,
     children_peak_rss,
     contains,
     copy_side_files,
     host_budget,
     host_info,
+    report_file,
     sha256,
     source_report,
 )
@@ -79,6 +81,7 @@ def export_command(
     recipe: settings.MtkRecipe,
     soc: str,
     config_path: Path,
+    dataset: str | None = None,
 ) -> list[str]:
     window = recipe.cache_size
     return [
@@ -90,7 +93,7 @@ def export_command(
         "--num_chunks",
         str(plan.num_chunks),
         "--dataset",
-        recipe.calibration,
+        dataset or recipe.calibration,
         "--response_cap",
         str(recipe.response_cap),
         "--preformatter",
@@ -222,16 +225,28 @@ def run(
         if problems:
             raise ExportError("; ".join(problems))
 
-    prompts_file = examples_dir / recipe.calibration
-    prompts = sum(1 for line in prompts_file.read_text(encoding="utf-8").splitlines() if line.strip())
-    needed = calibration_bytes(source.config, recipe, prompts)
+    # Calibration memory grows with the window (calibration_bytes): larger windows keep
+    # fewer of MediaTek's prompts, down to mtk.min_calibration_prompts; past that the window
+    # is skipped on this host rather than calibrated on too little.
+    prompts_text = (examples_dir / recipe.calibration).read_text(encoding="utf-8")
+    lines = [line for line in prompts_text.splitlines() if line.strip()]
     budget = host_budget(host_info())
+    prompts = len(lines)
+    floor = min(recipe.min_calibration_prompts, prompts)
+    while budget is not None and prompts > floor and calibration_bytes(source.config, recipe, prompts) > budget:
+        prompts -= 1
+    needed = calibration_bytes(source.config, recipe, prompts)
     if budget is not None and needed > budget:
-        raise ExportError(
-            f"calibration at a {window}-token cache needs about {needed:,} B "
-            f"({prompts} prompts x {1 + recipe.response_cap} steps), this host has {budget:,} B: "
-            "use a smaller --context"
+        raise SkipExport(
+            f"calibration at a {window}-token cache needs about {needed:,} B even with {prompts} prompts "
+            f"({1 + recipe.response_cap} steps each), this host has {budget:,} B"
         )
+    dataset = recipe.calibration
+    if prompts < len(lines):
+        work_dir.mkdir(parents=True, exist_ok=True)
+        trimmed = work_dir / "calibration-prompts.txt"
+        trimmed.write_text("\n".join(lines[:prompts]) + "\n", encoding="utf-8")
+        dataset = str(trimmed.resolve())
 
     tools = tool_versions(tool_python)
     for package, pinned in (("mtk_converter", "MTK_CONVERTER_VERSION"), ("mtk-neuron", "MTK_NEURON_VERSION")):
@@ -250,7 +265,7 @@ def run(
     tokenizer, licenses = copy_side_files(source, weight_dir, out_dir)
     bos, eos = hub.special_token_ids(source)
 
-    command = export_command(tool_python, plan, recipe, soc, weight_dir / "config.json")
+    command = export_command(tool_python, plan, recipe, soc, weight_dir / "config.json", dataset)
     print("==> " + " ".join(command))
     export_started = time.time()
     with MemorySampler() as memory:
@@ -305,13 +320,19 @@ def run(
             "num_chunks": plan.num_chunks,
             "prompt_tokens": recipe.prompt_tokens,
             "cache_size": window,
-            "calibration": {"prompts": recipe.calibration, "preformatter": plan.preformatter},
+            "calibration": {
+                "prompts": recipe.calibration,
+                "prompts_used": prompts,
+                "prompts_available": len(lines),
+                "preformatter": plan.preformatter,
+            },
             "label": f"NeuroPilot {recipe.precision}, {plan.num_chunks} chunks",
             "description": (
                 f"ExecuTorch {tools['executorch']} MediaTek LLM export (`examples/mediatek`, "
                 f"`{plan.script}`): {recipe.precision} (16-bit activations, "
                 f"{recipe.precision.rsplit('W', 1)[-1]}-bit weights) calibrated on MediaTek's "
-                f"`{recipe.calibration.rsplit('/', 1)[-1]}` prompts in the {plan.preformatter} chat "
+                f"`{recipe.calibration.rsplit('/', 1)[-1]}` prompts ({prompts} of {len(lines)}) in the "
+                f"{plan.preformatter} chat "
                 f"template, cut into {plan.num_chunks} chunks, with a {recipe.prompt_tokens}-token "
                 f"prompt graph and a one-token generation graph over a {window}-token cache, "
                 f"compiled with MediaTek NeuroPilot Express SDK (mtk_converter {sdk['mtk_converter']}, "
@@ -343,7 +364,7 @@ def run(
     (backend_dir / "config.json").write_text(
         json.dumps(manifest.backend_config(report), indent=2) + "\n", encoding="utf-8"
     )
-    (backend_dir / "export-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    (backend_dir / report_file(window)).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     if not keep_work:
         shutil.rmtree(work_dir, ignore_errors=True)
         shutil.rmtree(examples_dir / "pte" / exp, ignore_errors=True)

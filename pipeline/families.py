@@ -188,7 +188,8 @@ def architecture(config: dict, total_params: int) -> Architecture:
         dim=dim,
         intermediate=int(c["intermediate_size"]),
         total_params=int(total_params),
-        tied_embeddings=bool(c.get("tie_word_embeddings", False)),
+        # transformers' PretrainedConfig default, the same one convert.py assumes.
+        tied_embeddings=bool(c.get("tie_word_embeddings", True)),
     )
 
 
