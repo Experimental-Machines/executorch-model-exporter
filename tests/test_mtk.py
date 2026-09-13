@@ -3,7 +3,7 @@ import json
 import subprocess
 
 import pytest
-from conftest import hf_config, load_json
+from conftest import TOTAL_PARAMS, hf_config, load_json
 
 from pipeline import export_mtk, families, manifest, naming, publish, settings
 
@@ -159,16 +159,23 @@ def test_publish_refuses_a_tokenizer_inside_a_mediatek_folder(tmp_path):
         publish.publish_hf(tmp_path, "mtk", "MT6991")
 
 
-def test_calibration_memory_estimate_matches_the_run_that_took_the_runner_down():
+def test_calibration_memory_estimate_covers_the_measured_peak_and_refuses_what_did_not_fit():
     # Qwen3-0.6B: 28 layers x K,V x 8 KV heads x 128 x 4 B = 229,376 B of fp32 cache per token.
     # MediaTek's alpaca.txt holds 9 prompts (8 newlines: its last line has none).
     config = hf_config("Qwen/Qwen3-0.6B")
-    at_2k = dataclasses.replace(CFG.mtk, cache_size=2048, response_cap=9)
-    assert export_mtk.calibration_bytes(config, at_2k, 9) == 9 * 10 * 229_376 * 2048 * 2 == 84_557_168_640
-    assert export_mtk.calibration_bytes(config, CFG.mtk, 9) == 21_139_292_160  # the 512 default
-    # 16.8 GB RAM + 24 GB swap minus the reserve: 2048 is refused, 512 fits.
-    budget = 16_766_414_848 + 25_769_799_680 - 1_000_000_000
-    assert export_mtk.calibration_bytes(config, at_2k, 9) > budget > export_mtk.calibration_bytes(config, CFG.mtk, 9)
+    params = TOTAL_PARAMS["Qwen/Qwen3-0.6B"]
+    weights = 751_632_384 * 6
+    at_512 = export_mtk.calibration_bytes(config, CFG.mtk, 9, params)
+    assert at_512 == int(9 * 10 * 229_376 * 512 * 2.4) + weights == 29_876_944_896
+    # Run 34760462220 peaked at 29,592,731,648 B of RAM + swap in use (finding 25).
+    assert at_512 >= 29_592_731_648
+    # 16.8 GB RAM + 24 GB swap minus the reserve: 512 fits with all 9 prompts; 2048 does not
+    # fit even with mtk.min_calibration_prompts (run 1 took the runner down at 2048).
+    budget = 16_765_378_560 + 25_769_799_680 - 1_000_000_000
+    at_2k = dataclasses.replace(CFG.mtk, cache_size=2048)
+    assert at_512 < budget
+    assert export_mtk.calibration_bytes(config, at_2k, CFG.mtk.min_calibration_prompts, params) == 49_606_950_912
+    assert 49_606_950_912 > budget
 
 
 def test_the_calibration_patch_adds_what_the_export_checks_for():

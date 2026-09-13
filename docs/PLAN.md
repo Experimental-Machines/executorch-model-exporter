@@ -202,9 +202,13 @@ calling ExecuTorch's own script in compile-only mode:
   a 622 MB fp32 embedding table, 1.05 GB in all. Export 1,695 s, calibration 43% of it.
   Memory in use reached up to ~29.0 GB (16.5 GB of RAM + 12.4 GB of swap), above the 21.1 GB
   `calibration_bytes` estimate (docs/research, findings 22-23).
-- **Windows, open:** the watcher dispatches `export-mtk.yml` (the last of `watch.STAGES`)
-  without `contexts`, so it runs the `context_tiers` (2,048-32,768), not the 512 that works;
-  2,048 passes the estimate gate but likely exceeds the runner (docs/research, finding 24).
+- **Published** (2026-09-13): Qwen3-0.6B for MT6989 at 512, `mtk/mt6989/` and release
+  `Qwen3-0.6B-mtk-mt6989-512-c1899de`; export 1,343 s (docs/research, finding 26).
+- **Windows:** `export-mtk.yml` with no `contexts` (as the watcher dispatches it) runs the
+  `context_tiers` plus `mtk.cache_size` 512 (finding 24). The memory gate
+  (`calibration_bytes`: 6 B per parameter + 2.4 x the calibration tensors, fitted to the
+  measured 29.6 GB peak at 512) skips Qwen3-0.6B at 2,048 and up, so for now only 512 builds
+  (finding 25).
 
 ## Phases
 

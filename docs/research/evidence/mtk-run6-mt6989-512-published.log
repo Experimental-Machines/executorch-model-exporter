@@ -1,0 +1,58 @@
+# Sixth MediaTek export, the first published: Qwen3-0.6B, MT6989 (Dimensity 9300), 512-token cache. Stage times, and the time of the RAM + swap peak (peak_in_use_at 2026-09-13T13:44:16Z in the report).
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34760462220 , job "export (MT6989, 512)" (available).
+# Lines kept: those matching /mtk_converter  |mtk-neuron  |Applied patch|Export shape|Loading weights|Preparing Model Calibration|Exporting Chunk|Calibrating Model: .*(0|1|9)/9 \[|Getting ATen Dialect|Delegating Edge|Transforming delegated|Model Size|==> Qwen|Traceback|huggingface\.co/|##\[group\]Run (set \+e|python -m pipeline publish)/, with the step name in brackets; ANSI codes and progress-bar redraws removed (first and last calibration updates per chunk kept).
+
+2026-09-13T13:41:33Z [MediaTek tools] mtk_converter             8.13.0+public
+2026-09-13T13:41:33Z [MediaTek tools] mtk-neuron                8.2.23
+2026-09-13T13:41:37Z [ExecuTorch examples/medi] Applied patch examples/mediatek/model_export_scripts/qwen.py cleanly.
+2026-09-13T13:41:37Z [Export] ##[group]Run set +e
+2026-09-13T13:41:56Z [Export] Export shape(s):              ['128t512c', '1t512c']
+2026-09-13T13:41:57Z [Export] Loading weights from disk
+2026-09-13T13:41:58Z [Export] Loading weights for chunk 0
+2026-09-13T13:41:59Z [Export] Loading weights for chunk 1
+2026-09-13T13:41:59Z [Export] Loading weights for chunk 2
+2026-09-13T13:42:00Z [Export] Loading weights for chunk 3
+2026-09-13T13:42:01Z [Export] Preparing Model Calibration Inputs...
+2026-09-13T13:45:18Z [Export] Exporting Chunk 0 to PTE
+2026-09-13T13:45:43Z [Export] Calibrating Model:   0%|          | 0/9 [00:00<?, ?it/s]
+2026-09-13T13:45:59Z [Export] Calibrating Model:  11%|█         | 1/9 [00:19<02:34, 19.31s/it]
+2026-09-13T13:47:49Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:23<00:00, 15.68s/it]
+2026-09-13T13:47:49Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:23<00:00, 15.98s/it]
+2026-09-13T13:47:50Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 128t512c chunk 0
+2026-09-13T13:48:15Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 1t512c chunk 0
+2026-09-13T13:48:35Z [Export] Delegating Edge Program to Neuropilot Backend
+2026-09-13T13:49:43Z [Export] Transforming delegated program to executorch backend
+2026-09-13T13:49:47Z [Export]  Model Size: 86257152
+2026-09-13T13:49:47Z [Export] Exporting Chunk 1 to PTE
+2026-09-13T13:50:04Z [Export] Calibrating Model:   0%|          | 0/9 [00:00<?, ?it/s]
+2026-09-13T13:50:19Z [Export] Calibrating Model:  11%|█         | 1/9 [00:13<01:47, 13.45s/it]
+2026-09-13T13:51:54Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:01<00:00, 13.31s/it]
+2026-09-13T13:51:54Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:01<00:00, 13.54s/it]
+2026-09-13T13:51:55Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 128t512c chunk 1
+2026-09-13T13:52:16Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 1t512c chunk 1
+2026-09-13T13:52:35Z [Export] Delegating Edge Program to Neuropilot Backend
+2026-09-13T13:53:42Z [Export] Transforming delegated program to executorch backend
+2026-09-13T13:53:47Z [Export]  Model Size: 86257152
+2026-09-13T13:53:47Z [Export] Exporting Chunk 2 to PTE
+2026-09-13T13:54:06Z [Export] Calibrating Model:   0%|          | 0/9 [00:00<?, ?it/s]
+2026-09-13T13:54:23Z [Export] Calibrating Model:  11%|█         | 1/9 [00:15<02:00, 15.04s/it]
+2026-09-13T13:56:07Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:14<00:00, 14.86s/it]
+2026-09-13T13:56:07Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:14<00:00, 14.97s/it]
+2026-09-13T13:56:08Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 128t512c chunk 2
+2026-09-13T13:56:29Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 1t512c chunk 2
+2026-09-13T13:56:48Z [Export] Delegating Edge Program to Neuropilot Backend
+2026-09-13T13:57:54Z [Export] Transforming delegated program to executorch backend
+2026-09-13T13:57:58Z [Export]  Model Size: 86257280
+2026-09-13T13:57:58Z [Export] Exporting Chunk 3 to PTE
+2026-09-13T13:58:21Z [Export] Calibrating Model:   0%|          | 0/9 [00:00<?, ?it/s]
+2026-09-13T13:58:37Z [Export] Calibrating Model:  11%|█         | 1/9 [00:15<02:07, 15.99s/it]
+2026-09-13T14:00:48Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:39<00:00, 19.29s/it]
+2026-09-13T14:00:48Z [Export] Calibrating Model: 100%|██████████| 9/9 [02:39<00:00, 17.78s/it]
+2026-09-13T14:00:49Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 128t512c chunk 3
+2026-09-13T14:01:21Z [Export] Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 1t512c chunk 3
+2026-09-13T14:01:41Z [Export] Delegating Edge Program to Neuropilot Backend
+2026-09-13T14:04:04Z [Export] Transforming delegated program to executorch backend
+2026-09-13T14:04:08Z [Export]  Model Size: 165419008
+2026-09-13T14:04:32Z [Export] ==> Qwen/Qwen3-0.6B@c1899de289a0: qwen.py, 4 chunks, MT6989, window 512
+2026-09-13T14:05:24Z [Publish to Hugging Face] https://huggingface.co/experimentalmachines/Qwen3-0.6B-ExecuTorch/commit/d42edd8bc8dc7735b05ff49a9c9d7d0920cd3e13
+2026-09-13T14:05:24Z [Publish GitHub release] ##[group]Run python -m pipeline publish-release "$WORK_DIR/out" --backend mtk --target "$TARGET"

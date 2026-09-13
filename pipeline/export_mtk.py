@@ -57,8 +57,14 @@ RUNNER_IO_TYPES = {
     "mask_type": "fp32",
     "rot_emb_type": "fp32",
 }
-# Calibration tensors plus their Arrow copy (calibration_bytes).
-CALIBRATION_OVERHEAD = 2.0
+# calibration_bytes: the calibration tensors times this (their Arrow copy and the rest that
+# grows with them), plus WEIGHT_BYTES_PER_PARAM for the weights held throughout. Fitted to
+# run 34760462220 (Qwen3-0.6B, MT6989, 512, 9 prompts): 29,592,731,648 B of RAM + swap in
+# use at its peak, during "Preparing Model Calibration Inputs" (docs/research, finding 25).
+CALIBRATION_OVERHEAD = 2.4
+# model_export_scripts/qwen.py:454-480 keeps the whole checkpoint as a state_dict (16-bit as
+# published) and builds every chunk from it in fp32: 2 + 4 bytes per parameter.
+WEIGHT_BYTES_PER_PARAM = 6
 # third_party/executorch/patches/mediatek-calibration-as-arrays.patch: without it the
 # calibration reads every prepared row back as nested Python lists, ~35 min per prompt on
 # the hosted runner (docs/research, finding 17).
@@ -110,21 +116,23 @@ def export_command(
     ]
 
 
-def calibration_bytes(config: dict, recipe: settings.MtkRecipe, prompts: int) -> int:
-    """Rough peak of MediaTek's calibration input preparation.
+def calibration_bytes(config: dict, recipe: settings.MtkRecipe, prompts: int, params: int) -> int:
+    """Estimated peak of RAM + swap in use while MediaTek's script prepares calibration inputs,
+    the export's peak (docs/research, findings 15, 23, 25).
 
     For every prompt, model_export_scripts/*.py prepare_model_inputs keeps the fp32 KV cache
     of every layer at the full cache size for the prompt step and each generated token (up
-    to response_cap), and datasets.map then holds them all as Arrow rows before writing.
-    CALIBRATION_OVERHEAD covers that copy; a 2048-token Qwen3-0.6B run (9 prompts, cap 9,
-    estimate 85 GB) exhausted a 16.8 GB + 24 GB swap runner during this step.
+    to response_cap), and datasets.map then holds them all as Arrow rows before writing,
+    while the weights stay loaded. One measured point (see CALIBRATION_OVERHEAD) fixes the
+    factor, so how the peak splits between the two terms is an assumption.
     """
     c = families.text_config(config)
     n_heads = int(c["num_attention_heads"])
     head_dim = int(c.get("head_dim") or int(c["hidden_size"]) // n_heads)
     kv_per_token = int(c["num_hidden_layers"]) * 2 * int(c.get("num_key_value_heads") or n_heads) * head_dim * 4
     steps = prompts * (1 + recipe.response_cap)
-    return int(steps * kv_per_token * recipe.cache_size * CALIBRATION_OVERHEAD)
+    tensors = steps * kv_per_token * recipe.cache_size
+    return int(tensors * CALIBRATION_OVERHEAD) + params * WEIGHT_BYTES_PER_PARAM
 
 
 def exp_name(weight_dir: Path, precision: str, chunks: int) -> str:
@@ -260,9 +268,14 @@ def run(
     budget = host_budget(host_info())
     prompts = len(lines)
     floor = min(recipe.min_calibration_prompts, prompts)
-    while budget is not None and prompts > floor and calibration_bytes(source.config, recipe, prompts) > budget:
+    params = source.total_params  # eligibility refuses a model without it
+
+    def needs(n: int) -> int:
+        return calibration_bytes(source.config, recipe, n, params)
+
+    while budget is not None and prompts > floor and needs(prompts) > budget:
         prompts -= 1
-    needed = calibration_bytes(source.config, recipe, prompts)
+    needed = needs(prompts)
     if budget is not None and needed > budget:
         raise SkipExport(
             f"calibration at a {window}-token cache needs about {needed:,} B even with {prompts} prompts "
