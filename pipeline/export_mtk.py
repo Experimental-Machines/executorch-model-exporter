@@ -34,6 +34,7 @@ from pipeline.exporting import (
     children_peak_rss,
     contains,
     copy_side_files,
+    host_budget,
     host_info,
     sha256,
     source_report,
@@ -53,6 +54,8 @@ RUNNER_IO_TYPES = {
     "mask_type": "fp32",
     "rot_emb_type": "fp32",
 }
+# Calibration tensors plus their Arrow copy (calibration_bytes).
+CALIBRATION_OVERHEAD = 2.0
 TOOL_PACKAGES = ("executorch", "torch", "torchao", "transformers", "mtk_converter", "mtk-neuron")
 
 _LOAD_PROGRAM = """
@@ -87,6 +90,8 @@ def export_command(
         str(plan.num_chunks),
         "--dataset",
         recipe.calibration,
+        "--response_cap",
+        str(recipe.response_cap),
         "--preformatter",
         f"aot_utils/llm_utils/preformatter_templates/{plan.preformatter}",
         "-shapes",
@@ -95,6 +100,23 @@ def export_command(
         "--platform",
         SOC_PLATFORMS[soc],
     ]
+
+
+def calibration_bytes(config: dict, recipe: settings.MtkRecipe, prompts: int) -> int:
+    """Rough peak of MediaTek's calibration input preparation.
+
+    For every prompt, model_export_scripts/*.py prepare_model_inputs keeps the fp32 KV cache
+    of every layer at the full cache size for the prompt step and each generated token (up
+    to response_cap), and datasets.map then holds them all as Arrow rows before writing.
+    CALIBRATION_OVERHEAD covers that copy; a 2048-token Qwen3-0.6B run (8 prompts, cap 9,
+    estimate 75 GB) exhausted a 16.8 GB + 24 GB swap runner during this step.
+    """
+    c = families.text_config(config)
+    n_heads = int(c["num_attention_heads"])
+    head_dim = int(c.get("head_dim") or int(c["hidden_size"]) // n_heads)
+    kv_per_token = int(c["num_hidden_layers"]) * 2 * int(c.get("num_key_value_heads") or n_heads) * head_dim * 4
+    steps = prompts * (1 + recipe.response_cap)
+    return int(steps * kv_per_token * recipe.cache_size * CALIBRATION_OVERHEAD)
 
 
 def exp_name(weight_dir: Path, precision: str, chunks: int) -> str:
@@ -198,6 +220,17 @@ def run(
         problems = naming.check_app_rules(output_repo, f"{folder}/{name}", BACKEND)
         if problems:
             raise ExportError("; ".join(problems))
+
+    prompts_file = examples_dir / recipe.calibration
+    prompts = sum(1 for line in prompts_file.read_text(encoding="utf-8").splitlines() if line.strip())
+    needed = calibration_bytes(source.config, recipe, prompts)
+    budget = host_budget(host_info())
+    if budget is not None and needed > budget:
+        raise ExportError(
+            f"calibration at a {window}-token cache needs about {needed:,} B "
+            f"({prompts} prompts x {1 + recipe.response_cap} steps), this host has {budget:,} B: "
+            "use a smaller --context"
+        )
 
     tools = tool_versions(tool_python)
     for package, pinned in (("mtk_converter", "MTK_CONVERTER_VERSION"), ("mtk-neuron", "MTK_NEURON_VERSION")):

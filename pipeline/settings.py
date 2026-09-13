@@ -37,6 +37,7 @@ class MtkRecipe:
     prompt_tokens: int
     cache_size: int
     calibration: str
+    response_cap: int
 
 
 @dataclass(frozen=True)
@@ -115,6 +116,7 @@ def load() -> Settings:
             prompt_tokens=int(export["mtk"]["prompt_tokens"]),
             cache_size=int(export["mtk"]["cache_size"]),
             calibration=export["mtk"]["calibration"],
+            response_cap=int(export["mtk"]["response_cap"]),
         ),
         executorch_version=versions["EXECUTORCH_VERSION"],
     )

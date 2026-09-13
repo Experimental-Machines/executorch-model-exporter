@@ -86,9 +86,14 @@ export:
     precision: A16W4
     max_chunks: 4
     # Static shapes: a prompt graph taking prompt_tokens per step and a one-token
-    # generation graph, both over a cache of cache_size tokens (the window).
+    # generation graph, both over a cache of cache_size tokens (the window). 512 is
+    # MediaTek's default: calibration keeps a full fp32 KV cache per prompt and step, so
+    # its memory grows with the window (export_mtk.calibration_bytes); at 2048 it exhausted
+    # the runner's 16.8 GB RAM + 24 GB swap and took the runner down.
     prompt_tokens: 128
-    cache_size: 2048
+    cache_size: 512
     # Calibration prompts shipped with examples/mediatek, wrapped in the family's chat
-    # template (MediaTek's scripts fall back to random inputs without them).
+    # template (MediaTek's scripts fall back to random inputs without them), and the
+    # generated tokens per prompt that calibrate the one-token graph (MediaTek's default 9).
     calibration: aot_utils/llm_utils/prompts/alpaca.txt
+    response_cap: 9

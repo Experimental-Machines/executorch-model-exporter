@@ -45,7 +45,8 @@ def test_export_command_matches_mediateks_shell_scripts(tmp_path):
     assert flag(command, "--dataset") == "aot_utils/llm_utils/prompts/alpaca.txt"
     assert flag(command, "--preformatter") == "aot_utils/llm_utils/preformatter_templates/qwen3.json"
     shapes = command.index("-shapes")
-    assert command[shapes + 1 : shapes + 3] == ["128t2048c", "1t2048c"]
+    assert command[shapes + 1 : shapes + 3] == ["128t512c", "1t512c"]
+    assert flag(command, "--response_cap") == "9"
     assert flag(command, "--platform") == "DX3"
     assert flag(export_mtk.export_command("p", plan(), CFG.mtk, "MT6991", tmp_path), "--platform") == "DX4"
 
@@ -54,8 +55,8 @@ def test_output_names_follow_the_scripts(tmp_path):
     exp = export_mtk.exp_name(tmp_path / "Qwen3-0.6B", "A16W4", 4)
     assert exp == "Qwen3-0.6B_A16W4_4_chunks"
     assert export_mtk.method_names(exp, CFG.mtk, 3) == [
-        "Qwen3-0.6B_A16W4_4_chunks_128t2048c_3",
-        "Qwen3-0.6B_A16W4_4_chunks_1t2048c_3",
+        "Qwen3-0.6B_A16W4_4_chunks_128t512c_3",
+        "Qwen3-0.6B_A16W4_4_chunks_1t512c_3",
     ]
 
 
@@ -78,7 +79,7 @@ def test_runner_settings_for_qwen3_0_6b():
     assert runner["num_layer"] == 28
     assert runner["head_dim"] == 128
     assert runner["rot_emb_base"] == 1000000.0
-    assert runner["cache_size"] == 2048 and runner["prompt_token_batch_size"] == 128
+    assert runner["cache_size"] == 512 and runner["prompt_token_batch_size"] == 128
     assert runner["eos_token"] == 151645 and runner["eos_tokens"] == [151645, 151643]
     assert runner["vocab_size"] == 151936
     assert runner["tokenizer_type"] == "hf" and runner["cache_type"] == "fp32"
@@ -153,3 +154,14 @@ def test_publish_refuses_a_tokenizer_inside_a_mediatek_folder(tmp_path):
     (folder / "tokenizer.json").write_text("{}")
     with pytest.raises(ValueError, match="repo root"):
         publish.publish_hf(tmp_path, "mtk", "MT6991")
+
+
+def test_calibration_memory_estimate_matches_the_run_that_took_the_runner_down():
+    # Qwen3-0.6B: 28 layers x K,V x 8 KV heads x 128 x 4 B = 229,376 B of fp32 cache per token.
+    config = hf_config("Qwen/Qwen3-0.6B")
+    at_2k = dataclasses.replace(CFG.mtk, cache_size=2048, response_cap=9)
+    assert export_mtk.calibration_bytes(config, at_2k, 8) == 8 * 10 * 229_376 * 2048 * 2 == 75_161_927_680
+    assert export_mtk.calibration_bytes(config, CFG.mtk, 8) == 18_790_481_920  # the 512 default
+    # 16.8 GB RAM + 24 GB swap minus the reserve: 2048 is refused, 512 fits.
+    budget = 16_766_414_848 + 25_769_799_680 - 1_000_000_000
+    assert export_mtk.calibration_bytes(config, at_2k, 8) > budget > export_mtk.calibration_bytes(config, CFG.mtk, 8)
