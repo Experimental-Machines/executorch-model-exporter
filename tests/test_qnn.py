@@ -162,8 +162,9 @@ def tiny_program(tmp_path, delegate_id=None, methods=("forward",)):
 
     edge = to_edge({name: export(Add(), (torch.ones(2),)) for name in methods})
     if delegate_id:
-        # to_backend finds the backend class by name among BackendDetails' subclasses.
-        type(
+        # to_backend finds the backend class by name among BackendDetails' subclasses, which
+        # are weak references: keep the class alive until the lowering is done.
+        fake_backend = type(
             delegate_id,
             (BackendDetails,),
             {"preprocess": staticmethod(lambda program, specs: PreprocessResult(processed_bytes=b"fake-blob"))},
@@ -180,6 +181,7 @@ def tiny_program(tmp_path, delegate_id=None, methods=("forward",)):
                 return PartitionResult(tagged_exported_program=exported_program, partition_tags=tags)
 
         edge = edge.to_backend(All())
+        del fake_backend
     tmp_path.mkdir(parents=True, exist_ok=True)
     path = tmp_path / "tiny.pte"
     path.write_bytes(edge.to_executorch().buffer)
