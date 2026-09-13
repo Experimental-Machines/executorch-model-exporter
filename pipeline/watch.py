@@ -31,8 +31,9 @@ from pipeline.settings import Settings
 STATE_VERSION = 1
 # Backend → the workflow that exports it (one run covers every target chip). MediaTek
 # joins in phase 4.
-# export-mtk.yml joins once its first export has passed (docs/PLAN.md phase 4).
-WORKFLOWS = {"xnnpack": "export-xnnpack.yml", "qnn": "export-qnn.yml"}
+WORKFLOWS = {"xnnpack": "export-xnnpack.yml", "qnn": "export-qnn.yml", "mtk": "export-mtk.yml"}
+# Dispatch order: the CPU exports of every model first, then each NPU backend in turn.
+STAGES = ("xnnpack", "qnn", "mtk")
 # A model whose metadata could not be read is retried this many runs before it is skipped.
 MAX_ATTEMPTS = 5
 
@@ -67,6 +68,23 @@ def run_in_flight(workflow: str, model_id: str, repo: str | None) -> bool:
     if result.returncode != 0:
         return False
     return any(r["status"] in _IN_FLIGHT and f" {model_id}@" in r["displayTitle"] for r in json.loads(result.stdout))
+
+
+def runs_in_flight(workflow: str) -> bool:
+    """Whether ``workflow`` has any queued or running run (the stage is still busy).
+
+    A dispatched run is titled "<backend>: <model>@<revision>"; a run whose title is just
+    the workflow's name is a ghost GitHub created while its API was failing (2026-09-13),
+    stuck "queued" and impossible to cancel, and does not count.
+    """
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    command = ["gh", "run", "list", "--workflow", workflow, "--limit", "100", "--json", "displayTitle,name,status"]
+    if repo:
+        command += ["-R", repo]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"gh run list {workflow} failed: {result.stderr.strip()[-300:]}")
+    return any(r["status"] in _IN_FLIGHT and "@" in r["displayTitle"] for r in json.loads(result.stdout))
 
 
 def gh_dispatch(workflow: str, model_id: str, revision: str, attempts: int = 4) -> None:
@@ -163,9 +181,11 @@ def run(
     backfill: tuple[str, ...] = (),
     limit_per_org: int = 200,
     max_dispatch: int = 6,
+    requeue: bool = False,
     lister: Callable[[str, int], list[Listed]] = list_org,
     fetch: Callable[[str, str], hub.SourceModel] = hub.fetch,
     dispatcher: Callable[[str, str, str], None] = gh_dispatch,
+    in_flight: Callable[[str], bool] = runs_in_flight,
 ) -> dict:
     """One watcher pass. Returns a summary; the caller saves ``summary["state"]``."""
     state = load_state(state_path)
@@ -204,13 +224,33 @@ def run(
         models[model_id] = entry
         summary["backfilled"].append(model_id)
 
+    if requeue:
+        # Runs were cancelled: everything recorded as dispatched goes back to the queue.
+        for entry in models.values():
+            for info in entry.get("backends", {}).values():
+                if info["status"] == "dispatched":
+                    info.update(status="pending", requeued=stamp)
+                    info.pop("at", None)
+            if any(i["status"] == "pending" for i in entry.get("backends", {}).values()):
+                entry["status"] = "pending"
+
+    # Stages: every model's XNNPACK exports before any Qualcomm one, then MediaTek. A later
+    # stage starts only when the earlier one has nothing pending and nothing in flight.
     budget = max_dispatch
-    for model_id, entry in sorted(models.items(), key=lambda kv: kv[1].get("first_seen") or ""):
-        if entry.get("status") != "pending":
-            continue
-        for backend, info in entry["backends"].items():
-            if info["status"] != "pending" or budget == 0:
-                continue
+    by_first_seen = sorted(models.items(), key=lambda kv: kv[1].get("first_seen") or "")
+    for backend in STAGES:
+        queue = [
+            (model_id, entry)
+            for model_id, entry in by_first_seen
+            if entry.get("status") == "pending" and entry["backends"].get(backend, {}).get("status") == "pending"
+        ]
+        if not queue and not (dispatch and in_flight(WORKFLOWS[backend])):
+            continue  # this stage is finished; the next one may start
+        summary["stage"] = backend
+        for model_id, entry in queue:
+            if budget == 0:
+                break
+            info = entry["backends"][backend]
             if dispatch:
                 try:
                     dispatcher(WORKFLOWS[backend], model_id, entry["sha"])
@@ -223,7 +263,11 @@ def run(
                 info.pop("last_error", None)
             summary["dispatched"].append(f"{model_id} -> {backend}")
             budget -= 1
-        if all(info["status"] != "pending" for info in entry["backends"].values()):
+        break  # later stages wait for this one
+    for entry in models.values():
+        if entry.get("status") == "pending" and all(
+            i["status"] != "pending" for i in entry.get("backends", {}).values()
+        ):
             entry["status"] = "dispatched"
 
     summary["state"] = state
@@ -241,7 +285,8 @@ def markdown(summary: dict) -> str:
             "",
         ]
     checked = summary["new"] + summary["backfilled"]
-    lines.append(f"Checked {len(checked)} model(s); dispatched {len(summary['dispatched'])} export run(s).")
+    stage = f" (stage: {summary['stage']})" if summary.get("stage") else ""
+    lines.append(f"Checked {len(checked)} model(s); dispatched {len(summary['dispatched'])} export run(s){stage}.")
     if summary.get("failed"):
         lines += ["", "Could not dispatch (still pending, retried next run):", *[f"- {f}" for f in summary["failed"]]]
     if checked:

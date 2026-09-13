@@ -135,6 +135,7 @@ def _watch(args) -> int:
         cfg,
         dispatch=not args.dry_run,
         backfill=backfill,
+        requeue=args.requeue,
         limit_per_org=cfg.limit_per_org,
         max_dispatch=cfg.max_dispatch_per_run,
     )
@@ -208,6 +209,9 @@ def main(argv: list[str] | None = None) -> int:
     watch.add_argument("--backfill", default="", help="comma-separated model ids to evaluate and export now")
     watch.add_argument("--dry-run", action="store_true", help="dispatch nothing and leave the state file alone")
     watch.add_argument("--summary", default=None, help="append the markdown summary to this file")
+    watch.add_argument(
+        "--requeue", action="store_true", help="put every dispatched export back in the queue (after cancelling runs)"
+    )
     watch.set_defaults(func=_watch)
 
     for name, func, text in (

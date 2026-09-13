@@ -9,7 +9,7 @@ GitHub-hosted runners. Design and decisions: [docs/PLAN.md](docs/PLAN.md).
 | XNNPACK (CPU) | Qwen3, Qwen2.5, Llama 3.2, SmolLM2 |
 | Qualcomm QNN (SM8650, SM8750) | checkpoints in ExecuTorch 1.4.0's Qualcomm registry (Qwen3, Qwen2.5 base, Gemma 3 1B, SmolLM2 135M, SmolLM3 3B, Llama 3.2) |
 | MediaTek NeuroPilot (MT6989, MT6991) | Qwen3, Qwen2.5 (phase 4, first export pending); Llama 3.2 and Gemma 3 not validated yet |
-| HF watcher (auto-dispatch) | every 6 hours; state on the `state` branch |
+| HF watcher (auto-dispatch) | hourly; XNNPACK for every model first, then QNN, then MediaTek; state on the `state` branch |
 
 ## Running an export
 
@@ -31,7 +31,9 @@ Repository secrets:
   (`hub.org` in [config/pipeline.yaml](config/pipeline.yaml)). Its account must have
   accepted the licenses of gated source models (Llama, Gemma).
 
-**Watch Hugging Face** runs every 6 hours. Its first run records the models that already
+**Watch Hugging Face** runs hourly and dispatches in stages: every model's XNNPACK
+exports first, then Qualcomm, then MediaTek; a stage starts once the previous one has no
+run queued or running. Its first run records the models that already
 exist without exporting them; to export existing ones, run it with `backfill` set to a
 comma-separated list of model ids (or run **Export XNNPACK** directly). `dry_run` reports
 what it would do without dispatching or saving state.

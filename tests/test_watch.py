@@ -40,6 +40,7 @@ def run(tmp_path, hub, **kwargs):
         lister=hub.lister,
         fetch=hub.fetch,
         dispatcher=kwargs.pop("dispatcher", hub.dispatch),
+        in_flight=kwargs.pop("in_flight", lambda workflow: False),
         **kwargs,
     )
     if kwargs.get("dispatch", True):
@@ -78,14 +79,17 @@ def test_new_models_are_checked_once_and_dispatched(tmp_path):
         ("export-xnnpack.yml", "Qwen/Qwen3-1.7B-Instruct-2609", "sha-Qwen/Qwen3-1.7B-Instruct-2609")
     ]
     entry = models["Qwen/Qwen3-1.7B-Instruct-2609"]
-    assert entry["status"] == "dispatched"
+    assert entry["status"] == "pending"  # its MediaTek stage is still to come
     assert entry["backends"]["xnnpack"]["status"] == "dispatched"
     assert entry["backends"]["qnn"]["status"] == "skipped"
+    assert entry["backends"]["mtk"]["status"] == "pending"
     # Seeded models are not re-checked.
     assert "Qwen/Qwen3-0.6B" not in summary["new"]
-    # A second pass with nothing new does nothing.
+    # The next pass finds nothing new; the XNNPACK stage is idle, so MediaTek's turn comes.
     hub.dispatched.clear()
-    assert run(tmp_path, hub)["new"] == [] and hub.dispatched == []
+    summary = run(tmp_path, hub)
+    assert summary["new"] == [] and [d[0] for d in hub.dispatched] == ["export-mtk.yml"]
+    assert summary["state"]["models"]["Qwen/Qwen3-1.7B-Instruct-2609"]["status"] == "dispatched"
 
 
 def test_orgs_are_watched_for_their_own_families_only(tmp_path):
@@ -110,7 +114,7 @@ def test_dispatch_budget_carries_over(tmp_path):
     assert len(hub.dispatched) == 2
     summary = run(tmp_path, hub, max_dispatch=2)
     assert len(hub.dispatched) == 3
-    assert {e["status"] for e in summary["state"]["models"].values()} == {"dispatched"}
+    assert {e["backends"]["xnnpack"]["status"] for e in summary["state"]["models"].values()} == {"dispatched"}
 
 
 def test_fetch_errors_are_retried_then_given_up(tmp_path):
@@ -130,11 +134,13 @@ def test_backfill_exports_a_seeded_model(tmp_path):
     run(tmp_path, hub)
     summary = run(tmp_path, hub, backfill=("Qwen/Qwen3-1.7B",))
     assert summary["backfilled"] == ["Qwen/Qwen3-1.7B"]
-    # Qwen3-1.7B is also in ExecuTorch's Qualcomm registry: one run per backend workflow.
-    assert hub.dispatched == [
-        ("export-xnnpack.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B"),
-        ("export-qnn.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B"),
-    ]
+    # Qwen3-1.7B is also in ExecuTorch's Qualcomm registry, but stages go one backend at a
+    # time: XNNPACK now, QNN on the pass after the XNNPACK stage is idle.
+    assert hub.dispatched == [("export-xnnpack.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B")]
+    assert summary["stage"] == "xnnpack"
+    summary = run(tmp_path, hub)
+    assert hub.dispatched[-1] == ("export-qnn.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B")
+    assert summary["stage"] == "qnn"
 
 
 def test_backfill_on_the_first_run_still_seeds_everything_else(tmp_path):
@@ -194,6 +200,59 @@ def test_gh_dispatch_treats_a_run_in_flight_as_dispatched(monkeypatch):
     watch.gh_dispatch("export-xnnpack.yml", "Qwen/Qwen3-0.6B", "abc")
     assert calls == [["gh", "run", "list"]]
     assert not watch.run_in_flight("export-xnnpack.yml", "Qwen/Qwen3-0.6B-Base", None)
+
+
+def test_stages_wait_for_the_previous_backend_to_finish(tmp_path):
+    hub = FakeHub({"Qwen": []})
+    run(tmp_path, hub)
+    hub.listings["Qwen"] = ["Qwen/Qwen3-0.6B", "Qwen/Qwen3-1.7B", "Qwen/Qwen3-4B"]  # 0.6B/1.7B also QNN
+    summary = run(tmp_path, hub)
+    assert [d[0] for d in hub.dispatched] == ["export-xnnpack.yml"] * 3 and summary["stage"] == "xnnpack"
+    # XNNPACK runs still in flight: nothing new, the QNN stage waits.
+    hub.dispatched.clear()
+    summary = run(tmp_path, hub, in_flight=lambda wf: wf == "export-xnnpack.yml")
+    assert hub.dispatched == [] and summary["stage"] == "xnnpack"
+    # XNNPACK idle: QNN starts, for every model in one pass.
+    summary = run(tmp_path, hub)
+    assert sorted(d[1] for d in hub.dispatched) == ["Qwen/Qwen3-0.6B", "Qwen/Qwen3-1.7B"]
+    assert {d[0] for d in hub.dispatched} == {"export-qnn.yml"} and summary["stage"] == "qnn"
+    # QNN idle: MediaTek, the last stage, for every model with a recipe (all three here).
+    hub.dispatched.clear()
+    summary = run(tmp_path, hub)
+    assert {d[0] for d in hub.dispatched} == {"export-mtk.yml"} and len(hub.dispatched) == 3
+    assert summary["stage"] == "mtk"
+    # Everything dispatched: nothing left, no stage.
+    hub.dispatched.clear()
+    summary = run(tmp_path, hub)
+    assert hub.dispatched == [] and "stage" not in summary
+    assert {e["status"] for e in summary["state"]["models"].values()} == {"dispatched"}
+
+
+def test_requeue_puts_cancelled_dispatches_back(tmp_path):
+    hub = FakeHub({"Qwen": []})
+    run(tmp_path, hub)
+    hub.listings["Qwen"] = ["Qwen/Qwen3-4B"]
+    run(tmp_path, hub)
+    assert len(hub.dispatched) == 1
+    summary = run(tmp_path, hub, requeue=True)  # the run was cancelled: dispatch it again
+    assert len(hub.dispatched) == 2
+    entry = summary["state"]["models"]["Qwen/Qwen3-4B"]
+    assert entry["backends"]["xnnpack"]["status"] == "dispatched" and "requeued" in entry["backends"]["xnnpack"]
+
+
+def test_runs_in_flight_ignores_ghost_runs(monkeypatch):
+    runs = [
+        {"displayTitle": "Export XNNPACK", "name": "Export XNNPACK", "status": "queued"},  # ghost
+        {"displayTitle": "XNNPACK: Qwen/Qwen3-4B@abc", "name": "Export XNNPACK", "status": "completed"},
+    ]
+
+    def fake_run(command, **kwargs):
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps(runs), stderr="")
+
+    monkeypatch.setattr(watch.subprocess, "run", fake_run)
+    assert not watch.runs_in_flight("export-xnnpack.yml")
+    runs[1]["status"] = "in_progress"
+    assert watch.runs_in_flight("export-xnnpack.yml")
 
 
 def test_state_version_is_checked(tmp_path):

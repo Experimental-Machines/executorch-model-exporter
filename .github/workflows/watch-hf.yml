@@ -5,7 +5,9 @@ name: Watch Hugging Face
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    # Hourly: a stage (XNNPACK, then QNN, then MediaTek) hands over to the next on the pass
+    # after its last run finishes.
+    - cron: "17 * * * *"
   workflow_dispatch:
     inputs:
       backfill:
@@ -14,6 +16,10 @@ on:
         type: string
       dry_run:
         description: Report only; dispatch nothing and leave the state alone
+        default: false
+        type: boolean
+      requeue:
+        description: Put every export recorded as dispatched back in the queue (after cancelling runs)
         default: false
         type: boolean
 
@@ -35,6 +41,7 @@ jobs:
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       BACKFILL: ${{ inputs.backfill }}
       DRY_RUN: ${{ inputs.dry_run }}
+      REQUEUE: ${{ inputs.requeue }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -66,6 +73,7 @@ jobs:
           args=(--state .state/seen.json --summary "$GITHUB_STEP_SUMMARY")
           if [ -n "$BACKFILL" ]; then args+=(--backfill "$BACKFILL"); fi
           if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          if [ "$REQUEUE" = "true" ]; then args+=(--requeue); fi
           python -m pipeline watch "${args[@]}"
 
       # Saved even when a dispatch failed (the watch step exits 1): what was dispatched must

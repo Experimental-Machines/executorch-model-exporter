@@ -33,9 +33,11 @@ from the CPU index first, as in `.github/actions/setup-export/action.yml`. Other
 
 `pipeline/` is one package driven by `python -m pipeline <command>`. Each GitHub workflow calls these subcommands:
 
-- **`watch-hf.yml`** (every 6 h) → `watch.py`: lists each watched org's newest repos, checks every unseen one (by name
+- **`watch-hf.yml`** (hourly) → `watch.py`: lists each watched org's newest repos, checks every unseen one (by name
   first with no network, then by config), and runs `gh workflow run` for each backend's export workflow. State is
-  `seen.json` on the orphan **`state` branch**. The first run only seeds the state; existing models are exported via the
+  `seen.json` on the orphan **`state` branch**. Dispatch is staged (`watch.STAGES`: XNNPACK for every model, then QNN, then
+  MediaTek; the next stage starts when the previous has nothing queued or running) and idempotent (a run in flight for
+  the model counts as dispatched); `requeue` puts cancelled dispatches back. The first run only seeds the state; existing models are exported via the
   `backfill` input. `watch.WORKFLOWS` maps backend → workflow.
 - **`export-xnnpack.yml`** → `export_xnnpack.py`: `hub.fetch` → `eligibility.evaluate` → `sizing.choose_context` →
   download → `convert.py` (HF safetensors → ExecuTorch checkpoint layout) → generated `params.json` + `export_llm`

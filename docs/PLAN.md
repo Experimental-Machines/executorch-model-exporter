@@ -10,7 +10,7 @@ the [openweights](https://github.com/alpharomercoma/openweights) Android app: XN
 |---|---|
 | Models | Dense (no MoE) text LLMs of the 4B class and smaller (size in the name ≤ 4B; real count < 4.5B, since Qwen3-4B is 4,022,468,096), instruct and base, original bf16/fp16 weights only |
 | Watched orgs | `Qwen`, `google`, `meta-llama`, `HuggingFaceTB`, each for its own families |
-| Trigger | Scheduled watcher; a new eligible model auto-dispatches every backend workflow that supports it |
+| Trigger | Hourly watcher; eligible models are dispatched in stages, XNNPACK for every model first, then Qualcomm, then MediaTek (a stage waits until the previous one has nothing queued or running) |
 | First run | Seeds state without exporting; existing models are backfilled by manual dispatch |
 | Runners | Standard GitHub-hosted `ubuntu-latest` (public repo: 4 vCPU, 16 GB RAM), one workflow run per backend |
 | Chips | QNN: SM8650 (8 Gen 3), SM8750 (8 Elite). MediaTek: MT6989 (D9300), MT6991 (D9400) |
@@ -193,8 +193,9 @@ calling ExecuTorch's own script in compile-only mode:
 1. **XNNPACK end to end** (`export-xnnpack.yml`, done 2026-09-12): first publish
    [experimentalmachines/Qwen3-0.6B-ExecuTorch](https://huggingface.co/experimentalmachines/Qwen3-0.6B-ExecuTorch)
    (16k window, smoke test "Paris") and GitHub release `Qwen3-0.6B-xnnpack-c1899de`.
-2. **Watcher** (`watch-hf.yml`, every 6 hours at :17, plus manual dispatch with `backfill`
-   and `dry_run` inputs). Lists each org's 200 newest repos; a repo not yet in
+2. **Watcher** (`watch-hf.yml`, hourly at :17, plus manual dispatch with `backfill`, `dry_run`
+   and `requeue` inputs; dispatches in stages, XNNPACK → QNN → MediaTek, `watch.STAGES`).
+   Lists every repo of each org (`limit_per_org` 1,500); a repo not yet in
    `seen.json` (on the `state` branch) is checked once, by name first and then by config,
    and each org only for its own families (`org_families`). Eligible models go to
    `export-xnnpack.yml` at the revision seen, at most 6 runs per watcher run. A dry run over
