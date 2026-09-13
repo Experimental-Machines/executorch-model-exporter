@@ -18,7 +18,9 @@ watch:
     meta-llama: [llama32]
     HuggingFaceTB: [smollm2, smollm3]
   # Newest repos listed per org and watcher run (the listing is sorted by creation date).
-  limit_per_org: 200
+  # Qwen alone has 465 repos and its 200 newest (2026-09-13) start after Qwen3-4B, so the
+  # window has to cover a whole org; google's 1,134 is the largest.
+  limit_per_org: 1500
   # Export workflow runs one watcher run may start; the rest wait for the next run.
   max_dispatch_per_run: 6
   pipeline_tag: text-generation
