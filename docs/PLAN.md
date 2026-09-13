@@ -123,7 +123,8 @@ calling ExecuTorch's own script in compile-only mode:
   `datasets==3.6.0`, `lm_eval==0.4.5` (`requirements/export-qnn.txt`).
 - No host runtime for HTP binaries, so the check is structural: the program loads, has
   `prefill_forward` and `kv_forward`, and delegates to `QnnBackend`.
-- The window is fixed at compile time: `qnn.max_context_len` (2048 to start).
+- The window is fixed at compile time: `qnn.max_context_len` (2048 to start), or the
+  workflow's `context` input (`--context`) for one run.
 - QAIRT's license: `THIRD_PARTY_NOTICES.md`.
 
 ### MediaTek (phase 4)
@@ -158,7 +159,17 @@ MediaTek code: read the license bundled in the SDK archive and write
    the 40 newest real repos (2026-09-12) skipped all of them correctly: Qwen3.8 multimodal
    and FP8, Qwen3-ASR, Llama 4, Llama Guard, SmolLM3 (no XNNPACK recipe yet), and
    HuggingFaceTB's GSM8K fine-tune of Qwen3 (not HuggingFaceTB's own family).
-3. **QNN** (`export-qnn.yml`; the watcher dispatches it for registry checkpoints).
+3. **QNN** (`export-qnn.yml`; the watcher dispatches it for registry checkpoints). First
+   publish 2026-09-12: Qwen3-0.6B at 2k into the same repo (`qnn/sm8650/`, `qnn/sm8750/`)
+   and releases `Qwen3-0.6B-qnn-<chip>-c1899de`, both passing the structural check:
+
+   | Chip | `.pte` | Peak RSS | Export |
+   |---|---|---|---|
+   | SM8650 | 665,070,592 B | 15,657,545,728 B | 3,637 s (calibration + quantize 2,042 s, compile 1,538 s) |
+   | SM8750 | 664,296,448 B | 15,644,954,624 B | 2,434 s |
+
+   A 4k probe (`context` input, SM8750, not published) decides whether 4k becomes the
+   default window.
 4. **MediaTek.**
 
 ## Known limits
@@ -173,6 +184,13 @@ MediaTek code: read the license bundled in the SDK archive and write
   ExecuTorch release, and the app's AAR must move with it.
 - QNN/MediaTek exports of 3-4B models may run out of memory or hit the 6-hour job limit
   on 16 GB runners; they fail independently of the other backends.
-- NPU context windows are fixed at compile time and will be far smaller than 32k.
+- NPU context windows are fixed at compile time and will be far smaller than 32k. Every
+  decode step attends over the whole window, so a larger one slows every token, and the
+  16-bit KV cache costs 114,688 B per token for Qwen3-0.6B (28 layers × K,V × 8 heads × 128
+  × 2 B: 234,881,024 B at 2k).
+- QNN `.pte` metadata carries `get_bos_id` 1 and `get_eos_id` 2 whatever the model:
+  ExecuTorch 1.4.0 hard-codes them (`static_llama.py`), and its Qualcomm runner takes stop
+  tokens from the tokenizer per family instead (`<|im_end|>` for Qwen). The app has to do
+  the same when it loads QNN models.
 - Upstream licenses differ (e.g. Qwen2.5-3B is under the Qwen Research License); cards and
   `LICENSE` files copy upstream's terms exactly.
