@@ -134,52 +134,13 @@ def decoder_pte(artifact: Path, model_mode: str) -> Path:
     return matches[0]
 
 
-def delegates(pte: Path) -> dict[str, dict]:
-    """Per method: the backends it delegates to and how many delegate calls it makes.
-
-    Read from the program's flatbuffer (the schema ExecuTorch serialises), not by grepping
-    bytes: the backend id string also appears in a program whose graph never calls it.
-    """
-    from executorch.exir._serialize._program import deserialize_pte_binary
-    from executorch.exir.schema import DelegateCall
-
-    program = deserialize_pte_binary(pte.read_bytes()).program
-    result = {}
-    for plan in program.execution_plan:
-        calls = sum(
-            1
-            for chain in plan.chains
-            for instruction in chain.instructions
-            if isinstance(instruction.instr_args, DelegateCall)
-        )
-        result[plan.name] = {"backends": sorted({d.id for d in plan.delegates}), "delegate_calls": calls}
-    return result
+delegates = smoke.delegates  # kept for callers and tests
 
 
 def structural_check(pte: Path, model_mode: str) -> dict:
     """The program loads, has the decoder graphs, and each of them runs on the QNN delegate."""
-    problems = []
-    try:
-        metadata = smoke.read_metadata(pte)
-        graphs = delegates(pte)
-    except Exception as error:  # a program that does not even parse
-        return {"kind": "structural", "passed": False, "problems": [f"program did not load: {error}"]}
-    methods = metadata.get("methods", [])
     wanted = HYBRID_METHODS if model_mode == "hybrid" else ("kv_forward",)
-    for name in wanted:
-        graph = graphs.get(name)
-        if graph is None:
-            problems.append(f"missing decoder method {name!r} (has {methods})")
-        elif QNN_BACKEND_ID not in graph["backends"] or graph["delegate_calls"] == 0:
-            problems.append(f"{name} does not run on {QNN_BACKEND_ID}: {graph}")
-    return {
-        "kind": "structural",
-        "passed": not problems,
-        "problems": problems,
-        "methods": methods,
-        "delegates": {name: graphs[name] for name in wanted if name in graphs},
-        "metadata": metadata,
-    }
+    return smoke.structural_check(pte, wanted, QNN_BACKEND_ID)
 
 
 _SDK_PROBE = """

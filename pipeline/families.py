@@ -58,8 +58,16 @@ FAMILIES: tuple[Family, ...] = (
     Family("qwen3", ("Qwen3ForCausalLM",)),
     Family("qwen2_5", ("Qwen2ForCausalLM",)),
     Family("llama", ("LlamaForCausalLM",), {"mtk": _MTK_LLAMA}),
-    Family("gemma3", ("Gemma3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _MTK_GEMMA3}),
-    Family("smollm3", ("SmolLM3ForCausalLM",), {"xnnpack": _NOT_IN_EXPORT_LLM, "mtk": _MTK_NO_MODEL}),
+    Family(
+        "gemma3",
+        ("Gemma3ForCausalLM",),
+        {"xnnpack": _NOT_IN_EXPORT_LLM, "vulkan": _NOT_IN_EXPORT_LLM, "mtk": _MTK_GEMMA3},
+    ),
+    Family(
+        "smollm3",
+        ("SmolLM3ForCausalLM",),
+        {"xnnpack": _NOT_IN_EXPORT_LLM, "vulkan": _NOT_IN_EXPORT_LLM, "mtk": _MTK_NO_MODEL},
+    ),
 )
 
 # ExecuTorch 1.4.0's Qualcomm LLM scripts (examples/qualcomm/oss_scripts/llama, the
@@ -130,7 +138,7 @@ def mtk_plan(family: Family, config: dict, max_chunks: int) -> MtkPlan:
     return MtkPlan(script, preformatter, mtk_chunks(int(c["num_hidden_layers"]), max_chunks))
 
 
-BACKENDS = ("xnnpack", "qnn", "mtk")
+BACKENDS = ("xnnpack", "vulkan", "qnn", "mtk")
 
 
 def family_for(config: dict) -> Family | None:

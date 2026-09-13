@@ -204,6 +204,12 @@ def test_structural_check_reads_delegates_from_the_program(tmp_path):
     assert set(check["delegates"]) == set(export_qnn.HYBRID_METHODS)
     half = tiny_program(tmp_path / "half", delegate_id=export_qnn.QNN_BACKEND_ID, methods=("kv_forward",))
     assert "missing decoder method 'prefill_forward'" in export_qnn.structural_check(half, "hybrid")["problems"][0]
+    # The same check serves Vulkan files (one "forward" method on VulkanBackend).
+    from pipeline import export_xnnpack, smoke
+
+    gpu = tiny_program(tmp_path / "gpu", delegate_id=export_xnnpack.DELEGATE_ID["vulkan"])
+    assert smoke.structural_check(gpu, ("forward",), "VulkanBackend")["passed"]
+    assert not smoke.structural_check(plain, ("forward",), "VulkanBackend")["passed"]
     undelegated = tiny_program(tmp_path / "cpu", methods=export_qnn.HYBRID_METHODS)
     problems = export_qnn.structural_check(undelegated, "hybrid")["problems"]
     assert len(problems) == 2 and all("does not run on QnnBackend" in p for p in problems)

@@ -85,10 +85,12 @@ def test_new_models_are_checked_once_and_dispatched(tmp_path):
     assert entry["backends"]["mtk"]["status"] == "pending"
     # Seeded models are not re-checked.
     assert "Qwen/Qwen3-0.6B" not in summary["new"]
-    # The next pass finds nothing new; the XNNPACK stage is idle, so MediaTek's turn comes.
+    # The next passes find nothing new; each idle stage hands over: Vulkan, then MediaTek.
     hub.dispatched.clear()
     summary = run(tmp_path, hub)
-    assert summary["new"] == [] and [d[0] for d in hub.dispatched] == ["export-mtk.yml"]
+    assert summary["new"] == [] and [d[0] for d in hub.dispatched] == ["export-vulkan.yml"]
+    summary = run(tmp_path, hub)
+    assert [d[0] for d in hub.dispatched] == ["export-vulkan.yml", "export-mtk.yml"]
     assert summary["state"]["models"]["Qwen/Qwen3-1.7B-Instruct-2609"]["status"] == "dispatched"
 
 
@@ -135,9 +137,12 @@ def test_backfill_exports_a_seeded_model(tmp_path):
     summary = run(tmp_path, hub, backfill=("Qwen/Qwen3-1.7B",))
     assert summary["backfilled"] == ["Qwen/Qwen3-1.7B"]
     # Qwen3-1.7B is also in ExecuTorch's Qualcomm registry, but stages go one backend at a
-    # time: XNNPACK now, QNN on the pass after the XNNPACK stage is idle.
+    # time: XNNPACK now, Vulkan and QNN on the passes after the previous stage is idle.
     assert hub.dispatched == [("export-xnnpack.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B")]
     assert summary["stage"] == "xnnpack"
+    summary = run(tmp_path, hub)
+    assert hub.dispatched[-1] == ("export-vulkan.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B")
+    assert summary["stage"] == "vulkan"
     summary = run(tmp_path, hub)
     assert hub.dispatched[-1] == ("export-qnn.yml", "Qwen/Qwen3-1.7B", "sha-Qwen/Qwen3-1.7B")
     assert summary["stage"] == "qnn"
@@ -212,7 +217,11 @@ def test_stages_wait_for_the_previous_backend_to_finish(tmp_path):
     hub.dispatched.clear()
     summary = run(tmp_path, hub, in_flight=lambda wf: wf == "export-xnnpack.yml")
     assert hub.dispatched == [] and summary["stage"] == "xnnpack"
-    # XNNPACK idle: QNN starts, for every model in one pass.
+    # XNNPACK idle: Vulkan for every model, then (next pass) QNN for the two in the registry.
+    summary = run(tmp_path, hub)
+    assert {d[0] for d in hub.dispatched} == {"export-vulkan.yml"} and len(hub.dispatched) == 3
+    assert summary["stage"] == "vulkan"
+    hub.dispatched.clear()
     summary = run(tmp_path, hub)
     assert sorted(d[1] for d in hub.dispatched) == ["Qwen/Qwen3-0.6B", "Qwen/Qwen3-1.7B"]
     assert {d[0] for d in hub.dispatched} == {"export-qnn.yml"} and summary["stage"] == "qnn"

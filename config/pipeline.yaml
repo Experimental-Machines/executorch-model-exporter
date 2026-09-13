@@ -72,9 +72,17 @@ export:
     qmode: 8da4w
     group_size: 32
     embedding_quantize: "8,0"
+  vulkan:
+    # The GPU delegate runs the same torchao 8da4w linears (backends/vulkan/vulkan-quantization);
+    # the file is otherwise the XNNPACK recipe with backend.vulkan in export_llm.
+    qmode: 8da4w
+    group_size: 32
+    embedding_quantize: "8,0"
   qnn:
-    # Snapdragon 8 Gen 3 and 8 Elite. Each chip is its own compile and its own folder.
-    socs: [SM8650, SM8750]
+    # HTP context binaries are compiled per chip and load only on that chip. The benchmark
+    # devices (docs/PLAN.md, "Devices"): Snapdragon 8 Elite (Galaxy S25 Ultra) = SM8750.
+    # Add SM8650 for 8 Gen 3 devices; each chip is its own compile and its own folder.
+    socs: [SM8750]
     # Hybrid mode: a prefill graph consuming prefill_ar_len tokens per step plus a
     # one-token decode graph, both compiled into the .pte.
     model_mode: hybrid
@@ -86,8 +94,9 @@ export:
     calib_tasks: [wikitext]
     calib_limit: 1
   mtk:
-    # Dimensity 9300 (DX3) and 9400 (DX4), ExecuTorch examples/mediatek's two platforms.
-    socs: [MT6989, MT6991]
+    # NeuroPilot binaries are compiled per platform. The benchmark device is the Dimensity
+    # 9300+ (Galaxy Tab S10+) = MT6989 (DX3); add MT6991 (Dimensity 9400, DX4) when needed.
+    socs: [MT6989]
     # MediaTek's LLM recipe (examples/mediatek/shell_scripts/export_*.sh): 16-bit
     # activations, 4-bit weights, the model cut into chunks of equal layer counts.
     precision: A16W4

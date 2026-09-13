@@ -13,7 +13,7 @@ def test_qwen3_goes_to_every_backend():
     verdict = evaluate("Qwen/Qwen3-1.7B")
     assert verdict.eligible
     assert verdict.reasons == []
-    assert verdict.export_backends == ["xnnpack", "qnn", "mtk"]
+    assert verdict.export_backends == ["xnnpack", "vulkan", "qnn", "mtk"]
     assert verdict.variant == "instruct"
 
 
@@ -21,7 +21,7 @@ def test_qnn_needs_an_entry_in_executorchs_qualcomm_registry():
     # Same architecture, but ExecuTorch 1.4.0's Qualcomm scripts only list Qwen/Qwen3-1.7B.
     # The MediaTek scripts build any Qwen3 from its config.json.
     verdict = evaluate("Qwen/Qwen3-1.7B-Base", config=hf_config("Qwen/Qwen3-1.7B"))
-    assert verdict.export_backends == ["xnnpack", "mtk"]
+    assert verdict.export_backends == ["xnnpack", "vulkan", "mtk"]
     assert "no entry" in verdict.backends["qnn"]
 
 

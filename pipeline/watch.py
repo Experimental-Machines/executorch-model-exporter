@@ -31,9 +31,14 @@ from pipeline.settings import Settings
 STATE_VERSION = 1
 # Backend → the workflow that exports it (one run covers every target chip). MediaTek
 # joins in phase 4.
-WORKFLOWS = {"xnnpack": "export-xnnpack.yml", "qnn": "export-qnn.yml", "mtk": "export-mtk.yml"}
-# Dispatch order: the CPU exports of every model first, then each NPU backend in turn.
-STAGES = ("xnnpack", "qnn", "mtk")
+WORKFLOWS = {
+    "xnnpack": "export-xnnpack.yml",
+    "vulkan": "export-vulkan.yml",
+    "qnn": "export-qnn.yml",
+    "mtk": "export-mtk.yml",
+}
+# Dispatch order: the CPU exports of every model first, then GPU, then each NPU in turn.
+STAGES = ("xnnpack", "vulkan", "qnn", "mtk")
 # A model whose metadata could not be read is retried this many runs before it is skipped.
 MAX_ATTEMPTS = 5
 

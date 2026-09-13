@@ -1,0 +1,132 @@
+name: Export Vulkan
+run-name: "Vulkan: ${{ inputs.model_id }}@${{ inputs.revision }}${{ inputs.contexts && format(' ctx {0}', inputs.contexts) || '' }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_id:
+        description: Hugging Face model id, e.g. Qwen/Qwen3-1.7B
+        required: true
+        type: string
+      revision:
+        description: Branch, tag or commit of the source repo
+        default: main
+        type: string
+      contexts:
+        description: JSON list of context windows in tokens, one job each; empty for every tier in config/pipeline.yaml
+        default: ""
+        type: string
+      publish_hf:
+        description: Publish to the Hugging Face org in config/pipeline.yaml
+        default: true
+        type: boolean
+      publish_release:
+        description: Attach the files to a GitHub release
+        default: true
+        type: boolean
+
+permissions:
+  contents: write # GitHub releases
+
+concurrency:
+  group: export-vulkan-${{ inputs.model_id }}
+  cancel-in-progress: false
+
+jobs:
+  targets:
+    runs-on: ubuntu-latest
+    outputs:
+      contexts: ${{ steps.contexts.outputs.contexts }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: contexts
+        env:
+          CONTEXTS: ${{ inputs.contexts }}
+        # Accepts a JSON list, one number, or a comma-separated list; empty means every tier.
+        run: |
+          python3 -m pip install --quiet pyyaml
+          CONTEXTS=$(python3 - "$CONTEXTS" <<'PY'
+          import json, sys, yaml
+          raw = sys.argv[1].strip()
+          if not raw:
+              values = yaml.safe_load(open("config/pipeline.yaml"))["export"]["context_tiers"]
+          else:
+              try:
+                  values = json.loads(raw)
+              except ValueError:
+                  values = [v for v in raw.strip("[]").split(",") if v.strip()]
+              if not isinstance(values, list):
+                  values = [values]
+          print(json.dumps(sorted({int(v) for v in values}, reverse=True)))
+          PY
+          )
+          echo "contexts=$CONTEXTS" >>"$GITHUB_OUTPUT"
+
+  export:
+    needs: targets
+    strategy:
+      fail-fast: false
+      matrix:
+        context: ${{ fromJSON(needs.targets.outputs.contexts) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      MODEL_ID: ${{ inputs.model_id }}
+      REVISION: ${{ inputs.revision }}
+      CONTEXT: ${{ matrix.context }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup-export
+        with:
+          swap-gib: "24"
+
+      # Exit 4 means this runner cannot build this window (memory grows with the square of
+      # the window): recorded as a skip, so the other windows' jobs stand on their own.
+      # The runner has no GPU: the file gets a structural check, the device benchmarks run it.
+      - name: Export and check
+        run: |
+          echo "ARTIFACT=vulkan-${MODEL_ID//\//--}-${CONTEXT}" >>"$GITHUB_ENV"
+          set +e
+          python -m pipeline export-vulkan "$MODEL_ID" --revision "$REVISION" --context "$CONTEXT" \
+            --out "$WORK_DIR/out" --work "$WORK_DIR/work"
+          rc=$?
+          set -e
+          if [ "$rc" -eq 4 ]; then
+            echo "SKIPPED=1" >>"$GITHUB_ENV"
+            echo "::warning title=Window skipped::$MODEL_ID at $CONTEXT tokens cannot be exported on this runner"
+            exit 0
+          fi
+          exit "$rc"
+
+      - name: Summary
+        if: always() && env.SKIPPED != '1'
+        run: |
+          if compgen -G "$WORK_DIR/out/vulkan/export-report*.json" >/dev/null; then
+            python -m pipeline summary "$WORK_DIR/out" --backend vulkan >>"$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always() && env.SKIPPED != '1'
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ env.WORK_DIR }}/out
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Publish to Hugging Face
+        if: inputs.publish_hf && env.SKIPPED != '1'
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::Set the HF_TOKEN repository secret (write access to the output org)"
+            exit 1
+          fi
+          python -m pipeline publish-hf "$WORK_DIR/out" --backend vulkan
+
+      - name: Publish GitHub release
+        if: inputs.publish_release && env.SKIPPED != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m pipeline publish-release "$WORK_DIR/out" --backend vulkan

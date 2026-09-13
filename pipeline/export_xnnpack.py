@@ -1,4 +1,11 @@
-"""Export one HF model to an XNNPACK .pte with ExecuTorch's export_llm, then smoke-test it.
+"""Export one HF model to an XNNPACK (CPU) or Vulkan (GPU) .pte with ExecuTorch's export_llm.
+
+Both backends share the recipe (8da4w linears, int8 embeddings, fp32 KV cache): the Vulkan
+delegate runs torchao's Int8DynamicActivationIntxWeight linears (docs/source/backends/vulkan/
+vulkan-quantization.md), so only ``backend`` in the export_llm config differs. An XNNPACK
+file is smoke-tested with the wheel's TextLLMRunner; the runner has no Vulkan kernels and
+the host no GPU, so a Vulkan file gets the structural check (loads, delegates to
+VulkanBackend).
 
 Produces, under ``out_dir`` (the layout of the published HF repo):
 
@@ -38,6 +45,11 @@ from pipeline.exporting import (
 )
 
 BACKEND = "xnnpack"
+BACKEND_CONFIG = {
+    "xnnpack": {"xnnpack": {"enabled": True, "extended_ops": True}},
+    "vulkan": {"vulkan": {"enabled": True}},
+}
+DELEGATE_ID = {"xnnpack": "XnnpackBackend", "vulkan": "VulkanBackend"}
 
 
 def export_llm_config(
@@ -50,6 +62,7 @@ def export_llm_config(
     recipe: settings.XnnpackRecipe,
     bos: int | None,
     eos: list[int],
+    backend: str = BACKEND,
 ) -> dict:
     extra = {}
     if bos is not None:
@@ -79,7 +92,7 @@ def export_llm_config(
             "max_context_length": context,
             "output_name": str(output),
         },
-        "backend": {"xnnpack": {"enabled": True, "extended_ops": True}},
+        "backend": BACKEND_CONFIG[backend],
     }
 
 
@@ -91,14 +104,17 @@ def run(
     context: int | None = None,
     keep_work: bool = False,
     skip_smoke: bool = False,
+    backend: str = BACKEND,
 ) -> dict:
+    if backend not in BACKEND_CONFIG:
+        raise ExportError(f"unknown backend {backend!r}; this exporter builds {sorted(BACKEND_CONFIG)}")
     cfg = settings.load()
     source = hub.fetch(model_id, revision)
     verdict = eligibility.evaluate(source, cfg)
     if verdict.reasons:
         raise ExportError(f"{model_id} is not eligible: {'; '.join(verdict.reasons)}")
-    if verdict.backends[BACKEND] is not None:
-        raise ExportError(f"{model_id} cannot be exported to {BACKEND}: {verdict.backends[BACKEND]}")
+    if verdict.backends[backend] is not None:
+        raise ExportError(f"{model_id} cannot be exported to {backend}: {verdict.backends[backend]}")
 
     family = families.family_for(source.config)
     plan = families.xnnpack_plan(family, source.config)
@@ -126,15 +142,16 @@ def run(
             )
     resident = sizing.device_resident_bytes(arch, window, cfg.runtime_overhead_bytes)
 
+    recipe = cfg.xnnpack if backend == "xnnpack" else cfg.vulkan
     output_repo = naming.output_repo(model_id, cfg.hub_org, cfg.repo_suffix)
-    pte_name = naming.xnnpack_file(model_id, cfg.xnnpack.qmode, window)
-    pte_path_in_repo = f"{BACKEND}/{pte_name}"
-    problems = naming.check_app_rules(output_repo, pte_path_in_repo, BACKEND)
+    pte_name = naming.cpu_gpu_file(model_id, backend, recipe.qmode, window)
+    pte_path_in_repo = f"{backend}/{pte_name}"
+    problems = naming.check_app_rules(output_repo, pte_path_in_repo, backend)
     if problems:
         raise ExportError("; ".join(problems))
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    backend_dir = out_dir / BACKEND
+    backend_dir = out_dir / backend
     backend_dir.mkdir(exist_ok=True)
     src_dir = work_dir / "source"
     checkpoint = work_dir / "checkpoint" / "consolidated.pth"
@@ -154,7 +171,7 @@ def run(
     params_path.write_text(json.dumps(plan.params, indent=2), encoding="utf-8")
     bos, eos = hub.special_token_ids(source)
     pte = backend_dir / pte_name
-    config = export_llm_config(plan, params_path, checkpoint, pte, window, cfg.prefill_chunk, cfg.xnnpack, bos, eos)
+    config = export_llm_config(plan, params_path, checkpoint, pte, window, cfg.prefill_chunk, recipe, bos, eos, backend)
     config_path = work_dir / "export_llm.yaml"
     config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
@@ -188,7 +205,10 @@ def run(
         raise ExportError("exported metadata disagrees with the request: " + "; ".join(mismatches))
 
     smoke_result = None
-    if not skip_smoke:
+    if backend == "vulkan":
+        print("==> structural check")
+        smoke_result = smoke.structural_check(pte, ("forward",), DELEGATE_ID[backend])
+    elif not skip_smoke:
         print("==> smoke test")
         smoke_result = smoke.run(
             pte,
@@ -201,9 +221,8 @@ def run(
         print(f"    reply: {smoke_result['reply']!r}")
 
     kv_per_token = sizing.kv_cache_bytes(arch, 1)
-    recipe = cfg.xnnpack
     report = {
-        "backend": BACKEND,
+        "backend": backend,
         "target": None,
         "tokenizer": tokenizer,
         "output_repo": output_repo,
@@ -222,8 +241,8 @@ def run(
             "description": (
                 f"ExecuTorch {toolchain()['executorch']} `export_llm`: 8-bit dynamic activations "
                 f"and 4-bit weights in groups of {recipe.group_size}, int8 per-channel embeddings, "
-                f"XNNPACK with extended ops, prefill chunk {min(cfg.prefill_chunk, window)}, "
-                "fp32 KV cache."
+                f"{'XNNPACK with extended ops' if backend == 'xnnpack' else 'the Vulkan delegate'}, "
+                f"prefill chunk {min(cfg.prefill_chunk, window)}, fp32 KV cache."
             ),
         },
         "window": {

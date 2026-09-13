@@ -1,8 +1,10 @@
 # exe-expo: Hugging Face → ExecuTorch export pipeline
 
 Watches Hugging Face for new small dense LLMs and exports them to ExecuTorch `.pte` for
-the [openweights](https://github.com/alpharomercoma/openweights) Android app: XNNPACK
-(CPU), Qualcomm QNN (Snapdragon HTP) and MediaTek NeuroPilot (Dimensity APU).
+the [openweights](https://github.com/alpharomercoma/openweights) Android app and its
+benchmarker: every ExecuTorch Android backend, XNNPACK (CPU), Vulkan (GPU), Qualcomm QNN
+(Snapdragon HTP), MediaTek NeuroPilot (Dimensity APU) and, when ExecuTorch gains an LLM path
+for it, Samsung Exynos (ENN). iOS is deferred.
 
 ## Decisions
 
@@ -10,10 +12,10 @@ the [openweights](https://github.com/alpharomercoma/openweights) Android app: XN
 |---|---|
 | Models | Dense (no MoE) text LLMs of the 4B class and smaller (size in the name ≤ 4B; real count < 4.5B, since Qwen3-4B is 4,022,468,096), instruct and base, original bf16/fp16 weights only |
 | Watched orgs | `Qwen`, `google`, `meta-llama`, `HuggingFaceTB`, each for its own families |
-| Trigger | Hourly watcher; eligible models are dispatched in stages, XNNPACK for every model first, then Qualcomm, then MediaTek (a stage waits until the previous one has nothing queued or running) |
+| Trigger | Hourly watcher; eligible models are dispatched in stages, XNNPACK for every model first, then Vulkan, then Qualcomm, then MediaTek (a stage waits until the previous one has nothing queued or running) |
 | First run | Seeds state without exporting; existing models are backfilled by manual dispatch |
 | Runners | Standard GitHub-hosted `ubuntu-latest` (public repo: 4 vCPU, 16 GB RAM), one workflow run per backend |
-| Chips | QNN: SM8650 (8 Gen 3), SM8750 (8 Elite). MediaTek: MT6989 (D9300), MT6991 (D9400) |
+| Chips | The benchmark devices ("Devices" below): QNN SM8750 (Snapdragon 8 Elite), MediaTek MT6989 (Dimensity 9300+); SM8650 and MT6991 can be added in `config/pipeline.yaml` |
 | Outputs | Hugging Face Hub, GitHub Releases (files ≤ 2 GiB), Actions artifacts |
 | HF layout | One repo per model, backend folders; NPU exports published even though the app can't load them yet |
 | Context window | Every window of 2k/4k/8k/16k/32k, per model and backend, one workflow job each; the app and the benchmarker decide what fits a device. A window the runner cannot build is skipped and reported, not failed |
@@ -30,8 +32,9 @@ experimentalmachines/Qwen3-1.7B-ExecuTorch
 ├── xnnpack/Qwen3-1.7B-8da4w-{2k,4k,8k,16k}.pte   # one file per window the runner could build
 ├── xnnpack/config.json                             # variants[]: every window, smallest first
 ├── xnnpack/export-report-{2k,4k,8k,16k}.json       # the full record of each export
-├── qnn/sm8650/…, qnn/sm8750/…                      # same shape per chip
-└── mtk/mt6989/…, mtk/mt6991/…                      # chunks per window, one shared embedding table
+├── vulkan/Qwen3-1.7B-vulkan-8w-{2k,…}.pte, config.json, export-report-*.json
+├── qnn/sm8750/…                                    # same shape per chip
+└── mtk/mt6989/…                                    # chunks per window, one shared embedding table
 ```
 
 Each window is its own workflow job and publishes on its own: `publish.publish_hf` replaces
@@ -103,6 +106,16 @@ First end-to-end run (local Docker, 8 GB, SmolLM2-135M-Instruct at 2k): 106,018,
 `.pte` (estimate 112,383,432), export peak RSS 2,748,440,576 B, 31 min of mostly
 single-threaded lowering, reply "The capital of France is Paris." Gated repos the token
 cannot read are reported as a skip reason, not a crash.
+
+### Vulkan (phase 6)
+
+`export_llm` with `backend.vulkan` instead of `backend.xnnpack` and the same recipe: the
+Vulkan delegate runs torchao's `Int8DynamicActivationIntxWeight` linears (8da4w) and the
+int8 embeddings (`docs/source/backends/vulkan/vulkan-quantization.md`). One module serves
+both (`export_xnnpack.run(backend="vulkan")`); files are named `<name>-vulkan-8da4w-<w>.pte`
+so the app's `CompiledBackend.of` reads "vulkan". The Linux wheel's runner has no Vulkan
+kernels and the runner no GPU, so the check is structural (`smoke.structural_check`:
+`forward` delegates to `VulkanBackend`); quality and speed are measured on the devices.
 
 ### QNN (phase 3)
 
@@ -204,7 +217,7 @@ calling ExecuTorch's own script in compile-only mode:
    [experimentalmachines/Qwen3-0.6B-ExecuTorch](https://huggingface.co/experimentalmachines/Qwen3-0.6B-ExecuTorch)
    (16k window, smoke test "Paris") and GitHub release `Qwen3-0.6B-xnnpack-c1899de`.
 2. **Watcher** (`watch-hf.yml`, hourly at :17, plus manual dispatch with `backfill`, `dry_run`
-   and `requeue` inputs; dispatches in stages, XNNPACK → QNN → MediaTek, `watch.STAGES`).
+   and `requeue` inputs; dispatches in stages, XNNPACK → Vulkan → QNN → MediaTek, `watch.STAGES`).
    Lists every repo of each org (`limit_per_org` 1,500); a repo not yet in
    `seen.json` (on the `state` branch) is checked once, by name first and then by config,
    and each org only for its own families (`org_families`). Eligible models go to
@@ -230,6 +243,47 @@ calling ExecuTorch's own script in compile-only mode:
    on the runner as predicted. 22 models dispatched through the watcher's backfill
    (whole-org listing); the gated Llama 3.2 and Gemma 3 repos wait for the HF_TOKEN
    account to accept their licenses.
+
+## Scope: every ExecuTorch Android backend, every supported family (2026-09-13)
+
+Decision: export everything ExecuTorch 1.4.0 can build for Android, at every window, and
+let the benchmarker decide downstream. iOS (CoreML, MPS) is deferred. Cells: **done** = the
+pipeline exports it now; **todo** = ExecuTorch supports it and the pipeline does not yet;
+**upstream** = not possible in ExecuTorch 1.4.0.
+
+| Family (dense ≤ 4B) | XNNPACK (CPU) | Vulkan (GPU) | Qualcomm QNN | MediaTek | Samsung Exynos |
+|---|---|---|---|---|---|
+| Qwen3 0.6B / 1.7B / 4B (+Base, +2507) | done | todo | done: 0.6B, 1.7B (registry) | done | upstream |
+| Qwen2.5 0.5B / 1.5B / 3B (+Instruct) | done | todo | done: 0.5B, 1.5B base (registry) | done | upstream |
+| Llama 3.2 1B / 3B (+Instruct) | done | todo | done: 1B/3B-Instruct (registry) | todo (validate `llama.py`: rope_type, tokenizer) | upstream |
+| SmolLM2 135M / 360M / 1.7B (+Instruct) | done | todo | done: 135M-Instruct (registry) | todo (validate, with Llama 3.2) | upstream |
+| SmolLM3 3B | upstream | upstream | done | upstream | upstream |
+| Gemma 3 1B | upstream | upstream | done: gemma-3-1b-it | todo (validate `gemma.py`: model_type gemma3_text) | upstream |
+| Gemma 2 2B | upstream | upstream | todo | todo | upstream |
+| Phi-4-mini 3.8B | todo (watch `microsoft`) | todo | todo | todo | upstream |
+| LFM2.5 350M / 1.2B, LFM2 350M / 700M / 1.2B | todo (watch `LiquidAI`) | todo | upstream | upstream | upstream |
+| Qwen3.5 0.8B / 2B / 4B | blocked: the app refuses `qwen35` names | — | upstream | upstream | upstream |
+| GLM-edge 1.5B, Granite 3.3 2B | upstream | upstream | todo | upstream | upstream |
+
+Sources, ExecuTorch v1.4.0: `extension/llm/export/config/llm_config.py` (`ModelType`,
+`BackendConfig`), `examples/qualcomm/oss_scripts/llama/__init__.py` (`SUPPORTED_LLM_MODELS`),
+`examples/mediatek/model_export_scripts/{llama,qwen,gemma,phi}.py` and
+`aot_utils/llm_utils/utils.py` (`resolve_model_classes`: model_type llama, qwen2, qwen3,
+phi3, phi4, gemma1/2/3), `examples/samsung` (CNN examples only; `backends/samsung` has the
+`EnnBackend` delegate and chipset `E9955` = Exynos 2500 but no LLM path).
+
+### Devices
+
+| Device | Chip | Backend files it runs |
+|---|---|---|
+| Galaxy S25 Ultra | Snapdragon 8 Elite = QNN `SM8750` | `qnn/sm8750/`, plus XNNPACK and Vulkan |
+| Galaxy Tab S10+ | Dimensity 9300+ = MediaTek `MT6989` (DX3) | `mtk/mt6989/`, plus XNNPACK and Vulkan |
+| Pixel 10 family | Tensor G5 (no ExecuTorch NPU delegate) | XNNPACK and Vulkan only |
+| Galaxy Z Flip7 | Exynos 2500 = ENN `E9955` (no LLM path in 1.4.0) | XNNPACK and Vulkan only |
+
+NPU binaries are compiled per chip (QNN `--soc_model`, MediaTek `--platform`) and load only
+on that chip, so the chip lists in `config/pipeline.yaml` (`qnn.socs`, `mtk.socs`) name the
+benchmark devices; XNNPACK and Vulkan files run on any of them.
 
 ## Alignment with the master plan (2026-09-13)
 

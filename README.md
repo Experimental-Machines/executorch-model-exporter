@@ -7,13 +7,15 @@ GitHub-hosted runners. Design and decisions: [docs/PLAN.md](docs/PLAN.md).
 | Backend | Status |
 |---|---|
 | XNNPACK (CPU) | Qwen3, Qwen2.5, Llama 3.2, SmolLM2 |
-| Qualcomm QNN (SM8650, SM8750) | checkpoints in ExecuTorch 1.4.0's Qualcomm registry (Qwen3, Qwen2.5 base, Gemma 3 1B, SmolLM2 135M, SmolLM3 3B, Llama 3.2) |
-| MediaTek NeuroPilot (MT6989, MT6991) | Qwen3, Qwen2.5 (phase 4, first export pending); Llama 3.2 and Gemma 3 not validated yet |
-| HF watcher (auto-dispatch) | hourly; XNNPACK for every model first, then QNN, then MediaTek; state on the `state` branch |
+| Vulkan (GPU) | the same models and recipe as XNNPACK, through ExecuTorch's Vulkan delegate; checked structurally (no GPU on the runner) |
+| Qualcomm QNN (SM8750; SM8650 optional) | checkpoints in ExecuTorch 1.4.0's Qualcomm registry (Qwen3, Qwen2.5 base, Gemma 3 1B, SmolLM2 135M, SmolLM3 3B, Llama 3.2) |
+| MediaTek NeuroPilot (MT6989; MT6991 optional) | Qwen3, Qwen2.5 (phase 4, first export pending); Llama 3.2 and Gemma 3 not validated yet |
+| Samsung Exynos (ENN) | waiting for an LLM path in ExecuTorch (1.4.0 ships the delegate with CNN examples only) |
+| HF watcher (auto-dispatch) | hourly; XNNPACK for every model first, then Vulkan, then QNN, then MediaTek; state on the `state` branch |
 
 ## Running an export
 
-Actions → **Export XNNPACK** (or **Export QNN**, **Export MediaTek**) → Run workflow, with a
+Actions → **Export XNNPACK** (or **Export Vulkan**, **Export QNN**, **Export MediaTek**) → Run workflow, with a
 model id such as `Qwen/Qwen3-1.7B`. One job per context window (2k, 4k, 8k, 16k, 32k; the
 `contexts` input narrows it) and, for the NPU backends, per chip. Each job exports, checks
 the result (XNNPACK: a smoke test with ExecuTorch's `TextLLMRunner`, the runner the app
@@ -32,7 +34,7 @@ Repository secrets:
   accepted the licenses of gated source models (Llama, Gemma).
 
 **Watch Hugging Face** runs hourly and dispatches in stages: every model's XNNPACK
-exports first, then Qualcomm, then MediaTek; a stage starts once the previous one has no
+exports first, then Vulkan, then Qualcomm, then MediaTek; a stage starts once the previous one has no
 run queued or running. Its first run records the models that already
 exist without exporting them; to export existing ones, run it with `backfill` set to a
 comma-separated list of model ids (or run **Export XNNPACK** directly). `dry_run` reports

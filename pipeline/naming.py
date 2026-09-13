@@ -28,7 +28,7 @@ APP_EXCLUDED = ("vl", "vision", "coder", "guard", "qwen35")
 _KEPT_PUNCTUATION = "-_."
 _SIZE_HINT = re.compile(r"(?<![A-Za-z0-9.])\d+(\.\d+)?[BM](?![A-Za-z0-9])", re.IGNORECASE)
 
-BACKEND_FOLDERS = {"xnnpack": "xnnpack", "qnn": "qnn", "mtk": "mtk"}
+BACKEND_FOLDERS = {"xnnpack": "xnnpack", "vulkan": "vulkan", "qnn": "qnn", "mtk": "mtk"}
 
 
 def normalise(name: str) -> str:
@@ -116,6 +116,14 @@ def xnnpack_file(model_id: str, qmode: str, context: int) -> str:
     return f"{source_name(model_id)}-{qmode}-{window_label(context)}.pte"
 
 
+def cpu_gpu_file(model_id: str, backend: str, qmode: str, context: int) -> str:
+    """XNNPACK keeps its original name; a Vulkan file says so, since the app reads the
+    backend from the name (CompiledBackend.of: "vulkan")."""
+    if backend == "xnnpack":
+        return xnnpack_file(model_id, qmode, context)
+    return f"{source_name(model_id)}-{backend}-{qmode}-{window_label(context)}.pte"
+
+
 def qnn_folder(soc: str) -> str:
     return f"qnn/{soc.lower()}"
 
@@ -147,7 +155,7 @@ def check_app_rules(repo_id: str, weights_path: str, backend: str) -> list[str]:
     if "xnnpack" in repo_name.lower():
         problems.append(f"repo name {repo_name!r} contains 'xnnpack': the app would read every file in it as XNNPACK")
     detected = app_backend(f"{repo_id}/{weights_path}")
-    expected = {"xnnpack": "xnnpack", "qnn": "qnn", "mtk": "neuropilot"}[backend]
+    expected = {"xnnpack": "xnnpack", "vulkan": "vulkan", "qnn": "qnn", "mtk": "neuropilot"}[backend]
     if detected != expected:
         problems.append(f"{repo_id}/{weights_path} reads as backend {detected!r}, not {expected!r}")
     installed = app_model_name(repo_id, weights_path)

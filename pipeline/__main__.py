@@ -66,6 +66,22 @@ def _export_xnnpack(args) -> int:
     )
 
 
+def _export_vulkan(args) -> int:
+    from pipeline import export_xnnpack
+
+    return _run_export(
+        lambda: export_xnnpack.run(
+            args.model,
+            args.revision,
+            Path(args.out),
+            Path(args.work),
+            context=args.context,
+            keep_work=args.keep_work,
+            backend="vulkan",
+        )
+    )
+
+
 def _export_mtk(args) -> int:
     from pipeline import export_mtk
 
@@ -172,6 +188,19 @@ def main(argv: list[str] | None = None) -> int:
     export.add_argument("--skip-smoke", action="store_true")
     export.set_defaults(func=_export_xnnpack)
 
+    vulkan = commands.add_parser("export-vulkan", help="download, convert, export a Vulkan (GPU) .pte")
+    vulkan.add_argument("model")
+    vulkan.add_argument("--revision", default="main")
+    vulkan.add_argument("--out", default="out")
+    vulkan.add_argument("--work", default="work")
+    vulkan.add_argument(
+        "--context", type=int, default=None, help="window in tokens (default: the largest this host can build)"
+    )
+    vulkan.add_argument(
+        "--keep-work", action="store_true", help="keep the work dir after success (a failure always leaves it)"
+    )
+    vulkan.set_defaults(func=_export_vulkan)
+
     qnn = commands.add_parser("export-qnn", help="compile a Qualcomm HTP .pte for one chip")
     qnn.add_argument("model")
     qnn.add_argument("--soc", required=True, help="e.g. SM8650")
@@ -221,7 +250,7 @@ def main(argv: list[str] | None = None) -> int:
     ):
         command = commands.add_parser(name, help=text)
         command.add_argument("out")
-        command.add_argument("--backend", required=True, choices=["xnnpack", "qnn", "mtk"])
+        command.add_argument("--backend", required=True, choices=["xnnpack", "vulkan", "qnn", "mtk"])
         command.add_argument("--target", default=None)
         command.add_argument("--context", type=int, default=None, help="which window, when the folder holds several")
         command.set_defaults(func=func)

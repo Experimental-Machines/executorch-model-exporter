@@ -45,3 +45,32 @@ def test_no_window_given_means_the_largest_the_host_can_build(tmp_path, qwen3_1_
     with pytest.raises(Downloaded):
         run(tmp_path, None)
     assert "window 16384" in capsys.readouterr().out
+
+
+def test_vulkan_shares_the_recipe_and_only_swaps_the_delegate(tmp_path):
+    from pathlib import Path
+
+    from conftest import hf_config
+
+    from pipeline import families, naming
+
+    cfg = settings.load()
+    plan = families.xnnpack_plan(families.family_for(hf_config("Qwen/Qwen3-1.7B")), hf_config("Qwen/Qwen3-1.7B"))
+    args = (plan, Path("p.json"), Path("c.pth"), Path("o.pte"), 4096, cfg.prefill_chunk, cfg.vulkan, 1, [2])
+    xnnpack = export_xnnpack.export_llm_config(*args, backend="xnnpack")
+    vulkan = export_xnnpack.export_llm_config(*args, backend="vulkan")
+    assert vulkan["backend"] == {"vulkan": {"enabled": True}}
+    assert xnnpack["backend"] == {"xnnpack": {"enabled": True, "extended_ops": True}}
+    assert {k: v for k, v in vulkan.items() if k != "backend"} == {k: v for k, v in xnnpack.items() if k != "backend"}
+    assert cfg.vulkan == cfg.xnnpack
+    # The app reads the backend from the name: the Vulkan file says so, the XNNPACK folder does.
+    repo = naming.output_repo("Qwen/Qwen3-1.7B", cfg.hub_org, cfg.repo_suffix)
+    name = naming.cpu_gpu_file("Qwen/Qwen3-1.7B", "vulkan", "8da4w", 4096)
+    assert name == "Qwen3-1.7B-vulkan-8da4w-4k.pte"
+    assert naming.check_app_rules(repo, f"vulkan/{name}", "vulkan") == []
+    assert naming.app_backend(f"{repo}/vulkan/{name}") == "vulkan"
+
+
+def test_unknown_backend_is_refused(tmp_path):
+    with pytest.raises(exporting.ExportError, match="unknown backend"):
+        export_xnnpack.run("Qwen/Qwen3-1.7B", "main", tmp_path, tmp_path, backend="coreml")

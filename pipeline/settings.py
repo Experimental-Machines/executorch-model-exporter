@@ -59,6 +59,7 @@ class Settings:
     runtime_overhead_bytes: int
     prefill_chunk: int
     xnnpack: XnnpackRecipe
+    vulkan: XnnpackRecipe
     qnn: QnnRecipe
     mtk: MtkRecipe
     executorch_version: str
@@ -101,6 +102,11 @@ def load() -> Settings:
             qmode=export["xnnpack"]["qmode"],
             group_size=int(export["xnnpack"]["group_size"]),
             embedding_quantize=str(export["xnnpack"]["embedding_quantize"]),
+        ),
+        vulkan=XnnpackRecipe(
+            qmode=export["vulkan"]["qmode"],
+            group_size=int(export["vulkan"]["group_size"]),
+            embedding_quantize=str(export["vulkan"]["embedding_quantize"]),
         ),
         qnn=QnnRecipe(
             socs=tuple(export["qnn"]["socs"]),

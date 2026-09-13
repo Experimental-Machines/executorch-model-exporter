@@ -129,7 +129,7 @@ def evaluate(source: SourceModel, settings: Settings) -> Verdict:
             verdict.backends[backend] = "no family"
         elif not family.supports(backend):
             verdict.backends[backend] = family.unsupported[backend]
-        elif backend == "xnnpack":
+        elif backend in ("xnnpack", "vulkan"):  # the same export_llm path, one delegate each
             try:
                 families.xnnpack_plan(family, source.config)
                 verdict.backends[backend] = None

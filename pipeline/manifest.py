@@ -33,7 +33,12 @@ NOTICES = {
 }
 BUILT_WITH = {"llama32": "Built with Llama"}
 
-BACKEND_TITLES = {"xnnpack": "XNNPACK (CPU)", "qnn": "Qualcomm QNN (HTP)", "mtk": "MediaTek NeuroPilot"}
+BACKEND_TITLES = {
+    "xnnpack": "XNNPACK (CPU)",
+    "vulkan": "Vulkan (GPU)",
+    "qnn": "Qualcomm QNN (HTP)",
+    "mtk": "MediaTek NeuroPilot",
+}
 
 
 def _variants(report: dict) -> list[dict]:

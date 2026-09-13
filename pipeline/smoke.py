@@ -44,6 +44,57 @@ def read_metadata(pte: Path) -> dict:
     return metadata
 
 
+def delegates(pte: Path) -> dict[str, dict]:
+    """Per method: the backends it delegates to and how many delegate calls it makes.
+
+    Read from the program's flatbuffer (the schema ExecuTorch serialises), not by grepping
+    bytes: the backend id string also appears in a program whose graph never calls it.
+    """
+    from executorch.exir._serialize._program import deserialize_pte_binary
+    from executorch.exir.schema import DelegateCall
+
+    program = deserialize_pte_binary(pte.read_bytes()).program
+    result = {}
+    for plan in program.execution_plan:
+        calls = sum(
+            1
+            for chain in plan.chains
+            for instruction in chain.instructions
+            if isinstance(instruction.instr_args, DelegateCall)
+        )
+        result[plan.name] = {"backends": sorted({d.id for d in plan.delegates}), "delegate_calls": calls}
+    return result
+
+
+def structural_check(pte: Path, wanted: tuple[str, ...], backend_id: str) -> dict:
+    """The program loads, has the ``wanted`` methods, and each of them runs on ``backend_id``.
+
+    For files no host runtime can execute: NPU context binaries, and Vulkan on a runner
+    without a GPU.
+    """
+    problems = []
+    try:
+        metadata = read_metadata(pte)
+        graphs = delegates(pte)
+    except Exception as error:  # a program that does not even parse
+        return {"kind": "structural", "passed": False, "problems": [f"program did not load: {error}"]}
+    methods = metadata.get("methods", [])
+    for name in wanted:
+        graph = graphs.get(name)
+        if graph is None:
+            problems.append(f"missing decoder method {name!r} (has {methods})")
+        elif backend_id not in graph["backends"] or graph["delegate_calls"] == 0:
+            problems.append(f"{name} does not run on {backend_id}: {graph}")
+    return {
+        "kind": "structural",
+        "passed": not problems,
+        "problems": problems,
+        "methods": methods,
+        "delegates": {name: graphs[name] for name in wanted if name in graphs},
+        "metadata": metadata,
+    }
+
+
 def generate(pte: Path, tokenizer: Path, prompt: str, max_new_tokens: int) -> tuple[list[str], dict]:
     # The wheel's runner links only portable and XNNPACK kernels. The exported graph also
     # calls llama::custom_sdpa / update_cache and quantized_decomposed::embedding_byte,
