@@ -251,6 +251,11 @@ G5, Dimensity 9300+, Exynos 2500; GSM8K, RetrievalQA, IFEval, PopQA, BFCL, Fresh
   fails, the next run dispatches the same models again; the per-model concurrency group
   queues the duplicate rather than running it alongside, and a repeat publish is
   idempotent, so the cost is runner time, not a broken repo.
+- There is no memory or time model for QAIRT's compile, so the QNN matrix has no skip
+  gate: measured calibration went from 936 s at 2k to 3,674 s at 4k on the same chip
+  (docs/research/export-bottlenecks.md), and 16k/32k static graphs may hit the 6-hour
+  job limit or the runner's memory. Those jobs fail on their own; the other windows of the
+  same run publish regardless (`fail-fast: false`).
 - QNN and MediaTek only export models ExecuTorch has hard-coded; a new family waits for an
   ExecuTorch release, and the app's AAR must move with it.
 - QNN/MediaTek exports of 3-4B models may run out of memory or hit the 6-hour job limit
