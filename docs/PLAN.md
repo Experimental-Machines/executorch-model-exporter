@@ -213,6 +213,12 @@ calling ExecuTorch's own script in compile-only mode:
    A 4k probe (`context` input, SM8750, not published) decides whether 4k becomes the
    default window.
 4. **MediaTek** (`export-mtk.yml`, built 2026-09-13; first export pending).
+5. **Window matrix** (2026-09-13): every tier per model and backend, one job each. First
+   matrix publishes the same day: SmolLM2-135M/360M/1.7B at 2k, 4k, 8k and 16k into
+   `experimentalmachines/<name>-ExecuTorch/xnnpack/` with merged `config.json`; 32k skipped
+   on the runner as predicted. 22 models dispatched through the watcher's backfill
+   (whole-org listing); the gated Llama 3.2 and Gemma 3 repos wait for the HF_TOKEN
+   account to accept their licenses.
 
 ## Alignment with the master plan (2026-09-13)
 
