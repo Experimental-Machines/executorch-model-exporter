@@ -59,6 +59,10 @@ RUNNER_IO_TYPES = {
 }
 # Calibration tensors plus their Arrow copy (calibration_bytes).
 CALIBRATION_OVERHEAD = 2.0
+# third_party/executorch/patches/mediatek-calibration-as-arrays.patch: without it the
+# calibration reads every prepared row back as nested Python lists, ~35 min per prompt on
+# the hosted runner (docs/research, finding 17).
+PATCH_MARKER = 'cal_dataset = cal_dataset.with_format("numpy")'
 TOOL_PACKAGES = ("executorch", "torch", "torchao", "transformers", "mtk_converter", "mtk-neuron")
 
 _LOAD_PROGRAM = """
@@ -112,8 +116,8 @@ def calibration_bytes(config: dict, recipe: settings.MtkRecipe, prompts: int) ->
     For every prompt, model_export_scripts/*.py prepare_model_inputs keeps the fp32 KV cache
     of every layer at the full cache size for the prompt step and each generated token (up
     to response_cap), and datasets.map then holds them all as Arrow rows before writing.
-    CALIBRATION_OVERHEAD covers that copy; a 2048-token Qwen3-0.6B run (8 prompts, cap 9,
-    estimate 75 GB) exhausted a 16.8 GB + 24 GB swap runner during this step.
+    CALIBRATION_OVERHEAD covers that copy; a 2048-token Qwen3-0.6B run (9 prompts, cap 9,
+    estimate 85 GB) exhausted a 16.8 GB + 24 GB swap runner during this step.
     """
     c = families.text_config(config)
     n_heads = int(c["num_attention_heads"])
@@ -213,6 +217,9 @@ def run(
     family = families.family_for(source.config)
     plan = families.mtk_plan(family, source.config, recipe.max_chunks)
     window = recipe.cache_size
+    script = examples_dir / "model_export_scripts" / plan.script
+    if PATCH_MARKER not in script.read_text(encoding="utf-8"):
+        raise ExportError(f"{script} lacks third_party/executorch/patches/mediatek-calibration-as-arrays.patch")
 
     output_repo = naming.output_repo(model_id, cfg.hub_org, cfg.repo_suffix)
     folder = naming.mtk_folder(soc)

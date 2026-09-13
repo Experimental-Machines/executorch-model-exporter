@@ -1,0 +1,19 @@
+# Second MediaTek export, Qwen3-0.6B, 512-token cache, MT6991: calibration of chunk 0 reads each prepared prompt back in ~35 min; cancelled after 193 min.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34745954055 , job "export (MT6991)" (available).
+# Lines kept: those matching /Mem:|Swap:|Export shape|Max Cache|Preparing Model Calibration|Exporting Chunk|Getting pre autograd|Calibrating Model: .*[0-9]+/9 \[|operation was canceled|shutdown signal/, ANSI codes and progress-bar redraws removed (tqdm's last redraw per update kept).
+
+2026-09-13T07:44:14Z Mem:     16765378560  1014304768 13507952640    43614208  2619625472 15751073792
+2026-09-13T07:44:14Z Swap:     3221221376           0  3221221376
+2026-09-13T07:47:08Z Mem:     16765378560  1013723136 13000712192    47116288  3138682880 15751655424
+2026-09-13T07:47:08Z Swap:    25769799680           0 25769799680
+2026-09-13T07:48:53Z Export shape(s):              ['128t512c', '1t512c']
+2026-09-13T07:48:54Z Max Cache Size: 512
+2026-09-13T07:48:57Z Preparing Model Calibration Inputs...
+2026-09-13T07:54:08Z Exporting Chunk 0 to PTE
+2026-09-13T07:54:10Z Getting pre autograd ATen Dialect Graph
+2026-09-13T07:55:17Z Calibrating Model:   0%|          | 0/9 [00:00<?, ?it/s]
+2026-09-13T08:37:28Z Calibrating Model:  11%|█         | 1/9 [00:53<07:05, 53.19s/it]
+2026-09-13T09:11:40Z Calibrating Model:  22%|██▏       | 2/9 [43:11<2:56:44, 1514.94s/it]
+2026-09-13T09:50:08Z Calibrating Model:  33%|███▎      | 3/9 [1:17:16<2:55:42, 1757.09s/it]
+2026-09-13T10:27:35Z Calibrating Model:  44%|████▍     | 4/9 [1:55:45<2:44:34, 1974.97s/it]
+2026-09-13T11:01:44Z ##[error]The operation was canceled.

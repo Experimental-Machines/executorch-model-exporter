@@ -160,11 +160,16 @@ calling ExecuTorch's own script in compile-only mode:
   workflow sparse-checks-out `examples/mediatek` at `EXECUTORCH_COMMIT`.
 - **Recipe** (MediaTek's own, `shell_scripts/export_qwen.sh`): A16W4, the model cut into up
   to 4 chunks of equal layer counts, a 128-token prompt graph and a one-token generation
-  graph over a 512-token cache, calibrated on MediaTek's `alpaca.txt` prompts (8, up to 9
+  graph over a 512-token cache, calibrated on MediaTek's `alpaca.txt` prompts (9, up to 9
   generated tokens each) in the family's chat template. The cache is MediaTek's default
   because calibration keeps a full fp32 KV cache per prompt and step: the first run, at
   2048, exhausted the runner's 16.8 GB + 24 GB swap while preparing calibration inputs
-  (estimate 75 GB, `export_mtk.calibration_bytes`, now checked before any download).
+  (estimate 85 GB, `export_mtk.calibration_bytes`, now checked before any download).
+- **Patch:** `third_party/executorch/patches/mediatek-calibration-as-arrays.patch` makes
+  MediaTek's calibration read its prepared inputs back as arrays instead of nested Python
+  lists; without it the second run needed ~35 min per prompt and could not finish
+  (docs/research, finding 17). Values are unchanged; `export_mtk` refuses an unpatched
+  script.
 - **Families:** the scripts build the model from `config.json`'s `model_type`, so any Qwen3
   or Qwen2.5 size works, not a fixed list. Llama 3.2 (the scripts read
   `rope_scaling['type']`, its config has `rope_type: llama3`), SmolLM2 (tokenizer class) and

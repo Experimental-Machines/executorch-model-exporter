@@ -142,7 +142,7 @@ jobs:
           echo "MTK_PYTHON=$tool_python" >>"$GITHUB_ENV"
 
       # The LLM export scripts are in the ExecuTorch source, not the wheel (BSD, fetched at
-      # the pinned commit).
+      # the pinned commit), with this repo's patches from third_party/executorch/patches.
       - name: ExecuTorch examples/mediatek
         run: |
           src="$WORK_DIR/executorch"
@@ -151,6 +151,9 @@ jobs:
           git -C "$src" sparse-checkout set examples/mediatek
           git -C "$src" fetch -q --depth 1 origin "$EXECUTORCH_COMMIT"
           git -C "$src" checkout -q FETCH_HEAD
+          for patch in third_party/executorch/patches/mediatek-*.patch; do
+            git -C "$src" apply -v "$GITHUB_WORKSPACE/$patch"
+          done
           echo "MTK_EXAMPLES=$src/examples/mediatek" >>"$GITHUB_ENV"
 
       # Exit 4 means this runner cannot build this window: recorded as a skip, so the other

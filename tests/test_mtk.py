@@ -160,10 +160,20 @@ def test_publish_refuses_a_tokenizer_inside_a_mediatek_folder(tmp_path):
 
 def test_calibration_memory_estimate_matches_the_run_that_took_the_runner_down():
     # Qwen3-0.6B: 28 layers x K,V x 8 KV heads x 128 x 4 B = 229,376 B of fp32 cache per token.
+    # MediaTek's alpaca.txt holds 9 prompts (8 newlines: its last line has none).
     config = hf_config("Qwen/Qwen3-0.6B")
     at_2k = dataclasses.replace(CFG.mtk, cache_size=2048, response_cap=9)
-    assert export_mtk.calibration_bytes(config, at_2k, 8) == 8 * 10 * 229_376 * 2048 * 2 == 75_161_927_680
-    assert export_mtk.calibration_bytes(config, CFG.mtk, 8) == 18_790_481_920  # the 512 default
+    assert export_mtk.calibration_bytes(config, at_2k, 9) == 9 * 10 * 229_376 * 2048 * 2 == 84_557_168_640
+    assert export_mtk.calibration_bytes(config, CFG.mtk, 9) == 21_139_292_160  # the 512 default
     # 16.8 GB RAM + 24 GB swap minus the reserve: 2048 is refused, 512 fits.
     budget = 16_766_414_848 + 25_769_799_680 - 1_000_000_000
-    assert export_mtk.calibration_bytes(config, at_2k, 8) > budget > export_mtk.calibration_bytes(config, CFG.mtk, 8)
+    assert export_mtk.calibration_bytes(config, at_2k, 9) > budget > export_mtk.calibration_bytes(config, CFG.mtk, 9)
+
+
+def test_the_calibration_patch_adds_what_the_export_checks_for():
+    patch = settings.ROOT / "third_party/executorch/patches/mediatek-calibration-as-arrays.patch"
+    added = [line[1:].strip() for line in patch.read_text(encoding="utf-8").splitlines() if line.startswith("+ ")]
+    assert export_mtk.PATCH_MARKER in added
+    # One family script per patch target: every mapped script must be covered.
+    targets = {line.split("/")[-1] for line in patch.read_text(encoding="utf-8").splitlines() if line.startswith("+++")}
+    assert {plan().script} <= targets

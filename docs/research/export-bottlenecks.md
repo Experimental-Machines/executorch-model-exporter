@@ -124,7 +124,11 @@ on-device way here to check the quality cost.
 - **MediaTek:** the first run was limited by memory, not time: preparing calibration inputs
   at a 2,048-token cache took the runner down
   ([`mtk-run1-calibration-memory.log`](evidence/mtk-run1-calibration-memory.log);
-  `export_mtk.calibration_bytes` estimates 75,161,927,680 B). No timing yet.
+  `export_mtk.calibration_bytes` estimates 75,161,927,680 B; corrected to 84,557,168,640 B
+  for the 9 prompts the file really holds, see [finding 18](README.md)). No timing yet.
+  *Added 2026-09-13:* the second run (512-token cache) was limited by reading the prepared
+  calibration inputs back as Python lists, about 35 minutes per prompt
+  ([finding 17](README.md)).
 - **Every job:** 2-4 minutes of setup (disk cleanup, swap, pip installs) before the export.
 
 ## 5. Options (not decided)
