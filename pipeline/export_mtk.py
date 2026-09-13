@@ -226,18 +226,20 @@ def run(
             raise ExportError("; ".join(problems))
 
     # Calibration memory grows with the window (calibration_bytes): larger windows keep
-    # fewer of MediaTek's prompts, down to one; past that the window is skipped on this host.
+    # fewer of MediaTek's prompts, down to mtk.min_calibration_prompts; past that the window
+    # is skipped on this host rather than calibrated on too little.
     prompts_text = (examples_dir / recipe.calibration).read_text(encoding="utf-8")
     lines = [line for line in prompts_text.splitlines() if line.strip()]
     budget = host_budget(host_info())
     prompts = len(lines)
-    while budget is not None and prompts > 1 and calibration_bytes(source.config, recipe, prompts) > budget:
+    floor = min(recipe.min_calibration_prompts, prompts)
+    while budget is not None and prompts > floor and calibration_bytes(source.config, recipe, prompts) > budget:
         prompts -= 1
     needed = calibration_bytes(source.config, recipe, prompts)
     if budget is not None and needed > budget:
         raise SkipExport(
-            f"calibration at a {window}-token cache needs about {needed:,} B with a single prompt "
-            f"({1 + recipe.response_cap} steps), this host has {budget:,} B"
+            f"calibration at a {window}-token cache needs about {needed:,} B even with {prompts} prompts "
+            f"({1 + recipe.response_cap} steps each), this host has {budget:,} B"
         )
     dataset = recipe.calibration
     if prompts < len(lines):

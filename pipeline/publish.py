@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -17,17 +18,36 @@ def _folder(backend: str, target: str | None) -> str:
     return backend if target is None else f"{backend}/{target.lower()}"
 
 
-def load_report(out_dir: Path, backend: str, target: str | None = None) -> dict:
-    """The one export report in the local backend folder (one run exports one window)."""
-    found = sorted((out_dir / _folder(backend, target)).glob("export-report*.json"))
+def load_report(out_dir: Path, backend: str, target: str | None = None, context: int | None = None) -> dict:
+    """The export report in the local backend folder: one run exports one window, so there
+    is one unless several windows were exported into the same folder by hand, in which
+    case ``context`` picks."""
+    folder = out_dir / _folder(backend, target)
+    found = sorted(folder.glob("export-report*.json"))
+    if context is not None:
+        found = [p for p in found if p.name == exporting.report_file(context)]
     if len(found) != 1:
-        raise ValueError(f"expected one export report in {out_dir / _folder(backend, target)}, found {found}")
+        raise ValueError(f"expected one export report in {folder}, found {[p.name for p in found]}; pass --context")
     return json.loads(found[0].read_text(encoding="utf-8"))
 
 
 def is_report(path: str) -> bool:
     name = path.rsplit("/", 1)[-1]
     return name.startswith("export-report") and name.endswith(".json")
+
+
+# The window label sits right before the extension (or before "-chunk<i>of<n>" for MediaTek),
+# so a model whose own name carries a window-like token ("SmolLM2-1.7B-Instruct-16k") is not
+# read as that window.
+_WINDOW_FILE = re.compile(r"-(?P<label>\d+k|\d+)(?:\.pte|-chunk\d+of\d+\.pte)$")
+
+
+def window_of(name: str) -> str | None:
+    """The window label a published file name carries, or None (config, embedding table)."""
+    if name.startswith("export-report-") and name.endswith(".json"):
+        return name[len("export-report-") : -len(".json")]
+    match = _WINDOW_FILE.search(name)
+    return match.group("label") if match else None
 
 
 def superseded(path: str, folder: str, label: str) -> bool:
@@ -39,10 +59,12 @@ def superseded(path: str, folder: str, label: str) -> bool:
     name = path[len(folder) + 1 :]
     if name in ("config.json", "export-report.json"):
         return True
-    return f"-{label}." in name or f"-{label}-" in name
+    return window_of(name) == label
 
 
-def publish_hf(out_dir: Path, backend: str, target: str | None = None, attempts: int = 6) -> str:
+def publish_hf(
+    out_dir: Path, backend: str, target: str | None = None, context: int | None = None, attempts: int = 6
+) -> str:
     """Commit this run's window into its backend folder beside the other windows, plus the
     shared root files; regenerate the folder's config.json and the repo README.md from
     every report in the repo.
@@ -55,12 +77,15 @@ def publish_hf(out_dir: Path, backend: str, target: str | None = None, attempts:
     from huggingface_hub.errors import HfHubHTTPError
 
     cfg = settings.load()
-    report = load_report(out_dir, backend, target)
+    report = load_report(out_dir, backend, target, context)
     repo_id = report["output_repo"]
     folder = _folder(backend, target)
     label = naming.window_label(report["window"]["context"])
     local_folder = out_dir / folder
-    new_paths = {f"{folder}/{p.name}": p for p in local_folder.iterdir() if p.is_file()}
+    # This window's files, plus the folder's shared ones (config.json, MediaTek's embedding).
+    new_paths = {
+        f"{folder}/{p.name}": p for p in local_folder.iterdir() if p.is_file() and window_of(p.name) in (None, label)
+    }
     root_files = {p.name: p for p in out_dir.iterdir() if p.is_file()}
     scoped = [path for path in new_paths if path.rsplit("/", 1)[-1] in exporting.TOKENIZER_FILES]
     if scoped:
@@ -123,9 +148,12 @@ def publish_hf(out_dir: Path, backend: str, target: str | None = None, attempts:
 
 
 def release_tag(report: dict) -> str:
+    """One release per backend, chip, window and source revision: the window jobs of one
+    model finish at the same time and must not race on one tag."""
     name = report["source"]["id"].rsplit("/", 1)[-1]
     target = f"-{report['target']}" if report.get("target") else ""
-    return f"{name}-{report['backend']}{target}-{report['source']['sha'][:7]}"
+    label = naming.window_label(report["window"]["context"])
+    return f"{name}-{report['backend']}{target}-{label}-{report['source']['sha'][:7]}"
 
 
 def release_notes(report: dict, hf_url: str | None) -> str:
@@ -146,30 +174,33 @@ def release_notes(report: dict, hf_url: str | None) -> str:
     return "\n".join(lines) + "\n"
 
 
-def publish_release(out_dir: Path, backend: str, target: str | None = None) -> str:
-    """Create (or update) a GitHub release with the export's files under the 2 GiB limit."""
-    report = load_report(out_dir, backend, target)
+def publish_release(out_dir: Path, backend: str, target: str | None = None, context: int | None = None) -> str:
+    """Create (or update) a GitHub release with this window's files under the 2 GiB limit."""
+    report = load_report(out_dir, backend, target, context)
     folder = out_dir / _folder(backend, target)
     tag = release_tag(report)
+    label = naming.window_label(report["window"]["context"])
     hf_url = f"https://huggingface.co/{report['output_repo']}"
-    candidates = [*sorted(folder.iterdir()), out_dir / report["tokenizer"]]
+    candidates = [p for p in sorted(folder.iterdir()) if window_of(p.name) in (None, label)]
+    candidates.append(out_dir / report["tokenizer"])
     assets = [str(p) for p in candidates if p.is_file() and p.stat().st_size < RELEASE_ASSET_LIMIT]
     notes = release_notes(report, hf_url)
-    exists = subprocess.run(["gh", "release", "view", tag], capture_output=True).returncode == 0
-    if exists:
-        subprocess.run(["gh", "release", "upload", tag, "--clobber", *assets], check=True)
-        subprocess.run(["gh", "release", "edit", tag, "--notes", notes], check=True)
-    else:
-        subprocess.run(
-            ["gh", "release", "create", tag, "--title", tag, "--notes", notes, *assets],
-            check=True,
-        )
+    created = subprocess.run(
+        ["gh", "release", "create", tag, "--title", tag, "--notes", notes, *assets], capture_output=True, text=True
+    )
+    if created.returncode == 0:
+        return tag
+    if "already exists" not in created.stderr + created.stdout:
+        raise RuntimeError(f"gh release create failed: {created.stderr.strip()[-2000:]}")
+    # A re-run of the same window: replace its assets and notes.
+    subprocess.run(["gh", "release", "upload", tag, "--clobber", *assets], check=True)
+    subprocess.run(["gh", "release", "edit", tag, "--notes", notes], check=True)
     return tag
 
 
-def summary(out_dir: Path, backend: str, target: str | None = None) -> str:
+def summary(out_dir: Path, backend: str, target: str | None = None, context: int | None = None) -> str:
     """Markdown for $GITHUB_STEP_SUMMARY."""
-    report = load_report(out_dir, backend, target)
+    report = load_report(out_dir, backend, target, context)
     smoke = report.get("smoke") or {}
     host = report["host"]
     estimates = report.get("estimates") or {}
