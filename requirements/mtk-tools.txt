@@ -12,7 +12,7 @@ tokenizers==0.22.2
 huggingface_hub==0.36.2
 safetensors==0.8.0
 datasets==3.6.0
-sentencepiece
+sentencepiece==0.2.2
 # backends/mediatek/requirements.txt
-piq
-pillow
+piq==0.8.0
+pillow==12.3.0

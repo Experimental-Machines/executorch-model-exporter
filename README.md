@@ -14,10 +14,13 @@ GitHub-hosted runners. Design and decisions: [docs/PLAN.md](docs/PLAN.md).
 ## Running an export
 
 Actions → **Export XNNPACK** (or **Export QNN**, **Export MediaTek**) → Run workflow, with a
-model id such as `Qwen/Qwen3-1.7B`. The run exports, checks the result (XNNPACK: a smoke
-test with ExecuTorch's `TextLLMRunner`, the runner the app uses; NPU backends: a structural
-check, as there is no host NPU runtime), uploads an artifact, and publishes to
-`experimentalmachines/<model>-ExecuTorch` on Hugging Face and to a GitHub release.
+model id such as `Qwen/Qwen3-1.7B`. One job per context window (2k, 4k, 8k, 16k, 32k; the
+`contexts` input narrows it) and, for the NPU backends, per chip. Each job exports, checks
+the result (XNNPACK: a smoke test with ExecuTorch's `TextLLMRunner`, the runner the app
+uses; NPU backends: a structural check, as there is no host NPU runtime), uploads an
+artifact, and publishes its window into `experimentalmachines/<model>-ExecuTorch` on
+Hugging Face beside the other windows, plus a GitHub release. A window the runner cannot
+build (export memory grows with the square of the window) is reported as skipped, not failed.
 
 The QNN and MediaTek workflows download Qualcomm's and MediaTek's SDKs from their publishers
 on each run, which accepts their license terms: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
@@ -66,14 +69,16 @@ stages are 87-93% of it:
 
 ```sh
 pip install -r requirements/dev.txt
-python -m pipeline plan Qwen/Qwen3-1.7B        # eligibility and window choice, no download
+python -m pipeline plan Qwen/Qwen3-1.7B        # eligibility, backends and the per-window sizing table, no download
 pytest
 ```
 
 A full export needs Linux x86_64 (the executorch wheel's LLM runner is not built for
 Windows); see the install steps in
 [.github/actions/setup-export/action.yml](.github/actions/setup-export/action.yml), then
-`python -m pipeline export-xnnpack <model> --out out --work work`.
+`python -m pipeline export-xnnpack <model> --context 4096 --out out --work work` (one window per
+invocation; without `--context`, the largest the host can build). Exit codes: 0 exported, 2
+failed, 4 skipped (this host cannot build the window).
 
 ## Layout
 

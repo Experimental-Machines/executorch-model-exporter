@@ -40,7 +40,7 @@ from the CPU index first, as in `.github/actions/setup-export/action.yml`. Other
 - **`export-xnnpack.yml`** → `export_xnnpack.py`: `hub.fetch` → `eligibility.evaluate` → `sizing.choose_context` →
   download → `convert.py` (HF safetensors → ExecuTorch checkpoint layout) → generated `params.json` + `export_llm`
   YAML → subprocess `executorch.extension.llm.export.export_llm` → `smoke.py` (greedy generation through the wheel's
-  `TextLLMRunner`, the same C++ runner the app uses) → `export-report.json` + `config.json`.
+  `TextLLMRunner`, the same C++ runner the app uses) → `export-report-<window>.json` + `config.json`.
 - **`export-qnn.yml`** (matrix job per chip in `qnn.socs`) → `export_qnn.py`: runs ExecuTorch's own Qualcomm script
   (`executorch.examples.qualcomm.oss_scripts.llama.llama --compile_only`) as a subprocess with `QNN_SDK_ROOT`/
   `LD_LIBRARY_PATH` pre-set (`qnn_env`). The script always downloads `main`, so a `--revision` that isn't `main`'s
@@ -48,10 +48,11 @@ from the CPU index first, as in `.github/actions/setup-export/action.yml`. Other
   parsed (`delegates()`) and each decoder method must delegate to `QnnBackend`.
 - **`publish.py`**: commits one backend folder to `experimentalmachines/<name>-ExecuTorch`, pinned to the parent
   revision and retried on HTTP 412, because backends publish concurrently. It regenerates the README from every backend's
-  `export-report.json` (`manifest.py`), then attaches files under 2 GiB to a GitHub release.
+  `export-report-<window>.json` (`manifest.py`), then attaches files under 2 GiB to a GitHub release.
 
-`export-report.json` is the contract between export, publish and summary; `manifest.backend_config` derives the app's
-`config.json` from it.
+`export-report-<window>.json` is the contract between export, publish and summary; `manifest.backend_config` derives
+the app's `config.json` from a folder's reports. **`export-mtk.yml`** → `export_mtk.py` runs ExecuTorch's
+`examples/mediatek` scripts in a separate Python 3.10 venv with MediaTek's wheels (see the module docstring).
 
 ### Key modules
 
@@ -65,9 +66,13 @@ from the CPU index first, as in `.github/actions/setup-export/action.yml`. Other
 - `naming.py`: output names, plus **Python ports of the app's Kotlin name rules** (`app_family`, `app_backend`,
   `app_model_name`, `app_size_hint`). The app infers chat template and backend from names, so every generated name must
   pass `check_app_rules`.
-- `sizing.py`: context auto-fit. Picks the largest tier in `context_tiers` whose phone-resident size (.pte + fp32 KV
-  cache + overhead) fits `device_budget_bytes` **and** whose export peak (grows with window² from per-layer causal
-  masks) fits host RAM + swap. Calibrated against probe runs in PLAN.md.
+- `sizing.py`: the memory model. Every tier in `context_tiers` is exported (one workflow job per window); the phone
+  estimate (.pte + fp32 KV cache + overhead vs `device_budget_bytes`) is recorded per file as `fits_phone_budget`, and
+  only the host estimate (export peak grows with window² from per-layer causal masks) is a gate: over it the export
+  raises `SkipExport` (CLI exit 4, workflow "skipped"). Calibrated against probe runs in PLAN.md.
+- `publish.py`: one run publishes one window. `superseded()` decides which existing files that window replaces; the
+  folder's `config.json` (`variants[]`, one per window) and the repo README are regenerated from every
+  `export-report-<window>.json` in the repo. Never delete another window's files.
 - `settings.py`: frozen `Settings` loaded (cached) from `config/pipeline.yaml` + `config/versions.env`.
 
 ## Constraints that aren't obvious from the code

@@ -18,6 +18,16 @@ class ExportError(Exception):
     pass
 
 
+class SkipExport(ExportError):
+    """This window cannot be exported on this host (memory), which is a property of the
+    runner, not of the model: the CLI exits 4 and the workflow records a skip, not a failure."""
+
+
+def report_file(context: int) -> str:
+    """One report per window, next to the files it describes: ``export-report-8k.json``."""
+    return f"export-report-{naming.window_label(context)}.json"
+
+
 def run_tool(command: list[str], what: str, **kwargs) -> None:
     """Run an export tool, turning a non-zero exit into ExportError (exit code 2, not a
     traceback) for the CLI. Its own output already says what went wrong."""

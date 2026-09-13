@@ -27,11 +27,27 @@ def _plan(args) -> int:
     return 0 if verdict.eligible else 3
 
 
+def _run_export(export) -> int:
+    """Exit codes: 0 exported, 2 failed, 4 skipped (this host cannot export this window)."""
+    from pipeline.exporting import ExportError, SkipExport
+
+    try:
+        report = export()
+    except SkipExport as error:
+        print(f"export skipped: {error}", file=sys.stderr)
+        return 4
+    except ExportError as error:
+        print(f"export failed: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps({"file": report["files"], "window": report["window"]["context"]}, indent=2))
+    return 0
+
+
 def _export_xnnpack(args) -> int:
     from pipeline import export_xnnpack
 
-    try:
-        report = export_xnnpack.run(
+    return _run_export(
+        lambda: export_xnnpack.run(
             args.model,
             args.revision,
             Path(args.out),
@@ -40,22 +56,17 @@ def _export_xnnpack(args) -> int:
             keep_work=args.keep_work,
             skip_smoke=args.skip_smoke,
         )
-    except export_xnnpack.ExportError as error:
-        print(f"export failed: {error}", file=sys.stderr)
-        return 2
-    print(json.dumps({"file": report["files"], "window": report["window"]["context"]}, indent=2))
-    return 0
+    )
 
 
 def _export_mtk(args) -> int:
     from pipeline import export_mtk
-    from pipeline.exporting import ExportError
 
     if not args.tool_python or not args.examples:
         print("export failed: set --tool-python and --examples (or MTK_PYTHON and MTK_EXAMPLES)", file=sys.stderr)
         return 2
-    try:
-        report = export_mtk.run(
+    return _run_export(
+        lambda: export_mtk.run(
             args.model,
             args.revision,
             args.soc,
@@ -66,19 +77,14 @@ def _export_mtk(args) -> int:
             keep_work=args.keep_work,
             context=args.context,
         )
-    except ExportError as error:
-        print(f"export failed: {error}", file=sys.stderr)
-        return 2
-    print(json.dumps({"file": report["files"], "target": report["target"]}, indent=2))
-    return 0
+    )
 
 
 def _export_qnn(args) -> int:
     from pipeline import export_qnn
-    from pipeline.exporting import ExportError
 
-    try:
-        report = export_qnn.run(
+    return _run_export(
+        lambda: export_qnn.run(
             args.model,
             args.revision,
             args.soc,
@@ -87,11 +93,7 @@ def _export_qnn(args) -> int:
             keep_work=args.keep_work,
             context=args.context,
         )
-    except ExportError as error:
-        print(f"export failed: {error}", file=sys.stderr)
-        return 2
-    print(json.dumps({"file": report["files"], "target": report["target"]}, indent=2))
-    return 0
+    )
 
 
 def _publish_hf(args) -> int:
@@ -153,7 +155,9 @@ def main(argv: list[str] | None = None) -> int:
     export.add_argument("--revision", default="main")
     export.add_argument("--out", default="out")
     export.add_argument("--work", default="work")
-    export.add_argument("--context", type=int, default=None, help="force a window instead of auto-fit")
+    export.add_argument(
+        "--context", type=int, default=None, help="window in tokens (default: the largest this host can build)"
+    )
     export.add_argument(
         "--keep-work", action="store_true", help="keep the work dir after success (a failure always leaves it)"
     )

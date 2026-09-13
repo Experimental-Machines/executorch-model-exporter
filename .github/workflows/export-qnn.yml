@@ -1,5 +1,5 @@
 name: Export QNN
-run-name: "QNN: ${{ inputs.model_id }}@${{ inputs.revision }}${{ inputs.context && format(' ctx {0}', inputs.context) || '' }}"
+run-name: "QNN: ${{ inputs.model_id }}@${{ inputs.revision }}${{ inputs.contexts && format(' ctx {0}', inputs.contexts) || '' }}"
 
 on:
   workflow_dispatch:
@@ -16,8 +16,8 @@ on:
         description: JSON list of chips, or empty for qnn.socs in config/pipeline.yaml
         default: ""
         type: string
-      context:
-        description: Context window in tokens, or empty for qnn.max_context_len in config/pipeline.yaml
+      contexts:
+        description: JSON list of context windows in tokens, one job per chip and window; empty for every tier in config/pipeline.yaml
         default: ""
         type: string
       publish_hf:
@@ -41,6 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       socs: ${{ steps.socs.outputs.socs }}
+      contexts: ${{ steps.contexts.outputs.contexts }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: socs
@@ -52,6 +53,15 @@ jobs:
             SOCS=$(python3 -c 'import json, yaml; print(json.dumps(yaml.safe_load(open("config/pipeline.yaml"))["export"]["qnn"]["socs"]))')
           fi
           echo "socs=$SOCS" >>"$GITHUB_OUTPUT"
+      - id: contexts
+        env:
+          CONTEXTS: ${{ inputs.contexts }}
+        run: |
+          if [ -z "$CONTEXTS" ]; then
+            python3 -m pip install --quiet pyyaml
+            CONTEXTS=$(python3 -c 'import json, yaml; print(json.dumps(yaml.safe_load(open("config/pipeline.yaml"))["export"]["context_tiers"]))')
+          fi
+          echo "contexts=$CONTEXTS" >>"$GITHUB_OUTPUT"
 
   export:
     needs: targets
@@ -59,6 +69,7 @@ jobs:
       fail-fast: false
       matrix:
         soc: ${{ fromJSON(needs.targets.outputs.socs) }}
+        context: ${{ fromJSON(needs.targets.outputs.contexts) }}
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:
@@ -67,6 +78,7 @@ jobs:
       MODEL_ID: ${{ inputs.model_id }}
       REVISION: ${{ inputs.revision }}
       SOC: ${{ matrix.soc }}
+      CONTEXT: ${{ matrix.context }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -80,7 +92,7 @@ jobs:
           grep -E '^QAIRT_VERSION=' config/versions.env >>"$GITHUB_ENV"
           soc_lower=$(echo "$SOC" | tr '[:upper:]' '[:lower:]')
           echo "TARGET=$soc_lower" >>"$GITHUB_ENV"
-          echo "ARTIFACT=qnn-${soc_lower}-${MODEL_ID//\//--}" >>"$GITHUB_ENV"
+          echo "ARTIFACT=qnn-${soc_lower}-${MODEL_ID//\//--}-${CONTEXT}" >>"$GITHUB_ENV"
 
       # The executorch wheel downloads the QAIRT SDK and a libc++ into ~/.cache/executorch/qnn
       # on first import. Cached per version in this repository only; never re-hosted. Restore
@@ -107,22 +119,31 @@ jobs:
           path: ~/.cache/executorch/qnn
           key: qairt-${{ env.QAIRT_VERSION }}-${{ runner.os }}-${{ runner.arch }}
 
+      # Exit 4 means this runner cannot build this window: recorded as a skip, so the other
+      # jobs of the matrix stand on their own.
       - name: Export
-        env:
-          CONTEXT: ${{ inputs.context }}
         run: |
+          set +e
           python -m pipeline export-qnn "$MODEL_ID" --soc "$SOC" --revision "$REVISION" \
-            --out "$WORK_DIR/out" --work "$WORK_DIR/work" ${CONTEXT:+--context "$CONTEXT"}
+            --out "$WORK_DIR/out" --work "$WORK_DIR/work" --context "$CONTEXT"
+          rc=$?
+          set -e
+          if [ "$rc" -eq 4 ]; then
+            echo "SKIPPED=1" >>"$GITHUB_ENV"
+            echo "::warning title=Window skipped::$MODEL_ID at $CONTEXT tokens on $SOC cannot be exported on this runner"
+            exit 0
+          fi
+          exit "$rc"
 
       - name: Summary
-        if: always()
+        if: always() && env.SKIPPED != '1'
         run: |
-          if [ -f "$WORK_DIR/out/qnn/$TARGET/export-report.json" ]; then
+          if compgen -G "$WORK_DIR/out/qnn/$TARGET/export-report*.json" >/dev/null; then
             python -m pipeline summary "$WORK_DIR/out" --backend qnn --target "$TARGET" >>"$GITHUB_STEP_SUMMARY"
           fi
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: always() && env.SKIPPED != '1'
         with:
           name: ${{ env.ARTIFACT }}
           path: ${{ env.WORK_DIR }}/out
@@ -130,7 +151,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish to Hugging Face
-        if: inputs.publish_hf
+        if: inputs.publish_hf && env.SKIPPED != '1'
         run: |
           if [ -z "$HF_TOKEN" ]; then
             echo "::error::Set the HF_TOKEN repository secret (write access to the output org)"
@@ -139,7 +160,7 @@ jobs:
           python -m pipeline publish-hf "$WORK_DIR/out" --backend qnn --target "$TARGET"
 
       - name: Publish GitHub release
-        if: inputs.publish_release
+        if: inputs.publish_release && env.SKIPPED != '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python -m pipeline publish-release "$WORK_DIR/out" --backend qnn --target "$TARGET"
