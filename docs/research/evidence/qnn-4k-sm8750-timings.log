@@ -1,0 +1,23 @@
+# QNN 4k probe (--context 4096, not published), Qwen3-0.6B, SM8750: stage timings.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34741690464 , job "export (SM8750)" (available).
+# Lines kept: those matching /Run python -m pipeline export-qnn|seq_mse_candidates|Calibration: collected|calling TextDecoder::quantize|Calibration complete|quantize completed|compile completed|QDQ EP saved|Finish compile_only|\d/1 \[\d+:\d+|\"bytes\"|\"path\"/, ANSI codes and progress-bar redraws removed.
+
+2026-09-13T06:03:40Z ##[group]Run python -m pipeline export-qnn "$MODEL_ID" --soc "$SOC" --revision "$REVISION" \
+2026-09-13T06:03:55Z | seq_mse_candidates    | 50                    |
+2026-09-13T06:05:03Z 100%|██████████| 1/1 [00:00<00:00, 1240.18it/s]
+2026-09-13T06:05:08Z 100%|██████████| 1/1 [00:05<00:00,  5.80s/it]
+2026-09-13T06:05:13Z INFO:root:Calibration: collected 1 sequences (max_context_length=4096, limit=1)
+2026-09-13T06:05:13Z INFO:root:calling TextDecoder::quantize
+2026-09-13T07:07:19Z 100%|██████████| 1/1 [1:01:13<00:00, 3673.73s/it]
+2026-09-13T07:07:19Z 100%|██████████| 1/1 [1:01:13<00:00, 3673.77s/it]
+2026-09-13T07:07:19Z INFO:root:Calibration complete for prepare_pt2e
+2026-09-13T07:07:53Z INFO:root:TextDecoder::quantize completed in 3759.9433670043945s
+2026-09-13T07:09:28Z INFO:root:TextDecoder::quantize completed in 95.63702630996704s
+2026-09-13T07:11:12Z INFO:root:TextDecoder::quantize completed in 104.0199224948883s
+2026-09-13T07:11:12Z INFO:root:MultiModalManager::quantize completed in 4002.0264921188354s
+2026-09-13T07:12:45Z INFO:root:QDQ EP saved to /exe-expo-work/work/artifact/decode_qdq.pt2
+2026-09-13T07:42:57Z INFO:root:HybridTextDecoder::compile completed in 1904.8086638450623s
+2026-09-13T07:42:57Z INFO:root:MultiModalManager::compile completed in 1904.811074256897s
+2026-09-13T07:42:57Z Finish compile_only and save to /exe-expo-work/work/artifact
+2026-09-13T07:43:40Z       "path": "qnn/sm8750/Qwen3-0.6B-qnn-hybrid-4k.pte",
+2026-09-13T07:43:40Z       "bytes": 686009344,

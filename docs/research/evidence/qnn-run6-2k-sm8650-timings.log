@@ -1,0 +1,21 @@
+# First successful QNN export, Qwen3-0.6B, 2,048-token window, SM8650: stage timings.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34706269492 , job "export (SM8650)" (available).
+# Lines kept: those matching /Run python -m pipeline export-qnn|seq_mse_candidates|Calibration: collected|calling TextDecoder::quantize|Calibration complete|quantize completed|compile completed|QDQ EP saved|Finish compile_only|\d/1 \[\d+:\d+/, ANSI codes and progress-bar redraws removed.
+
+2026-09-12T16:51:07Z ##[group]Run python -m pipeline export-qnn "$MODEL_ID" --soc "$SOC" --revision "$REVISION" --out "$WORK_DIR/out" --work "$WORK_DIR/work"
+2026-09-12T16:51:22Z | seq_mse_candidates    | 50                    |
+2026-09-12T16:52:07Z 100%|██████████| 1/1 [00:00<00:00, 1379.71it/s]
+2026-09-12T16:52:07Z 100%|██████████| 1/1 [00:00<00:00,  2.26it/s]
+2026-09-12T16:52:45Z INFO:root:Calibration: collected 1 sequences (max_context_length=2048, limit=1)
+2026-09-12T16:52:45Z INFO:root:calling TextDecoder::quantize
+2026-09-12T17:23:02Z 100%|██████████| 1/1 [29:21<00:00, 1761.40s/it]
+2026-09-12T17:23:02Z 100%|██████████| 1/1 [29:21<00:00, 1761.41s/it]
+2026-09-12T17:23:02Z INFO:root:Calibration complete for prepare_pt2e
+2026-09-12T17:23:16Z INFO:root:TextDecoder::quantize completed in 1830.739192724228s
+2026-09-12T17:24:28Z INFO:root:TextDecoder::quantize completed in 72.00804591178894s
+2026-09-12T17:25:53Z INFO:root:TextDecoder::quantize completed in 84.87400722503662s
+2026-09-12T17:25:53Z INFO:root:MultiModalManager::quantize completed in 2041.7212104797363s
+2026-09-12T17:27:20Z INFO:root:QDQ EP saved to /exe-expo-work/work/artifact/decode_qdq.pt2
+2026-09-12T17:51:31Z INFO:root:HybridTextDecoder::compile completed in 1538.4483768939972s
+2026-09-12T17:51:31Z INFO:root:MultiModalManager::compile completed in 1538.4485867023468s
+2026-09-12T17:51:31Z Finish compile_only and save to /exe-expo-work/work/artifact

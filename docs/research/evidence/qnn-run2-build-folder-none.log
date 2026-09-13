@@ -1,0 +1,7 @@
+# llama.py main() realpath()s --build_folder even with --compile_only.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34701385778 , job "export (SM8650)" (deleted 2026-09-13 (history purge); excerpt kept from the downloaded log).
+# Lines kept: those matching /realpath|build_folder|TypeError/, ANSI codes and progress-bar redraws removed.
+
+2026-09-12T15:14:28Z     args.build_folder = os.path.realpath(args.build_folder)
+2026-09-12T15:14:28Z   File "<frozen posixpath>", line 412, in realpath
+2026-09-12T15:14:28Z TypeError: expected str, bytes or os.PathLike object, not NoneType

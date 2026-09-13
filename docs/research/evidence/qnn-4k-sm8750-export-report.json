@@ -1,0 +1,27 @@
+{
+  "_source": "qnn/sm8750/export-report.json in artifact 10313877361 of https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34741690464 (fields copied unchanged; the artifact expires after 14 days)",
+  "window": {
+    "context": 4096,
+    "reason": "forced with --context (static NPU graphs)",
+    "kv_cache_bytes_per_token": null
+  },
+  "host": {
+    "nproc": 4,
+    "mem_total_bytes": 16766414848,
+    "swap_total_bytes": 25769799680,
+    "peak_rss_export_bytes": 15702085632,
+    "export_seconds": 5987.1,
+    "total_seconds": 5996.1
+  },
+  "files": [
+    {
+      "path": "qnn/sm8750/Qwen3-0.6B-qnn-hybrid-4k.pte",
+      "bytes": 686009344,
+      "sha256": "fe1c434317cfa415d01b4d9d6eb2b2e0221d8f23159ffbbfddec411c49b50572"
+    }
+  ],
+  "smoke": {
+    "passed": true,
+    "problems": []
+  }
+}

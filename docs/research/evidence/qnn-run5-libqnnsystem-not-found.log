@@ -1,0 +1,16 @@
+# After 35 min of calibration, lowering fails: LD_LIBRARY_PATH set inside the process is not seen by dlopen.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34703060641 , job "export (SM8650)" (deleted 2026-09-13 (history purge); excerpt kept from the downloaded log).
+# Lines kept: those matching /Calibration: collected|quantize completed|calling .*compile|Creating new backend bundle|Cannot Open QNN library|Fail to load Qnn system|Failed to initialize QNN backend/, ANSI codes and progress-bar redraws removed.
+
+2026-09-12T15:48:28Z INFO:root:Calibration: collected 1 sequences (max_context_length=2048, limit=1)
+2026-09-12T16:16:34Z INFO:root:TextDecoder::quantize completed in 1686.3097004890442s
+2026-09-12T16:17:43Z INFO:root:TextDecoder::quantize completed in 68.64804697036743s
+2026-09-12T16:18:59Z INFO:root:TextDecoder::quantize completed in 76.62090682983398s
+2026-09-12T16:18:59Z INFO:root:MultiModalManager::quantize completed in 1889.8829255104065s
+2026-09-12T16:18:59Z INFO:root:calling MultiModalManager::compile
+2026-09-12T16:18:59Z INFO:root:calling HybridTextDecoder::compile
+2026-09-12T16:21:47Z [INFO] [Qnn ExecuTorch]: Creating new backend bundle.
+2026-09-12T16:21:47Z [ERROR] [Qnn ExecuTorch]: Cannot Open QNN library libQnnSystem.so, with error: libQnnSystem.so: cannot open shared object file: No such file or directory
+2026-09-12T16:21:47Z E 00:34:50.486400 executorch:QnnBackendUnifiedRegistry.cpp:162] Fail to load Qnn system library
+2026-09-12T16:21:48Z RuntimeError: Failed to initialize QNN backend for kHtpBackend. Ensure QNN SDK libraries are available (e.g. LD_LIBRARY_PATH includes $QNN_SDK_ROOT/lib/x86_64-linux-clang/).
+2026-09-12T16:21:48Z Exception: Failed to initialize QNN backend for kHtpBackend. Ensure QNN SDK libraries are available (e.g. LD_LIBRARY_PATH includes $QNN_SDK_ROOT/lib/x86_64-linux-clang/).

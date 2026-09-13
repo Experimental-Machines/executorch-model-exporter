@@ -1,0 +1,41 @@
+# What the executorch 1.4.0 Linux wheel packages, from its zip directory (read 2026-09-12 with HTTP range requests):
+# https://files.pythonhosted.org/packages/2d/b9/4f49d8c994c3c3b005f6d8c1eb4e44ea4e2ccc41a933b9d255beb6cebec5/executorch-1.4.0-cp311-cp311-manylinux_2_28_x86_64.whl
+# Compared with the ExecuTorch source at v1.4.0 (commit 3dd7ccd1d863fad22639dd2d918ae34a41ce45f0).
+
+entries in the wheel: 4819
+*.json under executorch/examples/: 0
+files under executorch/examples/mediatek/: 0
+files under executorch/backends/mediatek/: 12
+qnn_config.sh present: 0
+
+## executorch/backends/mediatek/ in the wheel
+executorch/backends/mediatek/
+executorch/backends/mediatek/__init__.py
+executorch/backends/mediatek/partitioner.py
+executorch/backends/mediatek/preprocess.py
+executorch/backends/mediatek/_passes/
+executorch/backends/mediatek/_passes/__init__.py
+executorch/backends/mediatek/_passes/decompose_scaled_dot_product_attention.py
+executorch/backends/mediatek/quantizer/
+executorch/backends/mediatek/quantizer/__init__.py
+executorch/backends/mediatek/quantizer/annotator.py
+executorch/backends/mediatek/quantizer/qconfig.py
+executorch/backends/mediatek/quantizer/quantizer.py
+
+## params files the Qualcomm LLM registry points at (examples/qualcomm/oss_scripts/llama/__init__.py), present in the source, absent from the wheel
+executorch/examples/models/codegen/config/config.json  wheel:0
+executorch/examples/models/gemma/config/2b_config.json  wheel:0
+executorch/examples/models/gemma2/config/2b_config.json  wheel:0
+executorch/examples/models/gemma3/config/1b_config.json  wheel:0
+executorch/examples/models/glm/config/1_5b_config.json  wheel:0
+executorch/examples/models/granite/config/2b_config.json  wheel:0
+executorch/examples/models/granite_speech/config/2b_config.json  wheel:0
+executorch/examples/models/internvl3/1b_config.json  wheel:0
+executorch/examples/models/phi_4_mini/config/config.json  wheel:0
+executorch/examples/models/qwen2_5/config/0_5b_config.json  wheel:0
+executorch/examples/models/qwen2_5/config/1_5b_config.json  wheel:0
+executorch/examples/models/qwen3/config/0_6b_config.json  wheel:0
+executorch/examples/models/qwen3/config/1_7b_config.json  wheel:0
+executorch/examples/models/smollm2/135M_config.json  wheel:0
+executorch/examples/models/smollm3/3b_config.json  wheel:0
+executorch/examples/models/smolvlm/500M_config.json  wheel:0

@@ -11,6 +11,8 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+# Research evidence is kept exactly as it was run.
+extend-exclude = ["docs/research/evidence"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

@@ -36,6 +36,32 @@ what it would do without dispatching or saving state.
 **Probe runner** exports one small model at a list of windows (default 2k and 16k) without publishing, to
 measure what the runner really has and calibrate the sizing estimates.
 
+## Findings
+
+Everything learned from running the pipeline is logged with its evidence (run links, log
+excerpts, report fields, ExecuTorch source lines, reproducers) in
+[docs/research/](docs/research/README.md). The headline so far:
+
+**Where export time goes** ([study](docs/research/export-bottlenecks.md)). A Qualcomm
+export of Qwen3-0.6B takes 2,434-5,987 s on the hosted runner (measured, 2k and 4k), and two
+stages are 87-93% of it:
+
+| Run | Calibration loop | HTP compile | Export |
+|---|---|---|---|
+| SM8650, 2k | 1,761 s (48.4%) | 1,538 s (42.3%) | 3,637 s |
+| SM8750, 2k | 936 s (38.5%) | 1,172 s (48.2%) | 2,434 s |
+| SM8750, 4k | 3,674 s (61.4%) | 1,905 s (31.8%) | 5,987 s |
+
+- The calibration loop is one pass over a window-length sequence, plus ExecuTorch's SeqMSE
+  search, which its recipe enables for Qwen3-0.6B and Llama-3.2-1B only: 101 evaluations of
+  each of the 197 conv layers over the whole sequence. By operation count that is about 99%
+  of the pass (estimate; the logs time the loop as a whole).
+- The HTP compile is Qualcomm's SDK building the prompt and decode graphs; CPU-bound.
+- Runners vary: identical 2k calibrations took 1,761 s and 936 s. The 2k to 4k growth on one
+  chip (3.92x) is not yet explained; reports now record the CPU model and peak swap in use.
+- XNNPACK exports take about 10-12 minutes and are limited by memory, not time; the first
+  MediaTek run was limited by calibration memory.
+
 ## Locally
 
 ```sh

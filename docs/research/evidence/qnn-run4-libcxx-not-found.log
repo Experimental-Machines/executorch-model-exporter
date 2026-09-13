@@ -1,0 +1,11 @@
+# The pipeline imported executorch.backends.qualcomm in its own process; the child inherited QNN_SDK_ROOT and skipped the libc++ preload.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34702755378 , job "export (SM8750)" (deleted 2026-09-13 (history purge); excerpt kept from the downloaded log).
+# Lines kept: those matching /Loaded lib|Using cached QNN SDK|from QNN_SDK_ROOT|Cannot Open QNN library|Fail to load Qnn|GetQnnSdkBuildId/, ANSI codes and progress-bar redraws removed.
+
+2026-09-12T15:39:38Z Loaded libc++abi.so.1.0
+2026-09-12T15:39:38Z Loaded libc++.so.1.0
+2026-09-12T15:39:38Z Loaded libunwind.so.1
+2026-09-12T15:39:38Z [QNN] Using cached QNN SDK v2.37.0.250724 at /home/runner/.cache/executorch/qnn/sdk-2.37.0.250724
+2026-09-12T15:39:48Z [QNN] Using QNN SDK at /home/runner/.cache/executorch/qnn/sdk-2.37.0.250724 (from QNN_SDK_ROOT)
+2026-09-12T15:39:54Z [ERROR] [Qnn ExecuTorch]: Cannot Open QNN library /home/runner/.cache/executorch/qnn/sdk-2.37.0.250724/lib/x86_64-linux-clang/libQnnHtp.so, with error: libc++.so.1: cannot open shared object file: No such file or directory
+2026-09-12T15:39:54Z F 00:00:05.671023 executorch:PyQnnManagerAdaptor.cpp:172] In function GetQnnSdkBuildId(), assert failed (qnn_loaded_backend.Load(nullptr) == Error::Ok): Fail to load Qnn library

@@ -31,6 +31,7 @@ from pathlib import Path
 from pipeline import eligibility, families, hub, manifest, naming, settings
 from pipeline.exporting import (
     ExportError,
+    MemorySampler,
     children_peak_rss,
     contains,
     copy_side_files,
@@ -252,7 +253,8 @@ def run(
     command = export_command(tool_python, plan, recipe, soc, weight_dir / "config.json")
     print("==> " + " ".join(command))
     export_started = time.time()
-    subprocess.run(command, check=True, cwd=examples_dir, env={**os.environ, "PYTHONUNBUFFERED": "1"})
+    with MemorySampler() as memory:
+        subprocess.run(command, check=True, cwd=examples_dir, env={**os.environ, "PYTHONUNBUFFERED": "1"})
     export_seconds = time.time() - export_started
 
     exp = exp_name(weight_dir, recipe.precision, plan.num_chunks)
@@ -330,6 +332,7 @@ def run(
         "host": {
             **host_info(),
             "peak_rss_export_bytes": children_peak_rss(),
+            **memory.result(),
             "export_seconds": round(export_seconds, 1),
             "total_seconds": round(time.time() - started, 1),
         },

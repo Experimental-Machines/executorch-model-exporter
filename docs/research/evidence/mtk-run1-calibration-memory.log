@@ -1,0 +1,23 @@
+# First MediaTek export, Qwen3-0.6B, 2,048-token cache: the runner is shut down while preparing calibration inputs.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34745540976 , job "export (MT6991)" (available).
+# Lines kept: those matching /Mem:|Swap:|mtk_converter  |mtk-neuron  |Loading weights|cmdline LUT|Instantiating|Preparing Model Calibration|shutdown signal|operation was canceled|-shapes|Cache Size|Export shape/, ANSI codes and progress-bar redraws removed.
+
+2026-09-13T07:34:03Z Mem:     16766414848  1455218688 13061468160    43425792  2626383872 15311196160
+2026-09-13T07:34:03Z Swap:     3221221376           0  3221221376
+2026-09-13T07:35:52Z Mem:     16766414848  1014710272 12992540672    46710784  3147796480 15751704576
+2026-09-13T07:35:52Z Swap:    25769799680           0 25769799680
+2026-09-13T07:36:03Z Cache Size: ~416 MB (436119174 B)
+2026-09-13T07:37:38Z mtk_converter             8.13.0+public
+2026-09-13T07:37:38Z mtk-neuron                8.2.19
+2026-09-13T07:38:00Z Export shape(s):              ['128t2048c', '1t2048c']
+2026-09-13T07:38:00Z Loading weights from disk
+2026-09-13T07:38:01Z cmdline LUT embedding bin exported to /exe-expo-work/work/weights/Qwen3-0.6B/embedding_Qwen3-0.6B_fp32.bin
+2026-09-13T07:38:01Z Max Cache Size: 2048
+2026-09-13T07:38:01Z Instantiating submodels
+2026-09-13T07:38:02Z Loading weights for chunk 0
+2026-09-13T07:38:02Z Loading weights for chunk 1
+2026-09-13T07:38:03Z Loading weights for chunk 2
+2026-09-13T07:38:04Z Loading weights for chunk 3
+2026-09-13T07:38:04Z Preparing Model Calibration Inputs...
+2026-09-13T07:40:06Z ##[error]The runner has received a shutdown signal. This can happen when the runner service is stopped, or a manually started runner is canceled.
+2026-09-13T07:40:08Z ##[error]The operation was canceled.

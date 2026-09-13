@@ -1,0 +1,6 @@
+# First QNN run: the Qualcomm LLM package imports torchtune at import time.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34700613240 , job "export (SM8650)" (deleted 2026-09-13 (history purge); excerpt kept from the downloaded log).
+# Lines kept: those matching /Run python -m pipeline export-qnn|ModuleNotFoundError|No module named/, ANSI codes and progress-bar redraws removed.
+
+2026-09-12T14:56:10Z ##[group]Run python -m pipeline export-qnn "$MODEL_ID" --soc "$SOC" --revision "$REVISION" --out "$WORK_DIR/out" --work "$WORK_DIR/work"
+2026-09-12T14:58:17Z ModuleNotFoundError: No module named 'torchtune'

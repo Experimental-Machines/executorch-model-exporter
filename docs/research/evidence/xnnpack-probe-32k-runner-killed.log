@@ -1,0 +1,13 @@
+# XNNPACK export of Qwen3-0.6B at a 32,768-token window: the runner is shut down during export_llm.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34697093999 , job "calibrate (32768)" (deleted 2026-09-13 (history purge); excerpt kept from the downloaded log).
+# Lines kept: those matching /CONTEXT: 32768|Exporting with|dynamic shapes|shutdown signal|operation was canceled|Mem:|Swap:/, ANSI codes and progress-bar redraws removed.
+
+2026-09-12T13:29:51Z   CONTEXT: 32768
+2026-09-12T13:29:53Z Mem:     16766414848  1021284352 13497155584    44990464  2626842624 15745130496
+2026-09-12T13:29:53Z Swap:     3221221376           0  3221221376
+2026-09-12T13:31:17Z Mem:     16766414848  1031356416 12980236288    47558656  3144306688 15735058432
+2026-09-12T13:31:17Z Swap:    25769799680           0 25769799680
+2026-09-12T13:36:52Z [2026-09-12 13:36:52,895][root][INFO] - Exporting with:
+2026-09-12T13:36:52Z [2026-09-12 13:36:52,934][root][INFO] - dynamic shapes: ({1: Dim('token_dim', min=0, max=2047)}, {'input_pos': {0: 1}})
+2026-09-12T13:37:27Z ##[error]The runner has received a shutdown signal. This can happen when the runner service is stopped, or a manually started runner is canceled.
+2026-09-12T13:37:28Z ##[error]The operation was canceled.

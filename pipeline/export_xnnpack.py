@@ -24,6 +24,7 @@ import yaml
 from pipeline import convert, eligibility, families, hub, manifest, naming, settings, sizing, smoke
 from pipeline.exporting import (
     ExportError,
+    MemorySampler,
     children_peak_rss,
     copy_side_files,
     host_budget,
@@ -155,12 +156,13 @@ def run(
 
     print("==> export_llm")
     export_started = time.time()
-    subprocess.run(
-        [sys.executable, "-m", "executorch.extension.llm.export.export_llm", "--config", str(config_path)],
-        check=True,
-        cwd=work_dir,
-        env={**os.environ, "PYTHONUNBUFFERED": "1"},
-    )
+    with MemorySampler() as memory:
+        subprocess.run(
+            [sys.executable, "-m", "executorch.extension.llm.export.export_llm", "--config", str(config_path)],
+            check=True,
+            cwd=work_dir,
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        )
     export_seconds = time.time() - export_started
     if not pte.exists():
         raise ExportError(f"export_llm finished but {pte} does not exist")
@@ -234,6 +236,7 @@ def run(
             **host,
             "peak_rss_convert_bytes": convert_peak,
             "peak_rss_export_bytes": children_peak_rss(),
+            **memory.result(),
             "export_seconds": round(export_seconds, 1),
             "total_seconds": round(time.time() - started, 1),
         },

@@ -1,0 +1,7 @@
+# The executorch wheel does not package examples/models/*/config/*.json, which the Qualcomm registry points at.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34701748768 , job "export (SM8650)" (deleted 2026-09-13 (history purge); excerpt kept from the downloaded log).
+# Lines kept: those matching /FileNotFoundError|No such file or directory: .*config\.json|tokenizer\.py/, ANSI codes and progress-bar redraws removed.
+
+2026-09-12T15:26:38Z   File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/executorch/examples/qualcomm/oss_scripts/llama/tokenizer.py", line 79, in __init__
+2026-09-12T15:26:38Z FileNotFoundError: [Errno 2] No such file or directory: '/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/executorch/examples/qualcomm/oss_scripts/llama/../../../models/qwen3/config/0_6b_config.json'
+2026-09-12T15:26:38Z Exception: [Errno 2] No such file or directory: '/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/executorch/examples/qualcomm/oss_scripts/llama/../../../models/qwen3/config/0_6b_config.json'

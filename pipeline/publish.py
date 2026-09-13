@@ -139,6 +139,8 @@ def summary(out_dir: Path, backend: str, target: str | None = None) -> str:
         ("Window", f"{report['window']['context']:,} ({report['window']['reason']})"),
         ("Files", ", ".join(f"`{f['path']}` {f['bytes']:,} B" for f in report["files"])),
         ("Peak RSS export", f"{host.get('peak_rss_export_bytes') or 0:,} B"),
+        ("Peak swap in use", f"{host.get('peak_swap_used_bytes') or 0:,} B"),
+        ("CPU", host.get("cpu_model") or "?"),
         ("Export time", f"{host.get('export_seconds')} s of {host.get('total_seconds')} s"),
     ]
     if estimates:

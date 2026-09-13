@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
+import threading
 from importlib import metadata as pkg_metadata
 from pathlib import Path
 
@@ -47,7 +48,65 @@ def host_info() -> dict:
             fields[key] = int(rest.split()[0]) * 1024
         info["mem_total_bytes"] = fields.get("MemTotal")
         info["swap_total_bytes"] = fields.get("SwapTotal")
+    cpuinfo = Path("/proc/cpuinfo")
+    if cpuinfo.exists():
+        # Hosted runners differ: the same Qwen3-0.6B calibration took 1,761 s on one and
+        # 936 s on another (docs/research/export-bottlenecks.md), so reports name the CPU.
+        for line in cpuinfo.read_text().splitlines():
+            if line.startswith("model name"):
+                info["cpu_model"] = line.partition(":")[2].strip()
+                break
     return info
+
+
+class MemorySampler:
+    """Samples /proc/meminfo while an export runs.
+
+    Peak RSS stops at physical memory, so it cannot show how far an export went into swap:
+    the Qwen3-0.6B QNN exports at 2k and 4k both peaked at ~15.7 GB RSS on a 16.8 GB runner
+    (docs/research/export-bottlenecks.md). This records the swap actually in use.
+    """
+
+    def __init__(self, interval: float = 5.0, meminfo: Path = Path("/proc/meminfo")):
+        self.interval = interval
+        self.meminfo = meminfo
+        self.peak_swap_used = None
+        self.min_available = None
+        self._stop = threading.Event()
+        self._thread = None
+
+    def sample(self) -> None:
+        if not self.meminfo.exists():
+            return
+        fields = {}
+        for line in self.meminfo.read_text().splitlines():
+            key, _, rest = line.partition(":")
+            if rest.split():
+                fields[key] = int(rest.split()[0]) * 1024
+        swap_used = fields.get("SwapTotal", 0) - fields.get("SwapFree", 0)
+        available = fields.get("MemAvailable")
+        self.peak_swap_used = max(swap_used, self.peak_swap_used or 0)
+        if available is not None:
+            self.min_available = available if self.min_available is None else min(available, self.min_available)
+
+    def _run(self) -> None:
+        while not self._stop.wait(self.interval):
+            self.sample()
+
+    def __enter__(self) -> MemorySampler:
+        self.sample()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join()
+        self.sample()
+
+    def result(self) -> dict:
+        return {"peak_swap_used_bytes": self.peak_swap_used, "min_mem_available_bytes": self.min_available}
 
 
 def host_budget(info: dict, reserve: int = 1_000_000_000) -> int | None:

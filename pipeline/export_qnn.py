@@ -28,6 +28,7 @@ from pathlib import Path
 from pipeline import eligibility, families, hub, manifest, naming, settings, smoke
 from pipeline.exporting import (
     ExportError,
+    MemorySampler,
     children_peak_rss,
     contains,
     copy_side_files,
@@ -247,7 +248,8 @@ def run(
     command = llama_command(decoder, soc, recipe, artifact, src_dir / "original" if meta else None)
     print("==> " + " ".join(command))
     export_started = time.time()
-    subprocess.run(command, check=True, cwd=work_dir, env=env)
+    with MemorySampler() as memory:
+        subprocess.run(command, check=True, cwd=work_dir, env=env)
     export_seconds = time.time() - export_started
 
     built = decoder_pte(artifact, recipe.model_mode)
@@ -294,6 +296,7 @@ def run(
         "host": {
             **host_info(),
             "peak_rss_export_bytes": children_peak_rss(),
+            **memory.result(),
             "export_seconds": round(export_seconds, 1),
             "total_seconds": round(time.time() - started, 1),
         },

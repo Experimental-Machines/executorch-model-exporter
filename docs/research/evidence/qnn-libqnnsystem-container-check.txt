@@ -1,0 +1,19 @@
+# Reproduction of the run-5 failure (qnn-run5-libqnnsystem-not-found.log) and check of the fix,
+# run locally on 2026-09-13 in Docker: python:3.11-slim plus libatomic1 (present on GitHub's
+# runners, absent from the slim image), torch 2.13.0 (CPU), executorch 1.4.0, the QAIRT
+# 2.37.0.250724 SDK the wheel downloads, and this repository mounted at /repo.
+# Script: qnn_env_check.py (in this folder). It lowers a 16x16 Linear+ReLU to QNN HTP fp16 for
+# SM8650 in a child process, first with the inherited environment, then with
+# pipeline.export_qnn.qnn_env. Output as printed, lines filtered by the script:
+
+SDK {'version': '2.37.0.250724', 'root': '/root/.cache/executorch/qnn/sdk-2.37.0.250724', 'libcxx_dir': '/root/.cache/executorch/qnn/libcxx-14.0.0', 'libcxx_files': ['libc++.so.1.0', 'libc++abi.so.1.0', 'libunwind.so.1']}
+=== fresh child, inherited environment (run 5's setup)
+exit 1
+[ERROR] [Qnn ExecuTorch]: Cannot Open QNN library libQnnSystem.so, with error: libQnnSystem.so: cannot open shared object file: No such file or directory
+E 00:00:05.962049 executorch:QnnManager.cpp:235] Fail to get or create shared Qnn backend bundle. Error code: 1
+    raise RuntimeError(
+RuntimeError: Failed to initialize QNN backend for kHtpBackend. Ensure QNN SDK libraries are available (e.g. LD_LIBRARY_PATH includes $QNN_SDK_ROOT/lib/x86_64-linux-clang/).
+=== child with qnn_env
+LD_LIBRARY_PATH /root/.cache/executorch/qnn/sdk-2.37.0.250724/lib/x86_64-linux-clang:/tmp/qnn-libs
+exit 0
+LOWERED 46592 True
