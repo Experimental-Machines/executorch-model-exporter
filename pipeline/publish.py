@@ -174,7 +174,9 @@ def release_notes(report: dict, hf_url: str | None) -> str:
     return "\n".join(lines) + "\n"
 
 
-def publish_release(out_dir: Path, backend: str, target: str | None = None, context: int | None = None) -> str:
+def publish_release(
+    out_dir: Path, backend: str, target: str | None = None, context: int | None = None, attempts: int = 5
+) -> str:
     """Create (or update) a GitHub release with this window's files under the 2 GiB limit."""
     report = load_report(out_dir, backend, target, context)
     folder = out_dir / _folder(backend, target)
@@ -185,14 +187,21 @@ def publish_release(out_dir: Path, backend: str, target: str | None = None, cont
     candidates.append(out_dir / report["tokenizer"])
     assets = [str(p) for p in candidates if p.is_file() and p.stat().st_size < RELEASE_ASSET_LIMIT]
     notes = release_notes(report, hf_url)
-    created = subprocess.run(
-        ["gh", "release", "create", tag, "--title", tag, "--notes", notes, *assets], capture_output=True, text=True
-    )
-    if created.returncode == 0:
-        return tag
-    if "already exists" not in created.stderr + created.stdout:
-        raise RuntimeError(f"gh release create failed: {created.stderr.strip()[-2000:]}")
-    # A re-run of the same window: replace its assets and notes.
+    create = ["gh", "release", "create", tag, "--title", tag, "--notes", notes, *assets]
+    # GitHub's API answers 5xx now and then (a whole evening of them on 2026-09-13); a
+    # release is the last step of a multi-hour job, so it is retried, not failed.
+    for attempt in range(attempts):
+        created = subprocess.run(create, capture_output=True, text=True)
+        if created.returncode == 0:
+            return tag
+        output = created.stderr + created.stdout
+        if "already exists" in output:
+            break
+        if not re.search(r"HTTP 5\d\d", output) or attempt == attempts - 1:
+            raise RuntimeError(f"gh release create failed: {created.stderr.strip()[-2000:]}")
+        time.sleep(30 * (attempt + 1))
+    # The release exists (a re-run of the same window, or a create that answered 5xx after
+    # creating it): replace its assets and notes.
     subprocess.run(["gh", "release", "upload", tag, "--clobber", *assets], check=True)
     subprocess.run(["gh", "release", "edit", tag, "--notes", notes], check=True)
     return tag
