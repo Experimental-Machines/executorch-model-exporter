@@ -113,3 +113,6 @@ watcher takes injectable `lister`/`fetch`/`dispatcher` callables, so tests never
 Commit subjects are short and scoped by area (`QNN export: …`, `PLAN: …`) and explain the reason, not just the change.
 Code comments cite the upstream source they depend on (ExecuTorch file, app Kotlin class) and measured numbers; keep
 doing that.
+
+Never put a `Claude-Session:` trailer or any claude.ai session link in a commit message, PR, release, model card or
+anything else published: this repo is public and its history has been rewritten to remove them.
