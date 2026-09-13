@@ -154,7 +154,9 @@ def main(argv: list[str] | None = None) -> int:
     export.add_argument("--out", default="out")
     export.add_argument("--work", default="work")
     export.add_argument("--context", type=int, default=None, help="force a window instead of auto-fit")
-    export.add_argument("--keep-work", action="store_true")
+    export.add_argument(
+        "--keep-work", action="store_true", help="keep the work dir after success (a failure always leaves it)"
+    )
     export.add_argument("--skip-smoke", action="store_true")
     export.set_defaults(func=_export_xnnpack)
 
@@ -165,7 +167,9 @@ def main(argv: list[str] | None = None) -> int:
     qnn.add_argument("--out", default="out")
     qnn.add_argument("--work", default="work")
     qnn.add_argument("--context", type=int, default=None, help="window instead of qnn.max_context_len")
-    qnn.add_argument("--keep-work", action="store_true")
+    qnn.add_argument(
+        "--keep-work", action="store_true", help="keep the work dir after success (a failure always leaves it)"
+    )
     qnn.set_defaults(func=_export_qnn)
 
     mtk = commands.add_parser("export-mtk", help="compile MediaTek NeuroPilot .pte chunks for one chip")

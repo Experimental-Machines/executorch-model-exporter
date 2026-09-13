@@ -111,8 +111,8 @@ def publish_release(out_dir: Path, backend: str, target: str | None = None) -> s
     folder = out_dir / _folder(backend, target)
     tag = release_tag(report)
     hf_url = f"https://huggingface.co/{report['output_repo']}"
-    assets = [str(p) for p in sorted(folder.iterdir()) if p.is_file() and p.stat().st_size < RELEASE_ASSET_LIMIT]
-    assets.append(str(out_dir / report["tokenizer"]))
+    candidates = [*sorted(folder.iterdir()), out_dir / report["tokenizer"]]
+    assets = [str(p) for p in candidates if p.is_file() and p.stat().st_size < RELEASE_ASSET_LIMIT]
     notes = release_notes(report, hf_url)
     exists = subprocess.run(["gh", "release", "view", tag], capture_output=True).returncode == 0
     if exists:
@@ -156,6 +156,8 @@ def summary(out_dir: Path, backend: str, target: str | None = None) -> str:
         )
     else:
         rows.append(("Smoke test", f"{'passed' if smoke.get('passed') else 'failed'}: {smoke.get('reply', '')!r}"))
+        if smoke.get("template_error"):
+            rows.append(("Chat template", f"could not be rendered, completion prompt used: {smoke['template_error']}"))
     title = manifest.BACKEND_TITLES[backend] + (f" {manifest.target(report)}" if report.get("target") else "")
     lines = [f"### {title}: {report['output_repo']}", "", "| | |", "|---|---|"]
     lines += [f"| {k} | {v} |" for k, v in rows]

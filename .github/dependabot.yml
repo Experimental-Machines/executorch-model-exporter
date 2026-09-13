@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Actions are pinned to commit SHAs; Dependabot keeps the SHA and the version comment moving.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  # Python pins are deliberate (ExecuTorch's own pins for its release): only the tooling
+  # that does not have to match the runtime is updated automatically.
+  - package-ecosystem: pip
+    directory: /requirements
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-name: pytest
+      - dependency-name: ruff

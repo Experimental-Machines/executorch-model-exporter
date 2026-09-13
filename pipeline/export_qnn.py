@@ -33,6 +33,7 @@ from pipeline.exporting import (
     contains,
     copy_side_files,
     host_info,
+    run_tool,
     sha256,
     source_report,
     toolchain,
@@ -41,6 +42,8 @@ from pipeline.exporting import (
 BACKEND = "qnn"
 # examples/qualcomm/oss_scripts/llama/decoder_constants.py: DECODER_GRAPH_NAMES
 HYBRID_METHODS = ("kv_forward", "prefill_forward")
+# backends/qualcomm/partition/qnn_partitioner.py: QnnBackend.__name__ is the delegate id.
+QNN_BACKEND_ID = "QnnBackend"
 META_FILES = ("original/consolidated.00.pth", "original/params.json", "original/tokenizer.model")
 SOC_NAMES = {"SM8650": "Snapdragon 8 Gen 3", "SM8750": "Snapdragon 8 Elite"}
 EXECUTORCH_SOURCE_FILES = settings.ROOT / "third_party" / "executorch"
@@ -111,6 +114,17 @@ def llama_command(
     return command
 
 
+def check_script_revision(source: hub.SourceModel, head: str) -> None:
+    """The Qualcomm script downloads its registry entry's repo at ``main``, whatever revision
+    was asked for; refuse when that would compile weights other than the ones recorded."""
+    if head != source.sha:
+        raise ExportError(
+            f"{source.id} was requested at {source.sha[:12]} but the Qualcomm script compiles "
+            f"main, now at {head[:12]}; re-run with --revision main (or the revision recorded "
+            "will not match the weights)"
+        )
+
+
 def decoder_pte(artifact: Path, model_mode: str) -> Path:
     """The text decoder the script wrote: ``[<decoder>_]<mode>_llama_qnn.pte``."""
     matches = sorted(artifact.glob(f"*{model_mode}_llama_qnn.pte"))
@@ -120,24 +134,50 @@ def decoder_pte(artifact: Path, model_mode: str) -> Path:
     return matches[0]
 
 
+def delegates(pte: Path) -> dict[str, dict]:
+    """Per method: the backends it delegates to and how many delegate calls it makes.
+
+    Read from the program's flatbuffer (the schema ExecuTorch serialises), not by grepping
+    bytes: the backend id string also appears in a program whose graph never calls it.
+    """
+    from executorch.exir._serialize._program import deserialize_pte_binary
+    from executorch.exir.schema import DelegateCall
+
+    program = deserialize_pte_binary(pte.read_bytes()).program
+    result = {}
+    for plan in program.execution_plan:
+        calls = sum(
+            1
+            for chain in plan.chains
+            for instruction in chain.instructions
+            if isinstance(instruction.instr_args, DelegateCall)
+        )
+        result[plan.name] = {"backends": sorted({d.id for d in plan.delegates}), "delegate_calls": calls}
+    return result
+
+
 def structural_check(pte: Path, model_mode: str) -> dict:
+    """The program loads, has the decoder graphs, and each of them runs on the QNN delegate."""
     problems = []
     try:
         metadata = smoke.read_metadata(pte)
+        graphs = delegates(pte)
     except Exception as error:  # a program that does not even parse
         return {"kind": "structural", "passed": False, "problems": [f"program did not load: {error}"]}
     methods = metadata.get("methods", [])
     wanted = HYBRID_METHODS if model_mode == "hybrid" else ("kv_forward",)
-    missing = [m for m in wanted if m not in methods]
-    if missing:
-        problems.append(f"missing decoder methods {missing} (has {methods})")
-    if not contains(pte, b"QnnBackend"):
-        problems.append("no QnnBackend delegate in the program")
+    for name in wanted:
+        graph = graphs.get(name)
+        if graph is None:
+            problems.append(f"missing decoder method {name!r} (has {methods})")
+        elif QNN_BACKEND_ID not in graph["backends"] or graph["delegate_calls"] == 0:
+            problems.append(f"{name} does not run on {QNN_BACKEND_ID}: {graph}")
     return {
         "kind": "structural",
         "passed": not problems,
         "problems": problems,
         "methods": methods,
+        "delegates": {name: graphs[name] for name in wanted if name in graphs},
         "metadata": metadata,
     }
 
@@ -161,7 +201,9 @@ def qnn_sdk() -> dict:
     executorch.backends.qualcomm edits os.environ and preloads libraries in the importing
     process, which must not leak into this one.
     """
-    result = subprocess.run([sys.executable, "-c", _SDK_PROBE], capture_output=True, text=True)
+    # The first import downloads the SDK archive (about a gigabyte); a stalled download
+    # should fail the job here, not at the 6-hour limit.
+    result = subprocess.run([sys.executable, "-c", _SDK_PROBE], capture_output=True, text=True, timeout=1800)
     if result.returncode != 0:
         raise ExportError(f"could not set up the QAIRT SDK:\n{result.stderr[-4000:]}")
     return json.loads(result.stdout.strip().splitlines()[-1])
@@ -215,6 +257,11 @@ def run(
     if verdict.backends[BACKEND] is not None:
         raise ExportError(f"{model_id} cannot be exported to {BACKEND}: {verdict.backends[BACKEND]}")
     decoder = families.qnn_decoder(source.id)
+    meta = decoder in families.QNN_META_CHECKPOINT
+    if not meta and revision != "main":
+        # At "main" the fetch above already resolved what the script will download (bar a
+        # push in the seconds between); any other revision has to be checked against it.
+        check_script_revision(source, hub.head_sha(model_id))
     window = recipe.max_context_len
 
     output_repo = naming.output_repo(model_id, cfg.hub_org, cfg.repo_suffix)
@@ -229,7 +276,6 @@ def run(
     backend_dir.mkdir(parents=True, exist_ok=True)
     src_dir = work_dir / "source"
     artifact = work_dir / "artifact"
-    meta = decoder in families.QNN_META_CHECKPOINT
     print(f"==> {model_id}@{source.sha[:12]}: --decoder_model {decoder}, {soc}, window {window}")
 
     sdk = qnn_sdk()
@@ -249,7 +295,7 @@ def run(
     print("==> " + " ".join(command))
     export_started = time.time()
     with MemorySampler() as memory:
-        subprocess.run(command, check=True, cwd=work_dir, env=env)
+        run_tool(command, "the Qualcomm llama script", cwd=work_dir, env=env)
     export_seconds = time.time() - export_started
 
     built = decoder_pte(artifact, recipe.model_mode)

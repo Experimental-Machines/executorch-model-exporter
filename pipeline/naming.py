@@ -83,6 +83,12 @@ def app_size_hint(name: str) -> str | None:
     return match.group(0).upper() if match else None
 
 
+def size_hints(name: str) -> list[str]:
+    """Every size-looking token in the name. The app reads the first; a name with several
+    ("Qwen2.5-1M-1.5B") would be shown at the wrong size, so such names are refused."""
+    return sorted({m.group(0).upper() for m in _SIZE_HINT.finditer(name)})
+
+
 def nominal_billions(name: str) -> float | None:
     """The size written in the name, in billions: "1.7B" → 1.7, "360M" → 0.36."""
     hint = app_size_hint(name)

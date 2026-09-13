@@ -20,12 +20,12 @@ lm_eval==0.4.5
 torchtune @ git+https://github.com/pytorch/torchtune.git@3c1872ace149f03ef4ffec765d3f0a5fd0399497
 # torchtune imports torchvision; 0.28.0 is the release built against torch 2.13.0 (CPU index).
 torchvision==0.28.0
-sentencepiece
-tiktoken
-blobfile
+sentencepiece==0.2.2
+tiktoken==0.14.0
+blobfile==3.3.0
 # backends/qualcomm/requirements.txt
-py-cpuinfo
-requests
-tabulate
-graphviz
-pydot
+py-cpuinfo==9.0.0
+requests==2.34.2
+tabulate==0.10.0
+graphviz==0.21
+pydot==4.0.1

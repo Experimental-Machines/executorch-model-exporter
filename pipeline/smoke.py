@@ -84,7 +84,12 @@ def run(
     total_params: int,
     max_new_tokens: int = 32,
 ) -> dict:
-    prompt = chat.render(model_dir, tokenizer_config, instruct)
+    template_error = None
+    try:
+        prompt = chat.render(model_dir, tokenizer_config, instruct)
+    except Exception as error:  # a template feature the sandboxed renderer lacks, not a bad .pte
+        template_error = f"{type(error).__name__}: {error}"
+        prompt = chat.render(model_dir, tokenizer_config, instruct=False)
     problems = []
     try:
         pieces, stats = generate(pte, tokenizer, prompt, max_new_tokens)
@@ -102,6 +107,7 @@ def run(
         problems.append(f"expected {chat.EXPECTED!r} in the reply")
     return {
         "prompt": prompt,
+        "template_error": template_error,
         "reply": text,
         "tokens": len(pieces),
         "answered": answered,
