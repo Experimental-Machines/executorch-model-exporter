@@ -38,21 +38,26 @@ agreement (read `LICENSE.pdf` for the binding text):
 Model cards of repos with `qnn/` folders state that the context binaries were compiled with
 QAIRT 2.37.0.250724 and that no Qualcomm SDK or runtime library is included.
 
-## MediaTek NeuroPilot Express SDK (build 20250327)
+## MediaTek NeuroPilot Express SDK 8.0.8 (build 20250925)
 
 Used by `export-mtk.yml` to compile MediaTek NeuroPilot model binaries for MT6989
-(Dimensity 9300) and MT6991 (Dimensity 9400). Each run downloads the archive ExecuTorch
-1.4.0's own CI uses from MediaTek's URL (`NEUROPILOT_SDK_URL` in `config/versions.env`),
-checks it against `NEUROPILOT_SDK_SHA256`, installs its `mtk_converter` 8.13.0 and
-`mtk_neuron` 8.2.19 wheels into a throwaway environment, and deletes the archive. Nothing
-from the SDK is committed to this repository, cached, uploaded as an artifact, or published.
+(Dimensity 9300) and MT6991 (Dimensity 9400). Each run downloads
+`neuropilot-express-sdk-8.0.8-build20250925.tar.gz` from the URL MediaTek lists on its
+NeuroPilot Express SDK page (`NEUROPILOT_SDK_URL` in `config/versions.env`), checks it against
+`NEUROPILOT_SDK_SHA256`, installs its `mtk_converter` 8.13.0 and `mtk_neuron` 8.2.23 wheels
+into a throwaway environment, and deletes the archive. Nothing from the SDK is committed to
+this repository, cached, uploaded as an artifact, or published. (The first runs used the
+earlier build 20250327 that ExecuTorch's CI installs; its `mtk_neuron` 8.2.19 lacks a function
+ExecuTorch's LLM export needs.)
 
 The SDK is © MediaTek Inc. and licensed under MediaTek's "Terms and Conditions of Use for
 NeuroPilot Express SDK License" (`LICENSE AGREEMENT.pdf` in the archive; the document is
-marked MediaTek Confidential, so it is not reproduced here). Accessing or using the SDK is
-acceptance of that agreement, which every run of `export-mtk.yml` does on behalf of whoever
-operates this repository; ExperimentalMachines accepted it on 2026-09-13. Points that bear on
-this pipeline, paraphrased (read the agreement for the binding text):
+marked MediaTek Confidential, so it is not reproduced here). The 8.0.8 archive's agreement is
+byte-identical to build 20250327's (SHA-256
+`966215c3036abce09af48828be520cff91346775c19141437b9eb5f7069dd911` for both). Accessing or
+using the SDK is acceptance of that agreement, which every run of `export-mtk.yml` does on
+behalf of whoever operates this repository; ExperimentalMachines accepted it on 2026-09-13.
+Points that bear on this pipeline, paraphrased (read the agreement for the binding text):
 
 - The license is non-exclusive, non-transferable and revocable, to use the SDK for developing
   applications used with MediaTek chipsets, and to distribute it only in object code as part

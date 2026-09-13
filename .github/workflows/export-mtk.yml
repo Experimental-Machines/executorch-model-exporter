@@ -134,9 +134,11 @@ jobs:
           echo "$NEUROPILOT_SDK_SHA256  $sdk.tar.gz" | sha256sum -c -
           tar xzf "$sdk.tar.gz" -C "$sdk" --strip-components=1 --wildcards \
             "*/mtk_neuron-${MTK_NEURON_VERSION}-*.whl" "*/mtk_converter-${MTK_CONVERTER_VERSION}+public-cp310-*.whl"
-          "$tool_python" -m pip install --quiet -r requirements/mtk-tools.txt \
-            "$sdk"/mtk_neuron-"${MTK_NEURON_VERSION}"-*.whl \
-            "$sdk"/mtk_converter-"${MTK_CONVERTER_VERSION}"+public-cp310-*.whl
+          # The 8.0.8 archive keeps mtk_converter only under mtk_converter-*_public_packages/.
+          neuron_whl=$(find "$sdk" -name "mtk_neuron-${MTK_NEURON_VERSION}-*.whl" | head -1)
+          converter_whl=$(find "$sdk" -name "mtk_converter-${MTK_CONVERTER_VERSION}+public-cp310-*.whl" | head -1)
+          test -n "$neuron_whl" && test -n "$converter_whl"
+          "$tool_python" -m pip install --quiet -r requirements/mtk-tools.txt "$neuron_whl" "$converter_whl"
           rm -rf "$sdk" "$sdk.tar.gz"
           "$tool_python" -m pip list | grep -iE '^(torch|torchao|executorch|transformers|mtk.converter|mtk.neuron) '
           echo "MTK_PYTHON=$tool_python" >>"$GITHUB_ENV"

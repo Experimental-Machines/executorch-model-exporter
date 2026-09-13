@@ -1,0 +1,13 @@
+# MediaTek's public NeuroPilot Express SDK page, download table as served on 2026-09-13 by
+# https://neuropilot.mediatek.com/api/markdown/public/npexpress/en/docs/npexpress (the JSON behind
+# https://neuropilot.mediatek.com/resources/public/npexpress/en/docs/npexpress).
+# Archive digests and wheel versions below were measured on the downloaded files.
+
+Package name | Download link
+neuropilot-express-sdk-8.0.8-build20250925.tar.gz | https://s3.ap-southeast-1.amazonaws.com/mediatek.neuropilot.com/b1c485de-fca8-4b20-836a-8b33152a3609.gz
+neuropilot-express-sdk-build20250327.tar.gz | https://s3.ap-southeast-1.amazonaws.com/mediatek.neuropilot.com/06302508-4c94-4bf2-9789-b0ee44e83e27.gz
+neuropilot-express-sdk-8.0.4-build20241016.tar.gz | https://s3.ap-southeast-1.amazonaws.com/mediatek.neuropilot.com/8c1ff4e4-4256-47ed-9e24-67818b4cc4b9.gz
+
+neuropilot-express-sdk-build20250327: sha256 d92a417877d955c6bd6018b173feed5f29c406ef04788ce9e8be3a9930dd8016, mtk_neuron 8.2.19 (no extract_shared_data), mtk_converter 8.13.0
+neuropilot-express-sdk-8.0.8-build20250925: sha256 42155c3b25e9f9af1bef55534d0700835f32564a289e8cb1e44f0b2433ddab48, mtk_neuron 8.2.23 (extract_shared_data in mtk_neuron/extract_shared.py), mtk_converter 8.13.0 (only under mtk_converter-8.13.0_public_packages/)
+LICENSE AGREEMENT.pdf in both archives: sha256 966215c3036abce09af48828be520cff91346775c19141437b9eb5f7069dd911 (identical)

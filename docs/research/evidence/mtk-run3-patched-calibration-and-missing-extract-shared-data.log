@@ -1,0 +1,28 @@
+# Third MediaTek export, Qwen3-0.6B, 512-token cache, MT6991, with mediatek-calibration-as-arrays.patch: chunk 0 calibrates 9 prompts in 2:18; lowering then fails because mtk_neuron 8.2.19 has no extract_shared_data.
+# Source: https://github.com/ExperimentalMachines/executorch-model-exporter/actions/runs/34755060062 , job "export (MT6991, 512)" (available).
+# Lines kept: those matching /Export shape|Max Cache|Preparing Model Calibration|Exporting Chunk|Calibrating Model: .*[0-9]+/9 \[|Getting ATen Dialect|Delegating Edge|AttributeError|extract_shared_data|mtk_converter  |mtk-neuron  |apply|Applied|Checking patch/, ANSI codes and progress-bar redraws removed (tqdm's last redraw per update kept).
+
+2026-09-13T11:46:59Z mtk_converter             8.13.0+public
+2026-09-13T11:46:59Z mtk-neuron                8.2.19
+2026-09-13T11:47:03Z Checking patch examples/mediatek/model_export_scripts/qwen.py...
+2026-09-13T11:47:03Z Applied patch examples/mediatek/model_export_scripts/qwen.py cleanly.
+2026-09-13T11:47:23Z Export shape(s):              ['128t512c', '1t512c']
+2026-09-13T11:47:24Z Max Cache Size: 512
+2026-09-13T11:47:27Z Preparing Model Calibration Inputs...
+2026-09-13T11:52:00Z Exporting Chunk 0 to PTE
+2026-09-13T11:52:26Z Calibrating Model:   0%|          | 0/9 [00:00<?, ?it/s]
+2026-09-13T11:52:49Z Calibrating Model:  11%|█         | 1/9 [00:18<02:24, 18.12s/it]
+2026-09-13T11:53:03Z Calibrating Model:  22%|██▏       | 2/9 [00:40<02:23, 20.46s/it]
+2026-09-13T11:53:17Z Calibrating Model:  33%|███▎      | 3/9 [00:54<01:45, 17.57s/it]
+2026-09-13T11:53:31Z Calibrating Model:  44%|████▍     | 4/9 [01:08<01:20, 16.16s/it]
+2026-09-13T11:53:45Z Calibrating Model:  56%|█████▌    | 5/9 [01:22<01:01, 15.33s/it]
+2026-09-13T11:53:59Z Calibrating Model:  67%|██████▋   | 6/9 [01:36<00:44, 14.90s/it]
+2026-09-13T11:54:13Z Calibrating Model:  78%|███████▊  | 7/9 [01:50<00:29, 14.68s/it]
+2026-09-13T11:54:27Z Calibrating Model:  89%|████████▉ | 8/9 [02:04<00:14, 14.52s/it]
+2026-09-13T11:54:29Z Calibrating Model: 100%|██████████| 9/9 [02:18<00:00, 14.36s/it]
+2026-09-13T11:54:29Z Calibrating Model: 100%|██████████| 9/9 [02:18<00:00, 15.41s/it]
+2026-09-13T11:54:29Z Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 128t512c chunk 0
+2026-09-13T11:54:56Z Getting ATen Dialect Graph for Qwen3-0.6B_A16W4_4_chunks 1t512c chunk 0
+2026-09-13T11:55:17Z Delegating Edge Program to Neuropilot Backend
+2026-09-13T11:56:29Z blob, new_models = mtk_neuron.extract_shared_data(
+2026-09-13T11:56:29Z AttributeError: module 'mtk_neuron' has no attribute 'extract_shared_data'

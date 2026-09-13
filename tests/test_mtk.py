@@ -112,9 +112,9 @@ def mtk_report(soc="mt6991"):
         "toolchain": {"executorch": "1.4.0"},
         "neuropilot": {
             "name": "NeuroPilot Express SDK",
-            "build": "20250327",
+            "build": "8.0.8-build20250925",
             "mtk_converter": "8.13.0+public",
-            "mtk_neuron": "8.2.19",
+            "mtk_neuron": "8.2.23",
         },
         "recipe": {"label": "NeuroPilot A16W4, 4 chunks", "description": "recipe."},
         "window": {"context": 2048, "kv_cache_bytes_per_token": None},
@@ -137,13 +137,13 @@ def test_config_describes_one_model_in_several_files():
     # MediaTek's runner flags differ per window (cache size, file names): they live on the variant.
     assert variant["runner"]["cache_size"] == 2048 and variant["context"] == 2048
     assert "runner" not in config
-    assert config["neuropilot_sdk"]["build"] == "20250327"
+    assert config["neuropilot_sdk"]["build"] == "8.0.8-build20250925"
 
 
 def test_readme_credits_mediatek_without_claiming_the_sdk_is_included():
     text = manifest.readme("experimentalmachines/Qwen3-0.6B-ExecuTorch", [mtk_report(), mtk_report("mt6989")], [], [])
     assert "MT6991 (Dimensity 9400)" in text and "MT6989 (Dimensity 9300)" in text
-    assert "MediaTek NeuroPilot Express SDK (build 20250327" in text and "MediaTek Inc." in text
+    assert "MediaTek NeuroPilot Express SDK 8.0.8-build20250925 (mtk_converter" in text and "MediaTek Inc." in text
     assert "No MediaTek SDK or runtime library is included" in text
     assert "neuropilot-embedding-fp32.bin" in text
     assert "- mtk" in text

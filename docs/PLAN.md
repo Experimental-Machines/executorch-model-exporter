@@ -146,12 +146,14 @@ calling ExecuTorch's own script in compile-only mode:
 
 `export-mtk.yml` runs one job per chip in `mtk.socs` (MT6989 = DX3, MT6991 = DX4):
 
-- **SDK:** NeuroPilot Express build 20250327, the archive ExecuTorch 1.4.0's CI installs,
-  downloaded from MediaTek on every run, checked against `NEUROPILOT_SDK_SHA256`, and
-  deleted once `mtk_converter` 8.13.0 and `mtk_neuron` 8.2.19 are installed. Its license
-  (read 2026-09-13, accepted for ExperimentalMachines) is summarised in
-  `THIRD_PARTY_NOTICES.md`; the agreement is marked MediaTek Confidential, so it is
-  paraphrased, not copied.
+- **SDK:** NeuroPilot Express 8.0.8 (build 20250925), from MediaTek's download table,
+  downloaded on every run, checked against `NEUROPILOT_SDK_SHA256`, and deleted once
+  `mtk_converter` 8.13.0 and `mtk_neuron` 8.2.23 are installed. 8.2.23 is the version
+  ExecuTorch 1.4.0 documents; the build 20250327 archive its CI installs has 8.2.19, which
+  lacks `mtk_neuron.extract_shared_data` that the LLM path calls (docs/research, finding
+  19). The license (read 2026-09-13, accepted for ExperimentalMachines, byte-identical in
+  both builds) is summarised in `THIRD_PARTY_NOTICES.md`; the agreement is marked MediaTek
+  Confidential, so it is paraphrased, not copied.
 - **Two Python environments:** `mtk_converter` is cp310-only and `examples/mediatek`
   imports transformers 4.x internals, which cap `huggingface_hub` below the 1.x the pipeline
   uses. The pipeline keeps its own environment (`requirements/export-mtk.txt`) and drives a

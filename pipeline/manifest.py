@@ -254,11 +254,11 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
         out += [
             "",
             f"The `mtk/` folders hold model binaries compiled with the MediaTek NeuroPilot Express SDK "
-            f"(build {sdk['build']}: mtk_converter {sdk['mtk_converter']}, mtk_neuron {sdk['mtk_neuron']}) "
+            f"{sdk['build']} (mtk_converter {sdk['mtk_converter']}, mtk_neuron {sdk['mtk_neuron']}) "
             "from MediaTek Inc., used under MediaTek's license terms for that SDK. No MediaTek SDK or "
             "runtime library is included. They run on MediaTek's LLM runner from ExecuTorch "
             "(`examples/mediatek/executor_runner`) with the device's NeuroPilot runtime; the settings it "
-            "needs are in each folder's `config.json` under `runner`.",
+            "needs are in each folder's `config.json`, under each variant's `runner`.",
         ]
     return "\n".join(out) + "\n"
 
