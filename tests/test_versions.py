@@ -44,3 +44,21 @@ def test_mediatek_tools_keep_transformers_4():
 
 def test_huggingface_hub_pin_is_shared():
     assert pins("requirements/dev.txt")["huggingface_hub"] == pins("requirements/export-xnnpack.txt")["huggingface_hub"]
+
+
+def test_backend_requirements_share_their_core_pins():
+    # transformers is the one deliberate difference: the Qualcomm scripts run on ExecuTorch's
+    # example pin (5.0.0rc1), the smoke test's runner import on a current release.
+    xnnpack, qnn = pins("requirements/export-xnnpack.txt"), pins("requirements/export-qnn.txt")
+    for package in set(xnnpack) & set(qnn) - {"transformers"}:
+        assert xnnpack[package] == qnn[package], package
+    assert qnn["executorch"] == settings.load().executorch_version
+
+
+def test_every_requirement_is_pinned():
+    for path in ("dev.txt", "watch.txt", "export-xnnpack.txt", "export-qnn.txt"):
+        for line in (settings.ROOT / "requirements" / path).read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            assert "==" in line or "@ git+" in line, f"{path}: {line!r} is not pinned"

@@ -98,6 +98,11 @@ def fetch(repo_id: str, revision: str = "main", token: str | None = None) -> Sou
     return source
 
 
+def head_sha(repo_id: str, token: str | None = None) -> str:
+    """The commit ``main`` points at right now."""
+    return api(token).model_info(repo_id, expand=["sha"]).sha
+
+
 def download(
     source: SourceModel,
     local_dir: Path,
@@ -129,7 +134,11 @@ def special_token_ids(source: SourceModel) -> tuple[int | None, list[int]]:
         return [int(v) for v in value] if isinstance(value, list) else [int(value)]
 
     gen, cfg = source.generation_config, source.config
-    bos = gen.get("bos_token_id", cfg.get("bos_token_id"))
+    # Some generation_config.json files carry the key with a null value; fall through to
+    # config.json in that case too, not only when the key is absent.
+    bos = gen.get("bos_token_id")
+    if bos is None:
+        bos = cfg.get("bos_token_id")
     eos = as_list(gen.get("eos_token_id")) or as_list(cfg.get("eos_token_id"))
     seen: list[int] = []
     for token in eos:

@@ -5,10 +5,11 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from conftest import load_json
+from conftest import load_json, make_source
 
 from pipeline import export_qnn, families, manifest, naming, publish, settings
 
+torch = pytest.importorskip("torch")
 CFG = settings.load()
 
 
@@ -133,12 +134,81 @@ def test_decoder_pte_is_found_by_mode(tmp_path):
         export_qnn.decoder_pte(tmp_path, "hybrid")
 
 
-def test_contains_finds_a_needle_across_block_boundaries(tmp_path):
-    path = tmp_path / "blob"
-    path.write_bytes(b"a" * 30 + b"QnnBackend" + b"b" * 30)
-    for block in (4, 7, 16, 35, 1 << 20):
-        assert export_qnn.contains(path, b"QnnBackend", block=block), block
-    assert not export_qnn.contains(path, b"XnnpackBackend", block=8)
+def test_a_forced_revision_behind_main_is_refused(tmp_path, monkeypatch):
+    source = make_source("Qwen/Qwen3-0.6B", sha="a" * 40)
+    export_qnn.check_script_revision(source, "a" * 40)
+    with pytest.raises(export_qnn.ExportError, match="compiles main"):
+        export_qnn.check_script_revision(source, "b" * 40)
+    # Wired into run(): refused right after the metadata fetch, before the SDK or any download.
+    monkeypatch.setattr(export_qnn.hub, "fetch", lambda model_id, revision: source)
+    monkeypatch.setattr(export_qnn.hub, "head_sha", lambda model_id: "b" * 40)
+    monkeypatch.setattr(export_qnn, "qnn_sdk", lambda: pytest.fail("reached the SDK probe"))
+    with pytest.raises(export_qnn.ExportError, match="compiles main"):
+        export_qnn.run("Qwen/Qwen3-0.6B", "a" * 40, "SM8750", tmp_path / "out", tmp_path / "work")
+
+
+def tiny_program(tmp_path, delegate_id=None, methods=("forward",)):
+    """A .pte with one add graph per method; with ``delegate_id``, the adds run through
+    that (fake) delegate."""
+    from executorch.exir import to_edge
+    from executorch.exir.backend.backend_details import BackendDetails, PreprocessResult
+    from executorch.exir.backend.compile_spec_schema import CompileSpec
+    from executorch.exir.backend.partitioner import DelegationSpec, Partitioner, PartitionResult
+    from torch.export import export
+
+    class Add(torch.nn.Module):
+        def forward(self, x):
+            return x + x
+
+    edge = to_edge({name: export(Add(), (torch.ones(2),)) for name in methods})
+    if delegate_id:
+        # to_backend finds the backend class by name among BackendDetails' subclasses.
+        type(
+            delegate_id,
+            (BackendDetails,),
+            {"preprocess": staticmethod(lambda program, specs: PreprocessResult(processed_bytes=b"fake-blob"))},
+        )
+
+        class All(Partitioner):
+            def partition(self, exported_program):
+                spec = DelegationSpec(delegate_id, [CompileSpec("k", b"v")])
+                tags = {}
+                for node in exported_program.graph.nodes:
+                    if node.op == "call_function":
+                        node.meta["delegation_tag"] = "t0"
+                        tags["t0"] = spec
+                return PartitionResult(tagged_exported_program=exported_program, partition_tags=tags)
+
+        edge = edge.to_backend(All())
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    path = tmp_path / "tiny.pte"
+    path.write_bytes(edge.to_executorch().buffer)
+    return path
+
+
+def test_structural_check_reads_delegates_from_the_program(tmp_path):
+    pytest.importorskip("executorch")
+    plain = tiny_program(tmp_path / "plain")
+    assert export_qnn.delegates(plain) == {"forward": {"backends": [], "delegate_calls": 0}}
+    check = export_qnn.structural_check(plain, "kv")
+    assert not check["passed"] and "missing decoder method 'kv_forward'" in check["problems"][0]
+
+    delegated = tiny_program(tmp_path / "qnn", delegate_id=export_qnn.QNN_BACKEND_ID)
+    assert export_qnn.delegates(delegated) == {"forward": {"backends": ["QnnBackend"], "delegate_calls": 1}}
+
+    hybrid = tiny_program(tmp_path / "hybrid", delegate_id=export_qnn.QNN_BACKEND_ID, methods=export_qnn.HYBRID_METHODS)
+    check = export_qnn.structural_check(hybrid, "hybrid")
+    assert check["passed"], check["problems"]
+    assert set(check["delegates"]) == set(export_qnn.HYBRID_METHODS)
+    half = tiny_program(tmp_path / "half", delegate_id=export_qnn.QNN_BACKEND_ID, methods=("kv_forward",))
+    assert "missing decoder method 'prefill_forward'" in export_qnn.structural_check(half, "hybrid")["problems"][0]
+    undelegated = tiny_program(tmp_path / "cpu", methods=export_qnn.HYBRID_METHODS)
+    problems = export_qnn.structural_check(undelegated, "hybrid")["problems"]
+    assert len(problems) == 2 and all("does not run on QnnBackend" in p for p in problems)
+    not_parsed = tmp_path / "junk.pte"
+    not_parsed.write_bytes(b"QnnBackend kv_forward prefill_forward")  # the old byte grep would pass this
+    check = export_qnn.structural_check(not_parsed, "hybrid")
+    assert not check["passed"] and check["problems"][0].startswith("program did not load")
 
 
 def test_every_registered_qnn_checkpoint_gets_names_the_app_reads_as_qnn():

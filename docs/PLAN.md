@@ -61,7 +61,9 @@ just to what the runner can export:
 - Export peak ≈ fp32 weights + KV cache + `n_layers × window²` bytes of causal masks +
   2.5 GB.
 - Pick the largest tier with resident ≤ `device_budget_bytes` (default 5.0 GB) and
-  estimated export peak ≤ runner RAM + swap.
+  estimated export peak ≤ runner RAM + swap. A forced window (`--context`, the workflow's
+  `context` input) gets both checks too: it can pick a smaller tier or one between tiers,
+  not one the phone cannot hold.
 
 ## Backends
 
@@ -122,7 +124,11 @@ calling ExecuTorch's own script in compile-only mode:
 - Calibration dependencies are ExecuTorch's example pins: `transformers==5.0.0rc1`,
   `datasets==3.6.0`, `lm_eval==0.4.5` (`requirements/export-qnn.txt`).
 - No host runtime for HTP binaries, so the check is structural: the program loads, has
-  `prefill_forward` and `kv_forward`, and delegates to `QnnBackend`.
+  `prefill_forward` and `kv_forward`, and each of those graphs delegates to `QnnBackend`
+  (read from the program's flatbuffer, not by searching the file for the name).
+- The script downloads its registry entry's repo at `main`, so the run refuses a `revision`
+  that is not what `main` currently points at, rather than recording one commit and
+  compiling another.
 - The window is fixed at compile time: `qnn.max_context_len` (2048 to start), or the
   workflow's `context` input (`--context`) for one run.
 - QAIRT's license: `THIRD_PARTY_NOTICES.md`.
@@ -199,6 +205,32 @@ calling ExecuTorch's own script in compile-only mode:
    default window.
 4. **MediaTek** (`export-mtk.yml`, built 2026-09-13; first export pending).
 
+## Alignment with the master plan (2026-09-13)
+
+The master diagram: openweights → llama.cpp and ExecuTorch runtimes; ExecuTorch on Android
+with XNNPACK, Vulkan, Qualcomm, MediaTek and Samsung Exynos delegates, on iOS with XNNPACK and
+CoreML; in GitHub Actions an **Exporter** (this repo, pull & push Hugging Face) feeding a
+**Benchmarker** (pull from Hugging Face, stream to a device farm: Snapdragon 8 Elite, Tensor
+G5, Dimensity 9300+, Exynos 2500; GSM8K, RetrievalQA, IFEval, PopQA, BFCL, FreshQA).
+
+| Diagram element | Here | Note |
+|---|---|---|
+| Exporter, pull & push HF, GitHub Actions | done | plus the watcher, sizing and releases the diagram does not show |
+| XNNPACK | done | Qwen3, Qwen2.5, Llama 3.2, SmolLM2; Gemma 3 and SmolLM3 are not in 1.4.0's `export_llm` model list |
+| Qualcomm (SM8650, SM8750) | done | registry checkpoints only, one fixed window |
+| MediaTek (MT6989, MT6991) | phase 4 | `mtk_converter` wheel, NeuroPilot SDK |
+| Vulkan | absent | 1.4.0's `export_llm` has `backend.vulkan.enabled` and a `vulkan_8w` qmode, so it is an XNNPACK-shaped job (S/M); the app's `CompiledBackend` already reads `vulkan` |
+| CoreML / iOS | absent | 1.4.0's `export_llm` has `backend.coreml` (ios 15-18, `coreml_*` qmodes); needs a macOS runner and iOS naming/tags in the app (M) |
+| Samsung Exynos | absent | 1.4.0 ships `backends/samsung` (`EnnBackend`) but no LLM example for it (L, upstream-bound) |
+| Tensor G5 | n/a | no ExecuTorch delegate for the Tensor TPU: it runs XNNPACK (or Vulkan) files |
+| Benchmarker, device farm, benchmarks | absent | another component; what it needs from here is already published per file: `config.json` `variants[].methods` (window, prefill chunk, BOS/EOS), `qnn_sdk_version`, the tokenizer at the root |
+| Several context lengths per model | **absent** | today exactly one window per model per backend: auto-fit picks the largest tier that fits (or `--context` forces one), `publish_hf` deletes any other file in the backend folder, `config.json` `variants[]` is rewritten with one entry, the watcher dispatches one run |
+
+Making the window matrix real touches `publish.publish_hf` (keep sibling windows, merge
+`variants[]`), the workflows (a `contexts` matrix like `probe-runner.yml`), the watcher (one
+dispatch per tier) and the sizing guard (each tier still has to fit the phone and the runner:
+32k is out for anything above ~0.6B, see Known limits). The file names already carry the window.
+
 ## Known limits
 
 - Export memory grows with the square of the window: every attention layer of ExecuTorch
@@ -207,6 +239,14 @@ calling ExecuTorch's own script in compile-only mode:
   16.8 GB + 24 GB swap runner; `sizing.export_peak_bytes` counts it and a forced window
   that cannot fit is refused.
 
+- The watcher checks each repo once. A model whose weights change after it was seen
+  (a new commit on `main`) is not re-exported automatically: most upstream commits touch
+  cards and tokenizer configs, and every re-export is a multi-hour run. Re-export by hand
+  with the `backfill` input or the export workflow.
+- The watcher dispatches export runs before the workflow pushes `seen.json`. If that push
+  fails, the next run dispatches the same models again; the per-model concurrency group
+  queues the duplicate rather than running it alongside, and a repeat publish is
+  idempotent, so the cost is runner time, not a broken repo.
 - QNN and MediaTek only export models ExecuTorch has hard-coded; a new family waits for an
   ExecuTorch release, and the app's AAR must move with it.
 - QNN/MediaTek exports of 3-4B models may run out of memory or hit the 6-hour job limit

@@ -139,6 +139,8 @@ def readme(repo_id: str, reports: list[dict], hub_tags: list[str], license_files
             verdict = "structure checked (no host NPU runtime)" if smoke.get("passed") else "structure check failed"
         if smoke.get("answered"):
             verdict += ' ("Paris")'
+        if smoke.get("template_error"):
+            verdict += " with a completion prompt (the chat template did not render)"
         for f in r["files"]:
             if f["path"].endswith((".pte", ".bin")):
                 out.append(

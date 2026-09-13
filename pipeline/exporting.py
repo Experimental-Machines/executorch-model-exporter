@@ -18,6 +18,17 @@ class ExportError(Exception):
     pass
 
 
+def run_tool(command: list[str], what: str, **kwargs) -> None:
+    """Run an export tool, turning a non-zero exit into ExportError (exit code 2, not a
+    traceback) for the CLI. Its own output already says what went wrong."""
+    import subprocess
+
+    try:
+        subprocess.run(command, check=True, **kwargs)
+    except subprocess.CalledProcessError as error:
+        raise ExportError(f"{what} exited with status {error.returncode}; its output above says why") from None
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as f:

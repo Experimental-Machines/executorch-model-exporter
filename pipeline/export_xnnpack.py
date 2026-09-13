@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 import os
 import shutil
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -29,6 +28,7 @@ from pipeline.exporting import (
     copy_side_files,
     host_budget,
     host_info,
+    run_tool,
     self_peak_rss,
     sha256,
     source_report,
@@ -113,6 +113,14 @@ def run(
     else:
         window = context
         window_reason = f"forced to {context} by the caller"
+        resident = sizing.device_resident_bytes(arch, context, cfg.runtime_overhead_bytes)
+        if resident > cfg.device_budget_bytes:
+            # The window is the whole point of the phone budget; a forced one gets the same
+            # guard the auto-fit applies, so an override cannot publish a file the app kills.
+            raise ExportError(
+                f"a {context}-token window needs about {resident:,} B resident on the phone, "
+                f"over the {cfg.device_budget_bytes:,} B budget (export.device_budget_bytes)"
+            )
         budget = host_budget(host)
         peak = sizing.export_peak_bytes(arch, context)
         if budget is not None and peak > budget:
@@ -157,9 +165,9 @@ def run(
     print("==> export_llm")
     export_started = time.time()
     with MemorySampler() as memory:
-        subprocess.run(
+        run_tool(
             [sys.executable, "-m", "executorch.extension.llm.export.export_llm", "--config", str(config_path)],
-            check=True,
+            "export_llm",
             cwd=work_dir,
             env={**os.environ, "PYTHONUNBUFFERED": "1"},
         )
@@ -176,6 +184,10 @@ def run(
         mismatches.append(f"get_max_context_len {method_values.get('get_max_context_len')} != {window}")
     if method_values.get("get_max_seq_len") != min(cfg.prefill_chunk, window):
         mismatches.append(f"get_max_seq_len {method_values.get('get_max_seq_len')}")
+    if bos is not None and method_values.get("get_bos_id") != bos:
+        mismatches.append(f"get_bos_id {method_values.get('get_bos_id')} != {bos}")
+    if eos and method_values.get("get_eos_ids") != eos:
+        mismatches.append(f"get_eos_ids {method_values.get('get_eos_ids')} != {eos}")
     if mismatches:
         raise ExportError("exported metadata disagrees with the request: " + "; ".join(mismatches))
 
