@@ -21,8 +21,10 @@ watch:
   # Qwen alone has 465 repos and its 200 newest (2026-09-13) start after Qwen3-4B, so the
   # window has to cover a whole org; google's 1,134 is the largest.
   limit_per_org: 1500
-  # Export workflow runs one watcher run may start; the rest wait for the next run.
-  max_dispatch_per_run: 6
+  # Export workflow runs one watcher run may start; the rest wait for the next run. Each
+  # run fans out into one job per window (and chip); GitHub runs 20 jobs at a time and
+  # queues the rest, so this bounds the queue, not the runner load.
+  max_dispatch_per_run: 40
   pipeline_tag: text-generation
   # Size limit, read from the size in the repo name ("4B", "360M"): at most this many
   # billions. Publishers name by nominal size; Qwen3-4B's real total is 4,022,468,096, so
